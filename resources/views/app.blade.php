@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,6 +13,10 @@
     </header>
 
     <main>
+        <livewire:dropdown-filter />
+        <livewire:products-table />
+        <livewire:data-series-table />
+        <livewire:download-buttons />
         {{ $slot }}
     </main>
 
