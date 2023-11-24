@@ -1,4 +1,3 @@
-
 <div>
     <!-- Products Table with pagination -->
     <table>
@@ -11,24 +10,15 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Placeholder content -->
-            <tr>
-                <td>Product 1</td>
-                <td>Daily</td>
-                <td>2023-01-01</td>
-                <td>2023-01-05</td>
-            </tr>
-            <tr>
-                <td>Product 2</td>
-                <td>Weekly</td>
-                <td>2023-01-02</td>
-                <td>2023-01-06</td>
-            </tr>
+            @foreach($products as $product)
+                <tr>
+                    <td>{{ $product->nome }}</td>
+                    <td>{{ $product->freq }}</td>
+                    <td>{{ $product->inserido }}</td>
+                    <td>{{ $product->alterado }}</td>
+                </tr>
+            @endforeach
         </tbody>
     </table>
-    <!-- Pagination controls -->
-    <div>
-        <button wire:click="previousPage">Previous</button>
-        <button wire:click="nextPage">Next</button>
-    </div>
+    {{ $products->links() }}
 </div>

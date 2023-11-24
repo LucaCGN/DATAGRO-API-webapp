@@ -1,24 +1,23 @@
-
 <div>
     <!-- Dropdown filters for Classificação, Subproduto, and Local -->
     <select wire:model="selectedClassificacao">
         <option value="">Select Classificação</option>
-        <!-- Placeholder options -->
-        <option value="1">Classificação 1</option>
-        <option value="2">Classificação 2</option>
+        @foreach($classifications as $classification)
+            <option value="{{ $classification }}">{{ $classification }}</option>
+        @endforeach
     </select>
-    
+
     <select wire:model="selectedSubproduto">
         <option value="">Select Subproduto</option>
-        <!-- Placeholder options -->
-        <option value="1">Subproduto 1</option>
-        <option value="2">Subproduto 2</option>
+        @foreach($subproducts as $subproduct)
+            <option value="{{ $subproduct }}">{{ $subproduct }}</option>
+        @endforeach
     </select>
-    
+
     <select wire:model="selectedLocal">
         <option value="">Select Local</option>
-        <!-- Placeholder options -->
-        <option value="1">Local 1</option>
-        <option value="2">Local 2</option>
+        @foreach($locations as $location)
+            <option value="{{ $location }}">{{ $location }}</option>
+        @endforeach
     </select>
 </div>

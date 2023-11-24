@@ -17,8 +17,7 @@ class DataSeriesTable extends Component
 
     public function onProductSelected($productId)
     {
-        // Assuming there's a relation between products and data series defined in the models
-        $this->dataSeries = DataSeries::where('product_id', $productId)->get();
+        $this->dataSeries = DataSeries::where('extended_product_list_id', $productId)->get();
     }
 
     public function render()
