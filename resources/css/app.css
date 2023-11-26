@@ -1,0 +1,55 @@
+body {
+   font-family: Arial, sans-serif;
+   color: #333;
+   background-color: #F5F5F5;
+}
+
+header {
+   background-color: #004225; /* Rich dark green */
+   color: white;
+   padding: 10px;
+   text-align: center;
+}
+
+main {
+   margin: 15px;
+}
+
+footer {
+   background-color: #333;
+   color: white;
+   text-align: center;
+   padding: 10px;
+}
+
+.button {
+   background-color: #8CC63F; /* Vibrant lime green */
+   color: white;
+   padding: 10px 20px;
+   text-align: center;
+   text-decoration: none;
+   display: inline-block;
+   font-size: 16px;
+   margin: 4px 2px;
+   cursor: pointer;
+   border: none;
+   border-radius: 5px; /* Slight rounding of button edges */
+   transition: background-color 0.3s; /* Smooth transition for hover effect */
+}
+
+.button:hover {
+   background-color: #7BB034; /* Slightly darker green on hover */
+}
+
+@media screen and (max-width: 600px) {
+   body {
+       font-size: 18px;
+   }
+
+   /* Responsive adjustments for smaller screens */
+   header, footer {
+       text-align: left;
+       padding: 10px 20px;
+   }
+}
+
