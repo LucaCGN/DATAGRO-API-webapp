@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use Livewire\Component;
 use App\Models\ExtendedProductList;
 use Symfony\Component\HttpFoundation\Response;
+use PDF; // Assuming you are using a package like "barryvdh/laravel-dompdf"
 
 class DownloadButtons extends Component
 {
@@ -37,9 +38,9 @@ class DownloadButtons extends Component
 
     public function downloadPDF()
     {
-        // To implement PDF download, use a library like dompdf
-        // Generate a PDF from a view or directly from HTML
-        // Then return a download response with the PDF file
+        $products = ExtendedProductList::all();
+        $pdf = PDF::loadView('livewire.products-pdf', ['products' => $products]);
+        return $pdf->download('products.pdf');
     }
 
     public function render()

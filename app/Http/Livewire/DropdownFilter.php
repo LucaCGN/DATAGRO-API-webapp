@@ -11,6 +11,11 @@ class DropdownFilter extends Component
     public $selectedSubproduto = null;
     public $selectedLocal = null;
 
+    public function updated($propertyName)
+    {
+        $this->emit('filterChanged', $this->selectedClassificacao, $this->selectedSubproduto, $this->selectedLocal);
+    }
+
     public function getClassificationsProperty()
     {
         return ExtendedProductList::distinct()->pluck('Classificação')->toArray();
@@ -29,9 +34,9 @@ class DropdownFilter extends Component
     public function render()
     {
         return view('livewire.dropdown-filter', [
-            'classifications' => $this->classifications,
-            'subproducts' => $this->subproducts,
-            'locations' => $this->locations,
+            'classifications' => $this->getClassificationsProperty(),
+            'subproducts' => $this->getSubproductsProperty(),
+            'locations' => $this->getLocationsProperty(),
         ]);
     }
 }
