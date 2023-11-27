@@ -1,4 +1,4 @@
-<div>
+<div class="responsive-table animated">
     <table>
         <thead>
             <tr>
@@ -17,4 +17,4 @@
             @endforeach
         </tbody>
     </table>
-</div>
+ </div>

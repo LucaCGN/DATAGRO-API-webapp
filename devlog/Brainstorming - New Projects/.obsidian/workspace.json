@@ -1,0 +1,231 @@
+{
+  "main": {
+    "id": "eda1439d7a01c4cd",
+    "type": "split",
+    "children": [
+      {
+        "id": "e11115cc34fd7d4c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6da86c5d63030068",
+            "type": "leaf",
+            "state": {
+              "type": "empty",
+              "state": {}
+            }
+          },
+          {
+            "id": "0ffb92dccbfd29ff",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "HomeServer/CustomGPT with GitHub Sync/Custom Actions High Level Overview.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "17131e1489a26849",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "HomeServer/CustomGPT with GitHub Sync/GPT - WorkFlow.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "0d11e78372f7b159",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "HomeServer/CustomGPT with GitHub Sync/Setup.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "0af2734760f131de",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "HomeServer/CustomGPT with GitHub Sync/Setup.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "b0a5074d9388ca3a",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Lunara - News Aggregator/Product Idea.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "671027af045fd463",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "DataAgro/Master Laravel Prompt.md",
+                "mode": "source",
+                "source": false
+              }
+            }
+          }
+        ],
+        "currentTab": 6
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "ef2be6ac3fa20ea8",
+    "type": "split",
+    "children": [
+      {
+        "id": "e46870b2c98e64a4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "6a85dcda5b6b4075",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "66572d13958d21e8",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "4c751df94f3f7935",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "594858301b0dc138",
+    "type": "split",
+    "children": [
+      {
+        "id": "1ef52d075be45b58",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "3b8365eaca794d04",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "DataAgro/Master Laravel Prompt.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "127ef24c7d36d59c",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "DataAgro/Master Laravel Prompt.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "c5761f22379d53e2",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "feb0b88faebc6292",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "DataAgro/Master Laravel Prompt.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "671027af045fd463",
+  "lastOpenFiles": [
+    "Lunara - News Aggregator/Product Idea.md",
+    "DataAgro/Master Laravel Prompt.md",
+    "DataAgro",
+    "HomeServer/CustomGPT with GitHub Sync/Setup.md",
+    "Lunara - News Aggregator",
+    "HomeServer/Proxmox - Initial Setup.md",
+    "HomeServer/CustomGPT with GitHub Sync/GPT - WorkFlow.md",
+    "HomeServer/CustomGPT with GitHub Sync/Custom Actions High Level Overview.md",
+    "HomeServer",
+    "HomeServer/CustomGPT with GitHub Sync"
+  ]
+}

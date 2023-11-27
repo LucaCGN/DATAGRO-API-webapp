@@ -1,4 +1,4 @@
-<div class="responsive-table">
+<div class="responsive-table animated">
     <!-- Products Table with pagination -->
     <table>
         <thead>
@@ -12,10 +12,10 @@
         <tbody>
             @foreach($products as $product)
                 <tr wire:click="selectProduct({{ $product->id }})">
-                    <td>{{ $product->nome }}</td>
-                    <td>{{ $product->freq }}</td>
-                    <td>{{ $product->inserido }}</td>
-                    <td>{{ $product->alterado }}</td>
+                   <td>{{ $product->nome }}</td>
+                   <td>{{ $product->freq }}</td>
+                   <td>{{ $product->inserido }}</td>
+                   <td>{{ $product->alterado }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -38,4 +38,4 @@
     </div>
     <!-- Default Livewire Pagination Links -->
     {{ $products->links() }}
-</div>
+ </div>
