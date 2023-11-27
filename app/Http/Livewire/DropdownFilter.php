@@ -17,6 +17,7 @@ class DropdownFilter extends Component
 
     public function mount()
     {
+        \Log::info('DropdownFilter: mount method executed');
         $this->classifications = ExtendedProductList::distinct()->pluck('Classificação')->toArray();
         $this->subproducts = ExtendedProductList::distinct()->pluck('Subproduto')->toArray();
         $this->locations = ExtendedProductList::distinct()->pluck('Local')->toArray();
@@ -24,6 +25,7 @@ class DropdownFilter extends Component
 
     public function render()
     {
+        \Log::info('DropdownFilter: render method executed');
         return view('livewire.dropdown-filter', [
             'classifications' => $this->classifications,
             'subproducts' => $this->subproducts,
