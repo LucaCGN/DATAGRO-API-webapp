@@ -10,11 +10,6 @@ class DataSeriesTable extends Component
     public $dataSeries = [];
     protected $listeners = ['productSelected' => 'onProductSelected'];
 
-    public function mount()
-    {
-        $this->dataSeries = DataSeries::all();
-    }
-
     public function onProductSelected($productId)
     {
         $this->dataSeries = DataSeries::where('extended_product_list_id', $productId)->get();

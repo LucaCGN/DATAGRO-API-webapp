@@ -10,17 +10,18 @@ class ProductsTable extends Component
 {
     use WithPagination;
 
-    public $products;
+    public $currentPage = 1;
 
-    public function mount()
+    public function getProductsProperty()
     {
-        $this->products = ExtendedProductList::paginate(10);
+        return ExtendedProductList::query()
+            ->paginate(10, ['*'], 'page', $this->currentPage);
     }
 
     public function render()
     {
         return view('livewire.products-table', [
-            'products' => $this->products
+            'products' => $this->getProductsProperty()
         ]);
     }
 }

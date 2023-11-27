@@ -17,7 +17,6 @@
         <livewire:products-table />
         <livewire:data-series-table />
         <livewire:download-buttons />
-        {{ $slot }}
     </main>
 
     <footer>

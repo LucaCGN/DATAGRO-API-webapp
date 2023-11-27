@@ -8,11 +8,11 @@
             </tr>
         </thead>
         <tbody>
-            @foreach(\$dataSeries as \$series)
+            @foreach($dataSeries as $series)
             <tr>
-                <td>{{ \$series['name'] }}</td>
-                <td>{{ \$series['value'] }}</td>
-                <td>{{ \$series['date'] }}</td>
+                <td>{{ $series['name'] }}</td>
+                <td>{{ $series['value'] }}</td>
+                <td>{{ $series['date'] }}</td>
             </tr>
             @endforeach
         </tbody>

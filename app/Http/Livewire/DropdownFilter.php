@@ -11,21 +11,23 @@ class DropdownFilter extends Component
     public $selectedSubproduto = null;
     public $selectedLocal = null;
 
-    public $classifications = [];
-    public $subproducts = [];
-    public $locations = [];
-
-    public function mount()
+    public function getClassificationsProperty()
     {
-        \Log::info('DropdownFilter: mount method executed');
-        $this->classifications = ExtendedProductList::distinct()->pluck('Classificação')->toArray();
-        $this->subproducts = ExtendedProductList::distinct()->pluck('Subproduto')->toArray();
-        $this->locations = ExtendedProductList::distinct()->pluck('Local')->toArray();
+        return ExtendedProductList::distinct()->pluck('Classificação')->toArray();
+    }
+
+    public function getSubproductsProperty()
+    {
+        return ExtendedProductList::distinct()->pluck('Subproduto')->toArray();
+    }
+
+    public function getLocationsProperty()
+    {
+        return ExtendedProductList::distinct()->pluck('Local')->toArray();
     }
 
     public function render()
     {
-        \Log::info('DropdownFilter: render method executed');
         return view('livewire.dropdown-filter', [
             'classifications' => $this->classifications,
             'subproducts' => $this->subproducts,
