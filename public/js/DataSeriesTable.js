@@ -1,15 +1,16 @@
 // Function to load data series for a product with pagination
 function loadDataSeries(productId, page = 1, perPage = 10) {
-    console.log(`Loading data series for productId: ${productId}, page: ${page}, perPage: ${perPage}`);
+    console.log(`[DataSeriesTable] Start loading data series for productId: ${productId}, page: ${page}, perPage: ${perPage}`);
     fetch(`/data-series/${productId}?page=${page}&perPage=${perPage}`)
         .then(response => {
             if (!response.ok) {
+                console.error(`[DataSeriesTable] Error fetching data series: ${response.statusText}`);
                 throw new Error(`Error fetching data series: ${response.statusText}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log("DataSeries API Response:", data);
+            console.log("[DataSeriesTable] DataSeries API Response received:", data);
             let tableBody = document.getElementById('data-series-body');
             tableBody.innerHTML = data.data.map(series => `
                 <tr>
@@ -24,15 +25,18 @@ function loadDataSeries(productId, page = 1, perPage = 10) {
                     <td>${series.aju}</td>
                 </tr>
             `).join('');
+            console.log("[DataSeriesTable] Data series successfully rendered in table");
 
             renderPagination(data.pagination, (newPage) => loadDataSeries(productId, newPage));
         })
-        .catch(error => console.error("DataSeries API Error:", error));
+        .catch(error => {
+            console.error("[DataSeriesTable] DataSeries API Error:", error);
+        });
 }
 
 // Function to render pagination for data series
 function renderPagination(paginationData, updateFunction) {
-    console.log("Rendering pagination with data:", paginationData);
+    console.log("[DataSeriesTable] Rendering pagination with data:", paginationData);
     let paginationDiv = document.getElementById('data-series-pagination');
     paginationDiv.innerHTML = '';
 
@@ -49,4 +53,5 @@ function renderPagination(paginationData, updateFunction) {
         nextButton.onclick = () => updateFunction(paginationData.current_page + 1);
         paginationDiv.appendChild(nextButton);
     }
+    console.log("[DataSeriesTable] Pagination controls rendered");
 }

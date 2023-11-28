@@ -23,3 +23,4 @@
     </div>
 </div>
 <script src="{{ asset('js/data-series.js') }}"></script>
+<script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>
