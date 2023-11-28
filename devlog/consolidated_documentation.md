@@ -1,4 +1,4 @@
-## resources\js\DataSeriesTable.js
+## public\js\DataSeriesTable.js
 ```php
 function loadDataSeries(productId, page = 1, perPage = 10) {
     console.log(`Loading data series for productId: ${productId}, page: ${page}, perPage: ${perPage}`);  // Log the function call
@@ -53,7 +53,7 @@ function renderPagination(paginationData, updateFunction) {
 
 ```
 
-## resources\js\DownloadButtons.js
+## public\js\DownloadButtons.js
 ```php
 function downloadCSV() {
     console.log("Downloading CSV file");  // Log the function call
@@ -76,7 +76,7 @@ document.getElementById('download-pdf-btn').addEventListener('click', () => {
 
 ```
 
-## resources\js\DropdownFilter.js
+## public\js\DropdownFilter.js
 ```php
 function updateFilters() {
     console.log("Updating filters");  // Log the function call
@@ -128,20 +128,29 @@ function updateProductsTable(products) {
 
 ```
 
-## resources\js\ProductsTable.js
+## public\js\ProductsTable.js
 ```php
 // Function to fetch and populate products with pagination
 function fetchAndPopulateProducts(page = 1, perPage = 10) {
+    console.log(`Fetching products for page: ${page}, perPage: ${perPage}`); // Log the function call
     fetch(`/products?page=${page}&perPage=${perPage}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                console.error(`Error fetching products: ${response.statusText}`);
+            }
+            return response.json();
+        })
         .then(data => {
+            console.log("Products API Response:", data); // Log API response
             populateProductsTable(data.products);
             renderPagination(data.pagination);
-        });
+        })
+        .catch(error => console.error("Products API Error:", error)); // Log any fetch errors
 }
 
 // Function to populate products table
 function populateProductsTable(products) {
+    console.log("Populating products table with:", products); // Log the products being rendered
     let tableBody = document.getElementById('products-table-body');
     tableBody.innerHTML = products.map(product => `
         <tr onclick="selectProduct(${product.id})">
@@ -155,6 +164,7 @@ function populateProductsTable(products) {
 
 // Function to render pagination controls
 function renderPagination(paginationData) {
+    console.log("Rendering pagination with data:", paginationData); // Log pagination data
     let paginationDiv = document.getElementById('products-pagination');
     paginationDiv.innerHTML = '';
 
@@ -162,7 +172,10 @@ function renderPagination(paginationData) {
     if (paginationData.currentPage > 1) {
         let prevButton = document.createElement('button');
         prevButton.textContent = 'Previous';
-        prevButton.onclick = () => fetchAndPopulateProducts(paginationData.currentPage - 1);
+        prevButton.onclick = () => {
+            console.log(`Previous page button clicked, going to page ${paginationData.currentPage - 1}`); // Log button click
+            fetchAndPopulateProducts(paginationData.currentPage - 1);
+        };
         paginationDiv.appendChild(prevButton);
     }
 
@@ -170,10 +183,92 @@ function renderPagination(paginationData) {
     if (paginationData.currentPage < paginationData.lastPage) {
         let nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        nextButton.onclick = () => fetchAndPopulateProducts(paginationData.currentPage + 1);
+        nextButton.onclick = () => {
+            console.log(`Next page button clicked, going to page ${paginationData.currentPage + 1}`); // Log button click
+            fetchAndPopulateProducts(paginationData.currentPage + 1);
+        };
         paginationDiv.appendChild(nextButton);
     }
 }
+
+```
+
+## resources/views/partials/data-series-table.blade.php
+```php
+<div class="responsive-table animated" id="data-series-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Data Series Name</th>
+                <th>Value</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody id="data-series-body">
+            <!-- Data populated by DataSeriesTable.js -->
+        </tbody>
+    </table>
+    <div id="data-series-pagination" class="pagination-controls">
+        <!-- Pagination Controls -->
+    </div>
+</div>
+<script src="{{ asset('js/data-series.js') }}"></script>
+
+```
+
+## resources/views/partials/download-buttons.blade.php
+```php
+<!-- Updated to remove Livewire syntax -->
+<div class="animated">
+    <button class="button" id="download-csv-btn">Download CSV</button>
+    <button class="button" id="download-pdf-btn">Download PDF</button>
+</div>
+<script src="{{ asset('js/download-buttons.js') }}"></script>
+
+```
+
+## resources/views/partials/dropdown-filter.blade.php
+```php
+<!-- Updated to remove Livewire syntax -->
+<div class="animated" id="dropdown-filter">
+    <!-- Dropdown filters -->
+    <select class="button" id="classification-select">
+        <!-- Options populated server-side -->
+    </select>
+
+    <select class="button" id="subproduct-select">
+        <!-- Options populated server-side -->
+    </select>
+
+    <select class="button" id="local-select">
+        <!-- Options populated server-side -->
+    </select>
+</div>
+<script src="{{ asset('js/dropdown-filter.js') }}"></script>
+
+```
+
+## resources/views/partials/products-table.blade.php
+```php
+<div class="responsive-table animated" id="products-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Frequency</th>
+                <th>Insert Date</th>
+                <th>Last Update</th>
+            </tr>
+        </thead>
+        <tbody id="products-table-body">
+            <!-- Data populated by ProductsTable.js -->
+        </tbody>
+    </table>
+    <div id="products-pagination" class="pagination-controls">
+        <!-- Pagination Controls -->
+    </div>
+</div>
+<script src="{{ asset('js/products-table.js') }}"></script>
 
 ```
 
@@ -182,67 +277,64 @@ function renderPagination(paginationData) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Datagro Comercial Team Web Application</title>
-    <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datagro Comercial Team Web Application</title>
+  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-    <header>
-        <!-- Header content goes here -->
-    </header>
+  <header>
+      <!-- Header content goes here -->
+  </header>
 
-    <main>
-        <!-- Include the updated Blade templates for each component -->
-        @include('partials.dropdown-filter')
-        @include('partials.products-table')
-        @include('partials.data-series-table')
-        @include('partials.download-buttons')
-    </main>
+  <main>
+      <!-- Main content goes here -->
+  </main>
 
-    <footer>
-        <!-- Footer content goes here -->
-    </footer>
+  <footer>
+      <!-- Footer content goes here -->
+  </footer>
 
-    <!-- Include the JavaScript files -->
-    <script src="{{ asset('js/dropdown-filter.js') }}"></script>
-    <script src="{{ asset('js/products-table.js') }}"></script>
-    <script src="{{ asset('js/data-series.js') }}"></script>
-    <script src="{{ asset('js/download-buttons.js') }}"></script>
+  <!-- Include the JavaScript files -->
+  <script type="module" src="{{ asset('js/app.js') }}"></script>
+  <script type="module" src="{{ asset('js/DropdownFilter.js') }}"></script>
+  <script type="module" src="{{ asset('js/ProductsTable.js') }}"></script>
+  <script type="module" src="{{ asset('js/DataSeriesTable.js') }}"></script>
+  <script type="module" src="{{ asset('js/DownloadButtons.js') }}"></script>
 </body>
 </html>
 
 ```
 
-## resources/css/app.css
+## public/css/app.css
 ```php
 body {
     font-family: Arial, sans-serif;
-    color: #333;
-    background-color: #F5F5F5;
-}
+    color: #ffffff;
+    background-color: #002d04;
+ }
 
-header {
-    background-color: #004225; /* Rich dark green */
-    color: white;
+ header {
+    background-color: #002d04;
+    color: #ffffff;
     padding: 10px;
     text-align: center;
-}
+ }
 
-main {
+ main {
     margin: 15px;
-}
+ }
 
-footer {
-    background-color: #333;
-    color: white;
+ footer {
+    background-color: #002d04;
+    color: #ffffff;
     text-align: center;
     padding: 10px;
-}
+ }
 
-.button {
-    background-color: #8CC63F; /* Vibrant lime green */
-    color: white;
+ .button {
+    background-color: #2ecb13;
+    color: #ffffff;
     padding: 10px 20px;
     text-align: center;
     text-decoration: none;
@@ -250,16 +342,16 @@ footer {
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
-    border: none;
-    border-radius: 5px; /* Slight rounding of button edges */
-    transition: background-color 0.3s; /* Smooth transition for hover effect */
-}
+    border: 1px solid #ffffff;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+ }
 
-.button:hover {
-    background-color: #7BB034; /* Slightly darker green on hover */
-}
+ .button:hover {
+    background-color: #002d04;
+ }
 
-@media screen and (max-width: 600px) {
+ @media screen and (max-width: 600px) {
     body {
         font-size: 18px;
     }
@@ -284,37 +376,37 @@ footer {
     .responsive-table {
         overflow-x: auto;
     }
-}
+ }
 
-/* Add animation classes */
-.animated {
+ /* Add animation classes */
+ .animated {
     animation: fadeIn 1s ease-in;
-}
+ }
 
-@keyframes fadeIn {
+ @keyframes fadeIn {
     0% {opacity: 0;}
     100% {opacity: 1;}
-}
+ }
 
-/* Pagination styles */
-.pagination-controls {
+ /* Pagination styles */
+ .pagination-controls {
     text-align: center;
     padding: 10px;
-}
+ }
 
-.pagination-controls button {
+ .pagination-controls button {
     margin: 0 5px;
     padding: 5px 10px;
-    background-color: #8CC63F;
-    color: white;
-    border: none;
+    background-color: #2ecb13;
+    color: #ffffff;
+    border: 1px solid #ffffff;
     border-radius: 5px;
     cursor: pointer;
-}
+ }
 
-.pagination-controls button:hover {
-    background-color: #7BB034;
-}
+ .pagination-controls button:hover {
+    background-color: #002d04;
+ }
 
 ```
 
