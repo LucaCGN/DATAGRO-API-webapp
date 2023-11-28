@@ -1,17 +1,17 @@
-// Function to load data series for a product
+// Function to load data series for a product with pagination
 function loadDataSeries(productId, page = 1, perPage = 10) {
     console.log(`Loading data series for productId: ${productId}, page: ${page}, perPage: ${perPage}`);
     fetch(`/data-series/${productId}?page=${page}&perPage=${perPage}`)
         .then(response => {
             if (!response.ok) {
-                console.error(`Error fetching data series: ${response.statusText}`);
+                throw new Error(`Error fetching data series: ${response.statusText}`);
             }
             return response.json();
         })
         .then(data => {
             console.log("DataSeries API Response:", data);
             let tableBody = document.getElementById('data-series-body');
-            tableBody.innerHTML = data.series.map(series => `
+            tableBody.innerHTML = data.data.map(series => `
                 <tr>
                     <td>${series.cod}</td>
                     <td>${series.data}</td>
@@ -36,17 +36,17 @@ function renderPagination(paginationData, updateFunction) {
     let paginationDiv = document.getElementById('data-series-pagination');
     paginationDiv.innerHTML = '';
 
-    if (paginationData.currentPage > 1) {
+    if (paginationData.current_page > 1) {
         let prevButton = document.createElement('button');
         prevButton.textContent = 'Previous';
-        prevButton.onclick = () => updateFunction(paginationData.currentPage - 1);
+        prevButton.onclick = () => updateFunction(paginationData.current_page - 1);
         paginationDiv.appendChild(prevButton);
     }
 
-    if (paginationData.currentPage < paginationData.lastPage) {
+    if (paginationData.current_page < paginationData.last_page) {
         let nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        nextButton.onclick = () => updateFunction(paginationData.currentPage + 1);
+        nextButton.onclick = () => updateFunction(paginationData.current_page + 1);
         paginationDiv.appendChild(nextButton);
     }
 }

@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <div class="animated" id="dropdown-filter">
     <select class="button" id="produto-select">
         <!-- Produto options populated server-side -->

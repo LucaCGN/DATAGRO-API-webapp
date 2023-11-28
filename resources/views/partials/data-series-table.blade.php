@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <div class="responsive-table animated" id="data-series-table">
     <table>
         <thead>

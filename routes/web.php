@@ -4,8 +4,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DataSeriesController;
 use App\Http\Controllers\DownloadController;
+use Illuminate\Support\Facades\Log;
 
 Route::get('/', function () {
+    Log::info('Navigating to the home page.');
     return view('app');
 });
 

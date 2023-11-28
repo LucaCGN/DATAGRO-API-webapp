@@ -4,13 +4,13 @@ function fetchAndPopulateProducts(page = 1, perPage = 10) {
     fetch(`/products?page=${page}&perPage=${perPage}`)
         .then(response => {
             if (!response.ok) {
-                console.error(`Error fetching products: ${response.statusText}`);
+                throw new Error(`Error fetching products: ${response.statusText}`);
             }
             return response.json();
         })
         .then(data => {
             console.log("Products API Response:", data);
-            populateProductsTable(data.products);
+            populateProductsTable(data.data);
             renderPagination(data.pagination);
         })
         .catch(error => console.error("Products API Error:", error));
@@ -30,23 +30,23 @@ function populateProductsTable(products) {
     `).join('');
 }
 
-// Function to render pagination controls
+// Function to render pagination controls for products
 function renderPagination(paginationData) {
     console.log("Rendering pagination with data:", paginationData);
     let paginationDiv = document.getElementById('products-pagination');
     paginationDiv.innerHTML = '';
 
-    if (paginationData.currentPage > 1) {
+    if (paginationData.current_page > 1) {
         let prevButton = document.createElement('button');
         prevButton.textContent = 'Previous';
-        prevButton.onclick = () => fetchAndPopulateProducts(paginationData.currentPage - 1);
+        prevButton.onclick = () => fetchAndPopulateProducts(paginationData.current_page - 1);
         paginationDiv.appendChild(prevButton);
     }
 
-    if (paginationData.currentPage < paginationData.lastPage) {
+    if (paginationData.current_page < paginationData.last_page) {
         let nextButton = document.createElement('button');
         nextButton.textContent = 'Next';
-        nextButton.onclick = () => fetchAndPopulateProducts(paginationData.currentPage + 1);
+        nextButton.onclick = () => fetchAndPopulateProducts(paginationData.current_page + 1);
         paginationDiv.appendChild(nextButton);
     }
 }
