@@ -1,13 +1,15 @@
 // Function to update filters and fetch filtered products
 function updateFilters() {
     console.log("Updating filters");
-    const classification = document.getElementById('classification-select').value;
-    const subproduct = document.getElementById('subproduct-select').value;
+    const produto = document.getElementById('produto-select').value;
+    const subproduto = document.getElementById('subproduct-select').value;
     const local = document.getElementById('local-select').value;
+    const freq = document.getElementById('freq-select').value;
+    const proprietario = document.getElementById('proprietario-select').value;
 
-    console.log(`Filter parameters - Classification: ${classification}, Subproduct: ${subproduct}, Local: ${local}`);
+    console.log(`Filter parameters - Produto: ${produto}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
 
-    fetch(`/filter-products?classification=${classification}&subproduct=${subproduct}&local=${local}`)
+    fetch(`/filter-products?produto=${produto}&subproduto=${subproduto}&local=${local}&freq=${freq}&proprietario=${proprietario}`)
         .then(response => {
             if (!response.ok) {
                 console.error(`Error fetching filtered products: ${response.statusText}`);
@@ -21,7 +23,7 @@ function updateFilters() {
         .catch(error => console.error("Filter products API Error:", error));
 }
 
-// Function to update the products table
+// Function to update the products table based on filters
 function updateProductsTable(products) {
     console.log("Updating products table with products:", products);
     let tableBody = document.getElementById('products-table-body');
@@ -35,17 +37,13 @@ function updateProductsTable(products) {
     `).join('');
 }
 
-// Ensure the DOM is fully loaded before adding event listeners
+// Event listeners for dropdown filters
 document.addEventListener('DOMContentLoaded', function () {
-    if (document.getElementById('classification-select')) {
-        document.getElementById('classification-select').addEventListener('change', updateFilters);
-    }
-
-    if (document.getElementById('subproduct-select')) {
-        document.getElementById('subproduct-select').addEventListener('change', updateFilters);
-    }
-
-    if (document.getElementById('local-select')) {
-        document.getElementById('local-select').addEventListener('change', updateFilters);
-    }
+    const filters = ['produto-select', 'subproduct-select', 'local-select', 'freq-select', 'proprietario-select'];
+    filters.forEach(filterId => {
+        const filterElement = document.getElementById(filterId);
+        if (filterElement) {
+            filterElement.addEventListener('change', updateFilters);
+        }
+    });
 });

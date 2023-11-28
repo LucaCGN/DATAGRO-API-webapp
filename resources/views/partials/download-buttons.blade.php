@@ -1,4 +1,3 @@
-<!-- Updated to remove Livewire syntax -->
 <div class="animated">
     <button class="button" id="download-csv-btn">Download CSV</button>
     <button class="button" id="download-pdf-btn">Download PDF</button>

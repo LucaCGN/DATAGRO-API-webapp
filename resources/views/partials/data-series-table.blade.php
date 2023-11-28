@@ -2,9 +2,15 @@
     <table>
         <thead>
             <tr>
-                <th>Data Series Name</th>
-                <th>Value</th>
-                <th>Date</th>
+                <th>Cod</th>
+                <th>data</th>
+                <th>ult</th>
+                <th>mini</th>
+                <th>maxi</th>
+                <th>abe</th>
+                <th>volumes</th>
+                <th>med</th>
+                <th>aju</th>
             </tr>
         </thead>
         <tbody id="data-series-body">

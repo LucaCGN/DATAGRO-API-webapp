@@ -15,11 +15,14 @@ file_paths = [
     'resources/views/partials/products-table.blade.php',
     'resources/views/app.blade.php',
     'public/css/app.css',
-#    'app/Models/DataSeries.php',
-#    'app/Models/ExtendedProductList.php',
-#    'app/Console/Commands/FetchDatagroData.php',
-#    'database/wmigrations/2023_03_01_120001_create_data_series_table.php',
-#    'database/migrations/2023_03_01_120000_create_extended_product_list_table.php',
+    'app/Models/DataSeries.php',
+    'app/Models/ExtendedProductList.php',
+    'app/Console/Commands/FetchDatagroData.php',
+    'routes\web.php',
+    'app\Http\Controllers\DownloadController.php',
+    'app\Http\Controllers\ProductController.php',
+    'app\Http\Controllers\DataSeriesController.php',
+    'app\Http\Controllers\Controller.php'
 ]
 
 # Path to the output Markdown file

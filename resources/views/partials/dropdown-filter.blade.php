@@ -1,16 +1,22 @@
-<!-- Updated to remove Livewire syntax -->
 <div class="animated" id="dropdown-filter">
-    <!-- Dropdown filters -->
-    <select class="button" id="classification-select">
-        <!-- Options populated server-side -->
+    <select class="button" id="produto-select">
+        <!-- Produto options populated server-side -->
     </select>
 
-    <select class="button" id="subproduct-select">
-        <!-- Options populated server-side -->
+    <select class="button" id="subproduto-select">
+        <!-- SubProduto options populated server-side -->
     </select>
 
     <select class="button" id="local-select">
-        <!-- Options populated server-side -->
+        <!-- Local options populated server-side -->
+    </select>
+
+    <select class="button" id="freq-select">
+        <!-- Frequência options populated server-side -->
+    </select>
+
+    <select class="button" id="proprietario-select">
+        <!-- Proprietário options populated server-side -->
     </select>
 </div>
 <script src="{{ asset('js/dropdown-filter.js') }}"></script>

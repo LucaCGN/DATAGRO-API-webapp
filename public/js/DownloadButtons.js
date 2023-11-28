@@ -9,17 +9,20 @@ function downloadPDF() {
     window.location.href = '/download/pdf';
 }
 
-// Ensure the DOM is fully loaded before adding event listeners
+// Event listeners for download buttons
 document.addEventListener('DOMContentLoaded', function () {
-    if (document.getElementById('download-csv-btn')) {
-        document.getElementById('download-csv-btn').addEventListener('click', function() {
+    const csvBtn = document.getElementById('download-csv-btn');
+    const pdfBtn = document.getElementById('download-pdf-btn');
+
+    if (csvBtn) {
+        csvBtn.addEventListener('click', function() {
             console.log("Download CSV button clicked");
             downloadCSV();
         });
     }
 
-    if (document.getElementById('download-pdf-btn')) {
-        document.getElementById('download-pdf-btn').addEventListener('click', function() {
+    if (pdfBtn) {
+        pdfBtn.addEventListener('click', function() {
             console.log("Download PDF button clicked");
             downloadPDF();
         });

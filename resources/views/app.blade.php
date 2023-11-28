@@ -12,10 +12,10 @@
   </header>
 
   <main>
-      @include('partials.data-series-table')
-      @include('partials.download-buttons')
       @include('partials.dropdown-filter')
       @include('partials.products-table')
+      @include('partials.data-series-table')
+      @include('partials.download-buttons')
   </main>
 
   <footer>
