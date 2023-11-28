@@ -12,7 +12,10 @@
   </header>
 
   <main>
-      <!-- Main content goes here -->
+      @include('partials.data-series-table')
+      @include('partials.download-buttons')
+      @include('partials.dropdown-filter')
+      @include('partials.products-table')
   </main>
 
   <footer>
@@ -20,7 +23,6 @@
   </footer>
 
   <!-- Include the JavaScript files -->
-  <script type="module" src="{{ asset('js/app.js') }}"></script>
   <script type="module" src="{{ asset('js/DropdownFilter.js') }}"></script>
   <script type="module" src="{{ asset('js/ProductsTable.js') }}"></script>
   <script type="module" src="{{ asset('js/DataSeriesTable.js') }}"></script>
