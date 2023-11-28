@@ -13,7 +13,7 @@
 
   <main>
       @include('partials.dropdown-filter')
-      @include('partials.products-table')
+      @include('partials.products-table', ['products' => $products])
       @include('partials.data-series-table')
       @include('partials.download-buttons')
   </main>

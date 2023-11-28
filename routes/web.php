@@ -5,11 +5,14 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DataSeriesController;
 use App\Http\Controllers\DownloadController;
 use Illuminate\Support\Facades\Log;
+use App\Models\ExtendedProductList;
+use App\Models\DataSeries;
 
 Route::get('/', function () {
-    Log::info('Navigating to the home page.');
-    return view('app');
+    $products = ExtendedProductList::all();
+    return view('app', compact('products'));
 });
+
 
 // Products related routes
 Route::get('/products', [ProductController::class, 'index']);
