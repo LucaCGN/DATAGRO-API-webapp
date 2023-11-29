@@ -13,7 +13,6 @@ Route::get('/', function () {
     return view('app', compact('products'));
 });
 
-
 // Products related routes
 Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{page}/{perPage}', [ProductController::class, 'paginate']);
@@ -27,4 +26,9 @@ Route::get('/download/csv', [DownloadController::class, 'downloadCSV']);
 Route::get('/download/pdf', [DownloadController::class, 'downloadPDF']);
 
 // Filter products
-Route::get('/filter-products', [ProductController::class, 'filter']);
+Route::post('/filter-products', [ProductController::class, 'filter']); // Changed to POST
+
+// Add a route to handle CSRF token generation
+Route::get('/csrf-token', function() {
+    return csrf_token();
+});

@@ -1,30 +1,31 @@
 body {
     font-family: Arial, sans-serif;
-    color: #ffffff;
-    background-color: #002d04;
- }
+    color: #4f4f4f; /* Dark grey for text, softer than pure white */
+    background-color: #f8f8f8; /* Light grey background for a clean look */
+}
 
- header {
-    background-color: #002d04;
-    color: #ffffff;
+header {
+    background-color: #fff; /* White background for header */
+    color: #4f4f4f; /* Dark grey for text */
     padding: 10px;
-    text-align: center;
- }
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
 
- main {
+main {
     margin: 15px;
- }
+}
 
- footer {
-    background-color: #002d04;
-    color: #ffffff;
+footer {
+    background-color: #fff; /* White background for footer */
+    color: #4f4f4f; /* Dark grey for text */
     text-align: center;
     padding: 10px;
- }
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
 
- .button {
-    background-color: #2ecb13;
-    color: #ffffff;
+.button {
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
     padding: 10px 20px;
     text-align: center;
     text-decoration: none;
@@ -32,14 +33,14 @@ body {
     font-size: 16px;
     margin: 4px 2px;
     cursor: pointer;
-    border: 1px solid #ffffff;
+    border: none; /* Removed border for a cleaner look */
     border-radius: 5px;
     transition: background-color 0.3s;
- }
+}
 
- .button:hover {
-    background-color: #002d04;
- }
+.button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
 
  @media screen and (max-width: 600px) {
     body {
@@ -87,13 +88,13 @@ body {
  .pagination-controls button {
     margin: 0 5px;
     padding: 5px 10px;
-    background-color: #2ecb13;
-    color: #ffffff;
-    border: 1px solid #ffffff;
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
+    border: none; /* Removed border for a cleaner look */
     border-radius: 5px;
     cursor: pointer;
- }
+}
 
- .pagination-controls button:hover {
-    background-color: #002d04;
- }
+.pagination-controls button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}

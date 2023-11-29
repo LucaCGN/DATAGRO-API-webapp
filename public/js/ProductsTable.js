@@ -1,91 +1,71 @@
-// Function to fetch and populate products with pagination
-function fetchAndPopulateProducts(page = 1, perPage = 10) {
-    console.log(`[ProductsTable] Fetching products for page: ${page}, perPage: ${perPage}`);
-    fetch(`/products?page=${page}&perPage=${perPage}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("[ProductsTable] Products API Response received:", data);
-            populateProductsTable(data.data);
-            renderPagination(data); // Call renderPagination with the fetched data
-        })
-        .catch(error => {
-            console.error("[ProductsTable] Products API Error:", error);
-        });
-}
+// Function to update filters and fetch filtered products
+function updateFilters() {
+    console.log("[DropdownFilter] Updating filters");
+    const produto = document.getElementById('produto-select').value;
+    const subproduto = document.getElementById('subproduct-select').value;
+    const local = document.getElementById('local-select').value;
+    const freq = document.getElementById('freq-select').value;
+    const proprietario = document.getElementById('proprietario-select').value;
 
-// Global variable to track the currently selected product ID
-let selectedProductId = null;
+    console.log(`[DropdownFilter] Filter parameters - Produto: ${produto}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
 
-// Function to handle row selection
-function selectProduct(productId) {
-    // Check if we're unselecting the current product
-    if (selectedProductId === productId) {
-        selectedProductId = null;
-        document.getElementById(`product-checkbox-${productId}`).checked = false;
-    } else {
-        // Unselect any previously selected checkbox
-        if (selectedProductId !== null) {
-            document.getElementById(`product-checkbox-${selectedProductId}`).checked = false;
+    // Updated to handle CSRF token and content type
+    fetch('/filter-products', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // Assumes a meta tag with the CSRF token is present
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            produto: produto,
+            subproduto: subproduto,
+            local: local,
+            freq: freq,
+            proprietario: proprietario
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        selectedProductId = productId;
-    }
-
-    // Perform any additional logic needed when a product is selected
-    console.log(`Product ${productId} selected`);
+        return response.json();
+    })
+    .then(data => {
+        console.log("[DropdownFilter] Filter products API Response:", data);
+        updateProductsTable(data.products);
+    })
+    .catch(error => {
+        console.error("[DropdownFilter] Filter products API Error:", error);
+    });
 }
 
-// Function to populate products table
-function populateProductsTable(products) {
-    console.log("[ProductsTable] Populating products table with:", products);
+// Function to update the products table based on filters
+function updateProductsTable(products) {
+    console.log("[DropdownFilter] Updating products table with products:", products);
     let tableBody = document.getElementById('products-table-body');
     tableBody.innerHTML = products.map(product => `
-        <tr>
-            <td><input type="checkbox" id="product-checkbox-${product.id}" name="selectedProduct" ${
-                selectedProductId === product.id ? 'checked' : ''
-            } onclick="selectProduct(${product.id})"></td>
-            <td>${product.Código_Produto}</td>
-            <td>${product.descr}</td>
+        <tr onclick="selectProduct(${product.id})">
+            <td>${product.nome}</td>
+            <td>${product.freq}</td>
             <td>${product.inserido}</td>
             <td>${product.alterado}</td>
         </tr>
     `).join('');
-    console.log("[ProductsTable] Products table populated");
+    console.log("[DropdownFilter] Products table updated");
 }
 
+// Event listeners for dropdown filters
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("[DropdownFilter] Setting up filter dropdown event listeners");
+    const filters = ['produto-select', 'subproduct-select', 'local-select', 'freq-select', 'proprietario-select'];
+    filters.forEach(filterId => {
+        const filterElement = document.getElementById(filterId);
+        if (filterElement) {
+            filterElement.addEventListener('change', updateFilters);
+        }
+    });
 
-// Function to update the current page indicator
-function updateCurrentPageIndicator(currentPage, lastPage) {
-    let currentPageIndicator = document.getElementById('current-page-indicator');
-    if (currentPageIndicator) {
-        currentPageIndicator.textContent = `Page ${currentPage} of ${lastPage}`;
-    }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    fetchAndPopulateProducts();
+    // Trigger filter update on load to populate the products table
+    updateFilters();
 });
-
-
-// Function to render pagination controls for products
-function renderPagination(paginationData) {
-    let paginationDiv = document.getElementById('products-pagination');
-    paginationDiv.innerHTML = ''; // Clear existing pagination controls
-
-    // Previous button
-    if (paginationData.current_page > 1) {
-        paginationDiv.innerHTML += `<button onclick="fetchAndPopulateProducts(${paginationData.current_page - 1}, ${paginationData.per_page})">Previous</button>`;
-    }
-
-    // Current Page Indicator
-    paginationDiv.innerHTML += `<span>Page ${paginationData.current_page} of ${paginationData.last_page}</span>`;
-
-    // Next button
-    if (paginationData.current_page < paginationData.last_page) {
-        paginationDiv.innerHTML += `<button onclick="fetchAndPopulateProducts(${paginationData.current_page + 1}, ${paginationData.per_page})">Next</button>`;
-    }
-}

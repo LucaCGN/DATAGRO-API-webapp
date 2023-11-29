@@ -1,19 +1,19 @@
 <!DOCTYPE html>
 <div class="animated" id="dropdown-filter">
     <select class="button" id="produto-select">
-        <!-- Produto options populated server-side -->
+        <!-- Options will be populated via JavaScript -->
     </select>
     <select class="button" id="subproduto-select">
-        <!-- SubProduto options populated server-side -->
+        <!-- Options will be populated via JavaScript -->
     </select>
     <select class="button" id="local-select">
-        <!-- Local options populated server-side -->
+        <!-- Options will be populated via JavaScript -->
     </select>
     <select class="button" id="freq-select">
-        <!-- Frequência options populated server-side -->
+        <!-- Options will be populated via JavaScript -->
     </select>
     <select class="button" id="proprietario-select">
-        <!-- Proprietário options populated server-side -->
+        <!-- Options will be populated via JavaScript -->
     </select>
 </div>
 <script src="{{ asset('js/DropdownFilter.js') }}"></script>

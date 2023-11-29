@@ -24,13 +24,21 @@ class ProductController extends Controller
         return response()->json($products);
     }
 
+    // Adjusted to handle POST requests for filtering
     public function filter(Request $request)
     {
-        Log::info("ProductController: filter method called with request: ", $request->all());
-        $products = ExtendedProductList::where('Código_Produto', $request->Código_Produto)
-                    ->orWhere('descr', $request->descr)
-                    ->paginate(10); // Assuming default 10 per page for filters as well
-        Log::info('Filtered Products Retrieved: ' . $products->count());
+        // Ensure your method is equipped to handle the request appropriately
+        $query = ExtendedProductList::query();
+
+        if ($request->filled('produto')) {
+            $query->where('Código_Produto', 'like', '%' . $request->produto . '%');
+        }
+        if ($request->filled('subproduto')) {
+            $query->where('Subproduto', 'like', '%' . $request->subproduto . '%');
+        }
+        // Add other filters similarly...
+
+        $products = $query->paginate(10); // Or the perPage value sent from the front-end
         return response()->json($products);
     }
 }
