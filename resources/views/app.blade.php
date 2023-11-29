@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Datagro Comercial Team Web Application</title>
-  <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- Add this line -->
+  <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- CSRF token meta tag added -->
   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
