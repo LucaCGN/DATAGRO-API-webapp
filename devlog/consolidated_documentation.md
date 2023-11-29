@@ -154,26 +154,6 @@ function populateProductsTable(products) {
 }
 
 
-// Function to fetch and populate products with pagination
-function fetchAndPopulateProducts(page = 1, perPage = 10) {
-    console.log(`[ProductsTable] Fetching products for page: ${page}, perPage: ${perPage}`);
-    fetch(`/products?page=${page}&perPage=${perPage}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("[ProductsTable] Products API Response received:", data);
-            populateProductsTable(data.data);
-            renderPagination(data);  // Call renderPagination with the fetched data
-        })
-        .catch(error => {
-            console.error("[ProductsTable] Products API Error:", error);
-        });
-}
-
 // Function to update the current page indicator
 function updateCurrentPageIndicator(currentPage, lastPage) {
     let currentPageIndicator = document.getElementById('current-page-indicator');
@@ -190,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ## resources/views/partials/data-series-table.blade.php
 ```php
-<!DOCTYPE html>
+<!-- Data Series Table -->
 <div class="responsive-table animated" id="data-series-table">
     <table>
         <thead>
@@ -210,9 +190,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <!-- Data populated by DataSeriesTable.js -->
         </tbody>
     </table>
-    <div id="data-series-pagination" class="pagination-controls">
-        <!-- Pagination Controls -->
-    </div>
+</div>
+<div id="data-series-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by DataSeriesTable.js -->
 </div>
 <script src="{{ asset('js/DataSeriesTable.js') }}"></script>
 <script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>
@@ -258,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 ## resources/views/partials/products-table.blade.php
 ```php
+<!-- Products Table -->
 <div class="responsive-table animated" id="products-table">
     <table>
         <thead>
@@ -273,9 +254,9 @@ document.addEventListener('DOMContentLoaded', () => {
             <!-- Data populated by ProductsTable.js -->
         </tbody>
     </table>
-    <div id="products-pagination" class="pagination-controls">
-        <!-- Pagination Controls populated by ProductsTable.js -->
-    </div>
+</div>
+<div id="products-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by ProductsTable.js -->
 </div>
 <script src="{{ asset('js/ProductsTable.js') }}"></script>
 

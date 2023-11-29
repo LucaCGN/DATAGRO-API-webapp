@@ -11,7 +11,7 @@ function fetchAndPopulateProducts(page = 1, perPage = 10) {
         .then(data => {
             console.log("[ProductsTable] Products API Response received:", data);
             populateProductsTable(data.data);
-            renderPagination(data);  // Call renderPagination with the fetched data
+            renderPagination(data); // Call renderPagination with the fetched data
         })
         .catch(error => {
             console.error("[ProductsTable] Products API Error:", error);
@@ -58,26 +58,6 @@ function populateProductsTable(products) {
 }
 
 
-// Function to fetch and populate products with pagination
-function fetchAndPopulateProducts(page = 1, perPage = 10) {
-    console.log(`[ProductsTable] Fetching products for page: ${page}, perPage: ${perPage}`);
-    fetch(`/products?page=${page}&perPage=${perPage}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("[ProductsTable] Products API Response received:", data);
-            populateProductsTable(data.data);
-            renderPagination(data);  // Call renderPagination with the fetched data
-        })
-        .catch(error => {
-            console.error("[ProductsTable] Products API Error:", error);
-        });
-}
-
 // Function to update the current page indicator
 function updateCurrentPageIndicator(currentPage, lastPage) {
     let currentPageIndicator = document.getElementById('current-page-indicator');
@@ -89,3 +69,23 @@ function updateCurrentPageIndicator(currentPage, lastPage) {
 document.addEventListener('DOMContentLoaded', () => {
     fetchAndPopulateProducts();
 });
+
+
+// Function to render pagination controls for products
+function renderPagination(paginationData) {
+    let paginationDiv = document.getElementById('products-pagination');
+    paginationDiv.innerHTML = ''; // Clear existing pagination controls
+
+    // Previous button
+    if (paginationData.current_page > 1) {
+        paginationDiv.innerHTML += `<button onclick="fetchAndPopulateProducts(${paginationData.current_page - 1}, ${paginationData.per_page})">Previous</button>`;
+    }
+
+    // Current Page Indicator
+    paginationDiv.innerHTML += `<span>Page ${paginationData.current_page} of ${paginationData.last_page}</span>`;
+
+    // Next button
+    if (paginationData.current_page < paginationData.last_page) {
+        paginationDiv.innerHTML += `<button onclick="fetchAndPopulateProducts(${paginationData.current_page + 1}, ${paginationData.per_page})">Next</button>`;
+    }
+}

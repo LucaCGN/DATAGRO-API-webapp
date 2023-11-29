@@ -1,3 +1,4 @@
+<!-- Products Table -->
 <div class="responsive-table animated" id="products-table">
     <table>
         <thead>
@@ -13,8 +14,8 @@
             <!-- Data populated by ProductsTable.js -->
         </tbody>
     </table>
-    <div id="products-pagination" class="pagination-controls">
-        <!-- Pagination Controls populated by ProductsTable.js -->
-    </div>
+</div>
+<div id="products-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by ProductsTable.js -->
 </div>
 <script src="{{ asset('js/ProductsTable.js') }}"></script>

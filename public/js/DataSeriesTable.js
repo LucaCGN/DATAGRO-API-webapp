@@ -35,23 +35,23 @@ function loadDataSeries(productId, page = 1, perPage = 10) {
 }
 
 // Function to render pagination for data series
-function renderPagination(paginationData, updateFunction) {
-    console.log("[DataSeriesTable] Rendering pagination with data:", paginationData);
+// Ensure the renderPagination is specific for DataSeries and does not overlap with ProductsTable
+function renderDataSeriesPagination(paginationData, productId) {
     let paginationDiv = document.getElementById('data-series-pagination');
-    paginationDiv.innerHTML = '';
+    paginationDiv.innerHTML = ''; // Clear existing pagination controls
 
+    // Previous button
     if (paginationData.current_page > 1) {
-        let prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.onclick = () => updateFunction(paginationData.current_page - 1);
-        paginationDiv.appendChild(prevButton);
+        paginationDiv.innerHTML += `<button onclick="loadDataSeries(${productId}, ${paginationData.current_page - 1}, ${paginationData.per_page})">Previous</button>`;
     }
 
+    // Current Page Indicator
+    paginationDiv.innerHTML += `<span>Page ${paginationData.current_page} of ${paginationData.last_page}</span>`;
+
+    // Next button
     if (paginationData.current_page < paginationData.last_page) {
-        let nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.onclick = () => updateFunction(paginationData.current_page + 1);
-        paginationDiv.appendChild(nextButton);
+        paginationDiv.innerHTML += `<button onclick="loadDataSeries(${productId}, ${paginationData.current_page + 1}, ${paginationData.per_page})">Next</button>`;
     }
-    console.log("[DataSeriesTable] Pagination controls rendered");
 }
+
+// Call this function wherever you need to render pagination for data series
