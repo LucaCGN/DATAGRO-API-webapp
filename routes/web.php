@@ -25,10 +25,14 @@ Route::get('/data-series/{productId}/{page}/{perPage}', [DataSeriesController::c
 Route::get('/download/csv', [DownloadController::class, 'downloadCSV']);
 Route::get('/download/pdf', [DownloadController::class, 'downloadPDF']);
 
-// Filter products
-Route::post('/filter-products', [ProductController::class, 'filter']); // Changed to POST
 
 // Add a route to handle CSRF token generation
 Route::get('/csrf-token', function() {
     return csrf_token();
 });
+
+// New route for fetching dropdown data
+Route::get('/api/get-dropdown-data', [FilterController::class, 'getDropdownData']);
+
+// Filter products
+Route::post('/filter-products', [ProductController::class, 'filter']); // Changed to POST

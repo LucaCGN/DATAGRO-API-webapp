@@ -22,5 +22,4 @@
 <div id="data-series-pagination" class="pagination-controls">
     <!-- Pagination Controls populated by DataSeriesTable.js -->
 </div>
-<script src="{{ asset('js/DataSeriesTable.js') }}"></script>
 <script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>

@@ -1,5 +1,141 @@
+## app/Http/Controllers/ProductController.php
+```
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\ExtendedProductList;
+use Illuminate\Support\Facades\Log;
+
+class ProductController extends Controller
+{
+    public function index()
+    {
+        Log::info('ProductController: index method called');
+        $products = ExtendedProductList::paginate(10); // Default to 10 per page
+        Log::info('Products Retrieved: ' . $products->count());
+        return response()->json($products);
+    }
+
+    public function paginate($page, $perPage)
+    {
+        Log::info("ProductController: paginate method called with page {$page} and perPage {$perPage}");
+        $products = ExtendedProductList::paginate($perPage, ['*'], 'page', $page);
+        Log::info('Paginated Products Retrieved');
+        return response()->json($products);
+    }
+
+    // Adjusted to handle POST requests for filtering
+    public function filter(Request $request)
+    {
+        // Ensure your method is equipped to handle the request appropriately
+        $query = ExtendedProductList::query();
+
+        if ($request->filled('produto')) {
+            $query->where('Código_Produto', 'like', '%' . $request->produto . '%');
+        }
+        if ($request->filled('subproduto')) {
+            $query->where('Subproduto', 'like', '%' . $request->subproduto . '%');
+        }
+        // Add other filters similarly...
+
+        $products = $query->paginate(10); // Or the perPage value sent from the front-end
+        return response()->json($products);
+    }
+}
+
+```
+## resources/views/partials/dropdown-filter.blade.php
+```
+<!DOCTYPE html>
+<div class="animated" id="dropdown-filter">
+    <select class="button" id="produto-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+    <select class="button" id="subproduto-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+    <select class="button" id="local-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+    <select class="button" id="freq-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+    <select class="button" id="proprietario-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+</div>
+<script src="{{ asset('js/DropdownFilter.js') }}"></script>
+<script>console.log('[dropdown-filter.blade.php] Dropdown filter view loaded');</script>
+
+```
+## app/Http/Controllers/FilterController.php
+```
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\ExtendedProductList;
+use Illuminate\Support\Facades\Log;
+
+class FilterController extends Controller
+{
+    public function getDropdownData()
+    {
+        // Assuming these are the fields for your dropdowns
+        $produto = ExtendedProductList::distinct('Código_Produto')->pluck('Código_Produto', 'id');
+        $subproduto = ExtendedProductList::distinct('Subproduto')->pluck('Subproduto', 'id');
+        $local = ExtendedProductList::distinct('Local')->pluck('Local', 'id');
+        $freq = ExtendedProductList::distinct('Freq')->pluck('Freq', 'id');
+        $proprietario = ExtendedProductList::distinct('Proprietario')->pluck('Proprietario', 'id');
+
+        return response()->json([
+            'produto' => $produto,
+            'subproduto' => $subproduto,
+            'local' => $local,
+            'freq' => $freq,
+            'proprietario' => $proprietario
+        ]);
+    }
+}
+
+```
+## app/Models/ExtendedProductList.php
+```
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class ExtendedProductList extends Model
+{
+    protected $table = 'extended_product_list_tables';
+    protected $fillable = [
+        'Código_Produto', 'Classificação', 'Subproduto', 'Local', 'Fetch_Status',
+        'bolsa', 'roda', 'fonte', 'tav', 'subtav', 'decimais', 'correlatos',
+        'empresa', 'contrato', 'subproduto_id', 'entcode', 'nome', 'longo', 'descr',
+        'codf', 'bd', 'palavras', 'habilitado', 'lote', 'rep', 'vln', 'dia',
+        'freq', 'dex', 'inserido', 'alterado'
+    ];
+    public $timestamps = true;
+
+    public function dataSeries()
+    {
+        return $this->hasOne(DataSeries::class, 'extended_product_list_id');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('active', 1);
+    }
+}
+
+```
 ## public/js/DataSeriesTable.js
-```php
+```
 // Function to load data series for a product with pagination
 function loadDataSeries(productId, page = 1, perPage = 10) {
     console.log(`[DataSeriesTable] Start loading data series for productId: ${productId}, page: ${page}, perPage: ${perPage}`);
@@ -59,128 +195,49 @@ function renderDataSeriesPagination(paginationData, productId) {
 // Call this function wherever you need to render pagination for data series
 
 ```
-
-## public/js/DownloadButtons.js
-```php
-// Functions to handle download actions
-function downloadCSV() {
-    console.log("[DownloadButtons] Initiating CSV download");
-    window.location.href = '/download/csv';
-}
-
-function downloadPDF() {
-    console.log("[DownloadButtons] Initiating PDF download");
-    window.location.href = '/download/pdf';
-}
-
-// Event listeners for download buttons
-document.addEventListener('DOMContentLoaded', function () {
-    console.log("[DownloadButtons] Setting up event listeners for download buttons");
-    const csvBtn = document.getElementById('download-csv-btn');
-    const pdfBtn = document.getElementById('download-pdf-btn');
-
-    if (csvBtn) {
-        csvBtn.addEventListener('click', function() {
-            console.log("[DownloadButtons] CSV Download button clicked");
-            downloadCSV();
-        });
-    }
-
-    if (pdfBtn) {
-        pdfBtn.addEventListener('click', function() {
-            console.log("[DownloadButtons] PDF Download button clicked");
-            downloadPDF();
-        });
-    }
-});
+## resources/views/partials/download-buttons.blade.php
+```
+<!DOCTYPE html>
+<div class="animated">
+    <button class="button" id="download-csv-btn">Download CSV</button>
+    <button class="button" id="download-pdf-btn">Download PDF</button>
+</div>
+<script src="{{ asset('js/DownloadButtons.js') }}"></script>
+<script>console.log('[download-buttons.blade.php] Download buttons view loaded');</script>
 
 ```
+## app/Models/DataSeries.php
+```
+<?php
 
-## public/js/DropdownFilter.js
-```php
-// DropdownFilter.js
-// Function to update filters and fetch filtered products
-function updateFilters() {
-    console.log("[DropdownFilter] Updating filters");
-    const produto = document.getElementById('produto-select').value;
-    // Ensure that the IDs match the ones in the HTML
-    const subproduto = document.getElementById('subproduct-select').value;
-    const local = document.getElementById('local-select').value;
-    const freq = document.getElementById('freq-select').value;
-    const proprietario = document.getElementById('proprietario-select').value;
+namespace App\Models;
 
-    console.log(`[DropdownFilter] Filter parameters - Produto: ${produto}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
+use Illuminate\Database\Eloquent\Model;
 
-    // Make sure the endpoint and method are correct
-    fetch('/filter-products', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            produto: produto,
-            subproduto: subproduto,
-            local: local,
-            freq: freq,
-            proprietario: proprietario
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("[DropdownFilter] Filter products API Response:", data);
-        // Call a function to update the products table
-        updateProductsTable(data.products);
-    })
-    .catch(error => {
-        console.error("[DropdownFilter] Filter products API Error:", error);
-    });
+class DataSeries extends Model
+{
+    protected $table = 'data_series_tables';
+
+    protected $fillable = [
+        'extended_product_list_id', 'cod', 'data', 'ult', 'mini', 'maxi',
+        'abe', 'volumes', 'cab', 'med', 'aju'
+    ];
+
+    public $timestamps = true;
+
+    // Define the relationship with ExtendedProductList
+    public function extendedProductList()
+    {
+        return $this->belongsTo(ExtendedProductList::class, 'extended_product_list_id');
+    }
 }
-
-// Function to update the products table based on filters
-function updateProductsTable(products) {
-    console.log("[DropdownFilter] Updating products table with products:", products);
-    // Make sure the table body exists in your HTML with this ID
-    let tableBody = document.getElementById('products-table-body');
-    // Ensure the properties of product match what you expect (e.g., product.nome)
-    tableBody.innerHTML = products.map(product => `
-        <tr onclick="selectProduct(${product.id})">
-            <td>${product.nome}</td>
-            <td>${product.freq}</td>
-            <td>${product.inserido}</td>
-            <td>${product.alterado}</td>
-        </tr>
-    `).join('');
-    console.log("[DropdownFilter] Products table updated");
-}
-
-// Event listeners for dropdown filters
-document.addEventListener('DOMContentLoaded', function () {
-    console.log("[DropdownFilter] Setting up filter dropdown event listeners");
-    const filters = ['produto-select', 'subproduct-select', 'local-select', 'freq-select', 'proprietario-select'];
-    filters.forEach(filterId => {
-        // Ensure the elements with these IDs exist in the DOM
-        const filterElement = document.getElementById(filterId);
-        if (filterElement) {
-            filterElement.addEventListener('change', updateFilters);
-        } else {
-            // Log an error if the element does not exist
-            console.error(`[DropdownFilter] Element with ID ${filterId} not found.`);
-        }
-    });
-});
 
 ```
-
 ## public/js/ProductsTable.js
-```php
-// Function to populate products table
+```
+// ProductsTable.js
+
+// Assume this function is provided the products data when called
 function populateProductsTable(products) {
     console.log("[ProductsTable] Populating products table with:", products);
     let tableBody = document.getElementById('products-table-body');
@@ -193,169 +250,50 @@ function populateProductsTable(products) {
         </tr>
     `).join('');
     console.log("[ProductsTable] Products table populated");
+
+    // Call populateDropdowns from DropdownFilter.js after the table is populated
+    populateDropdowns(products);
 }
 
-// Event listeners for dropdown filters
-document.addEventListener('DOMContentLoaded', function () {
-    console.log("[DropdownFilter] Setting up filter dropdown event listeners");
-    const filters = ['produto-select', 'subproduct-select', 'local-select', 'freq-select', 'proprietario-select'];
-    filters.forEach(filterId => {
-        const filterElement = document.getElementById(filterId);
-        if (filterElement) {
-            filterElement.addEventListener('change', updateFilters);
-        }
-    });
-
-    // Trigger filter update on load to populate the products table
-    updateFilters();
-});
+function selectProduct(productId) {
+    // Implementation of selectProduct
+    console.log("[ProductsTable] Product selected with ID:", productId);
+    // Additional logic for product selection
+}
 
 ```
+## app/Http/Controllers/DataSeriesController.php
+```
+<?php
 
-## resources/views/partials/data-series-table.blade.php
-```php
-<!-- Data Series Table -->
-<div class="responsive-table animated" id="data-series-table">
-    <table>
-        <thead>
-            <tr>
-                <th>Cod</th>
-                <th>data</th>
-                <th>ult</th>
-                <th>mini</th>
-                <th>maxi</th>
-                <th>abe</th>
-                <th>volumes</th>
-                <th>med</th>
-                <th>aju</th>
-            </tr>
-        </thead>
-        <tbody id="data-series-body">
-            <!-- Data populated by DataSeriesTable.js -->
-        </tbody>
-    </table>
-</div>
-<div id="data-series-pagination" class="pagination-controls">
-    <!-- Pagination Controls populated by DataSeriesTable.js -->
-</div>
-<script src="{{ asset('js/DataSeriesTable.js') }}"></script>
-<script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\DataSeries;
+use Illuminate\Support\Facades\Log;
+
+class DataSeriesController extends Controller
+{
+   public function show($productId)
+   {
+      Log::info("DataSeriesController: show method called for productId {$productId}");
+      $dataSeries = DataSeries::where('extended_product_list_id', $productId)->get();
+      Log::info('DataSeries Retrieved: ' . $dataSeries->count());
+      return response()->json($dataSeries);
+   }
+
+   public function paginate($productId, $page, $perPage)
+   {
+      Log::info("DataSeriesController: paginate method called for productId {$productId} with page {$page} and perPage {$perPage}");
+      $dataSeries = DataSeries::where('extended_product_list_id', $productId)->paginate($perPage);
+      Log::info('Paginated DataSeries Retrieved');
+      return response()->json($dataSeries);
+   }
+}
 
 ```
-
-## resources/views/partials/download-buttons.blade.php
-```php
-<!DOCTYPE html>
-<div class="animated">
-    <button class="button" id="download-csv-btn">Download CSV</button>
-    <button class="button" id="download-pdf-btn">Download PDF</button>
-</div>
-<script src="{{ asset('js/DownloadButtons.js') }}"></script>
-<script>console.log('[download-buttons.blade.php] Download buttons view loaded');</script>
-
-```
-
-## resources/views/partials/dropdown-filter.blade.php
-```php
-<!DOCTYPE html>
-<div class="animated" id="dropdown-filter">
-    <select class="button" id="produto-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-    <select class="button" id="subproduto-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-    <select class="button" id="local-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-    <select class="button" id="freq-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-    <select class="button" id="proprietario-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-</div>
-<script src="{{ asset('js/DropdownFilter.js') }}"></script>
-<script>console.log('[dropdown-filter.blade.php] Dropdown filter view loaded');</script>
-
-```
-
-## resources/views/partials/products-table.blade.php
-```php
-<!-- Products Table -->
-<div class="responsive-table animated" id="products-table">
-    <table>
-        <thead>
-            <tr>
-                <th>Select</th>
-                <th>Código_Produto</th>
-                <th>Descr</th>
-                <th>Data Inserido</th>
-                <th>Data Alterado</th>
-            </tr>
-        </thead>
-        <tbody id="products-table-body">
-            <!-- Data populated by ProductsTable.js -->
-        </tbody>
-    </table>
-</div>
-<div id="products-pagination" class="pagination-controls">
-    <!-- Pagination Controls populated by ProductsTable.js -->
-</div>
-<script src="{{ asset('js/ProductsTable.js') }}"></script>
-
-```
-
-## resources/views/app.blade.php
-```php
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Datagro Comercial Team Web Application</title>
-  <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- CSRF token meta tag added -->
-  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-</head>
-<body>
-    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
-        <h1>API Mercado Físico - SALES TOOL</h1>
-        <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
-    </header>
-
-  <main>
-      @include('partials.dropdown-filter')
-      @include('partials.products-table', ['products' => $products])
-      @include('partials.data-series-table')
-      @include('partials.download-buttons')
-  </main>
-
-  <footer style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
-    <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets" style="height: 50px;">
-    <div>
-        <h2>DATAGRO LINKS</h2>
-        <ul>
-            <li><a href="https://www.datagro.com/en/" target="_blank">www.datagro.com</a></li>
-            <li><a href="https://portal.datagro.com/" target="_blank">portal.datagro.com</a></li>
-            <li><a href="https://www.linkedin.com/company/datagro" target="_blank">Datagro LinkedIn</a></li>
-        </ul>
-    </div>
-  </footer>
-
-
-  <!-- Include the JavaScript files -->
-  <script type="module" src="{{ asset('js/DropdownFilter.js') }}"></script>
-  <script type="module" src="{{ asset('js/ProductsTable.js') }}"></script>
-  <script type="module" src="{{ asset('js/DataSeriesTable.js') }}"></script>
-  <script type="module" src="{{ asset('js/DownloadButtons.js') }}"></script>
-  <script>console.log('[app.blade.php] Main application view loaded');</script>
-</body>
-</html>
-
-```
-
 ## public/css/app.css
-```php
+```
 body {
     font-family: Arial, sans-serif;
     color: #4f4f4f; /* Dark grey for text, softer than pure white */
@@ -458,70 +396,8 @@ footer {
 }
 
 ```
-
-## app/Models/DataSeries.php
-```php
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class DataSeries extends Model
-{
-    protected $table = 'data_series_tables';
-
-    protected $fillable = [
-        'extended_product_list_id', 'cod', 'data', 'ult', 'mini', 'maxi',
-        'abe', 'volumes', 'cab', 'med', 'aju'
-    ];
-
-    public $timestamps = true;
-
-    // Define the relationship with ExtendedProductList
-    public function extendedProductList()
-    {
-        return $this->belongsTo(ExtendedProductList::class, 'extended_product_list_id');
-    }
-}
-
-```
-
-## app/Models/ExtendedProductList.php
-```php
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class ExtendedProductList extends Model
-{
-    protected $table = 'extended_product_list_tables';
-    protected $fillable = [
-        'Código_Produto', 'Classificação', 'Subproduto', 'Local', 'Fetch_Status',
-        'bolsa', 'roda', 'fonte', 'tav', 'subtav', 'decimais', 'correlatos',
-        'empresa', 'contrato', 'subproduto_id', 'entcode', 'nome', 'longo', 'descr',
-        'codf', 'bd', 'palavras', 'habilitado', 'lote', 'rep', 'vln', 'dia',
-        'freq', 'dex', 'inserido', 'alterado'
-    ];
-    public $timestamps = true;
-
-    public function dataSeries()
-    {
-        return $this->hasOne(DataSeries::class, 'extended_product_list_id');
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('active', 1);
-    }
-}
-
-```
-
 ## app/Console/Commands/FetchDatagroData.php
-```php
+```
 <?php
 
 namespace App\Console\Commands;
@@ -766,48 +642,248 @@ class FetchDatagroData extends Command
 }
 
 ```
+## resources/views/partials/products-table.blade.php
+```
+<!-- Products Table -->
+<div class="responsive-table animated" id="products-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>Código_Produto</th>
+                <th>Descr</th>
+                <th>Data Inserido</th>
+                <th>Data Alterado</th>
+            </tr>
+        </thead>
+        <tbody id="products-table-body">
+            <!-- Data populated by ProductsTable.js -->
+        </tbody>
+    </table>
+</div>
+<div id="products-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by ProductsTable.js -->
+</div>
+<script src="{{ asset('js/ProductsTable.js') }}"></script>
 
-## routes\web.php
-```php
-<?php
+```
+## public/js/DropdownFilter.js
+```
+// DropdownFilter.js
+// Function to update filters and fetch filtered products
+function updateFilters() {
+    console.log("[DropdownFilter] Updating filters");
+    const produto = document.getElementById('produto-select').value;
+    const subproduto = document.getElementById('subproduct-select').value;
+    const local = document.getElementById('local-select').value;
+    const freq = document.getElementById('freq-select').value;
+    const proprietario = document.getElementById('proprietario-select').value;
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\DataSeriesController;
-use App\Http\Controllers\DownloadController;
-use Illuminate\Support\Facades\Log;
-use App\Models\ExtendedProductList;
-use App\Models\DataSeries;
+    console.log(`[DropdownFilter] Filter parameters - Produto: ${produto}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
 
-Route::get('/', function () {
-    $products = ExtendedProductList::all();
-    return view('app', compact('products'));
-});
+    fetch('/filter-products', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+            produto: produto,
+            subproduto: subproduto,
+            local: local,
+            freq: freq,
+            proprietario: proprietario
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("[DropdownFilter] Filter products API Response:", data);
+        updateProductsTable(data.products);
+    })
+    .catch(error => {
+        console.error("[DropdownFilter] Filter products API Error:", error);
+    });
+}
 
-// Products related routes
-Route::get('/products', [ProductController::class, 'index']);
-Route::get('/products/{page}/{perPage}', [ProductController::class, 'paginate']);
+// Function to update the products table based on filters
+function updateProductsTable(products) {
+    let tableBody = document.getElementById('products-table-body');
+    tableBody.innerHTML = products.map(product => `
+        <tr onclick="selectProduct(${product.id})">
+            <td>${product.Código_Produto}</td>
+            <td>${product.descr}</td>
+            <td>${product.inserido}</td>
+            <td>${product.alterado}</td>
+        </tr>
+    `).join('');
+    console.log("[DropdownFilter] Products table updated");
+}
 
-// Data Series related routes
-Route::get('/data-series/{productId}', [DataSeriesController::class, 'show']);
-Route::get('/data-series/{productId}/{page}/{perPage}', [DataSeriesController::class, 'paginate']);
+// Function to populate dropdowns
+function populateDropdowns(products) {
+    const uniqueValues = (products, key) => [...new Set(products.map(product => product[key]))];
 
-// Download routes
-Route::get('/download/csv', [DownloadController::class, 'downloadCSV']);
-Route::get('/download/pdf', [DownloadController::class, 'downloadPDF']);
+    const populateDropdown = (dropdownId, values) => {
+        const dropdown = document.getElementById(dropdownId);
+        values.forEach(value => {
+            dropdown.add(new Option(value, value));
+        });
+    };
 
-// Filter products
-Route::post('/filter-products', [ProductController::class, 'filter']); // Changed to POST
+    populateDropdown('produto-select', uniqueValues(products, 'Código_Produto'));
+    populateDropdown('subproduto-select', uniqueValues(products, 'Subproduto'));
+    populateDropdown('local-select', uniqueValues(products, 'Local'));
+    populateDropdown('freq-select', uniqueValues(products, 'Freq'));
 
-// Add a route to handle CSRF token generation
-Route::get('/csrf-token', function() {
-    return csrf_token();
+    // Special logic for 'proprietario' dropdown
+    const proprietarioOptions = uniqueValues(products, 'bolsa').map(value => value === 2 ? 'Sim' : 'Não');
+    populateDropdown('proprietario-select', [...new Set(proprietarioOptions)]);
+}
+
+// This function should be called after products table is populated
+// For now, it's called here for demonstration purposes
+document.addEventListener('DOMContentLoaded', function () {
+    // Assuming products data is available here as 'productsData'
+    // populateDropdowns(productsData);
 });
 
 ```
+## resources/views/partials/data-series-table.blade.php
+```
+<!-- Data Series Table -->
+<div class="responsive-table animated" id="data-series-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Cod</th>
+                <th>data</th>
+                <th>ult</th>
+                <th>mini</th>
+                <th>maxi</th>
+                <th>abe</th>
+                <th>volumes</th>
+                <th>med</th>
+                <th>aju</th>
+            </tr>
+        </thead>
+        <tbody id="data-series-body">
+            <!-- Data populated by DataSeriesTable.js -->
+        </tbody>
+    </table>
+</div>
+<div id="data-series-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by DataSeriesTable.js -->
+</div>
+<script src="{{ asset('js/DataSeriesTable.js') }}"></script>
+<script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>
 
-## app\Http\Controllers\DownloadController.php
-```php
+```
+## public/js/DownloadButtons.js
+```
+// Functions to handle download actions
+function downloadCSV() {
+    console.log("[DownloadButtons] Initiating CSV download");
+    window.location.href = '/download/csv';
+}
+
+function downloadPDF() {
+    console.log("[DownloadButtons] Initiating PDF download");
+    window.location.href = '/download/pdf';
+}
+
+// Event listeners for download buttons
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("[DownloadButtons] Setting up event listeners for download buttons");
+    const csvBtn = document.getElementById('download-csv-btn');
+    const pdfBtn = document.getElementById('download-pdf-btn');
+
+    if (csvBtn) {
+        csvBtn.addEventListener('click', function() {
+            console.log("[DownloadButtons] CSV Download button clicked");
+            downloadCSV();
+        });
+    }
+
+    if (pdfBtn) {
+        pdfBtn.addEventListener('click', function() {
+            console.log("[DownloadButtons] PDF Download button clicked");
+            downloadPDF();
+        });
+    }
+});
+
+```
+## app/Http/Controllers/Controller.php
+```
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
+
+class Controller extends BaseController
+{
+    use AuthorizesRequests, ValidatesRequests;
+}
+
+```
+## resources/views/app.blade.php
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datagro Comercial Team Web Application</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- CSRF token meta tag added -->
+  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+</head>
+<body>
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+        <h1>API Mercado Físico - SALES TOOL</h1>
+        <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
+    </header>
+
+  <main>
+      @include('partials.dropdown-filter')
+      @include('partials.products-table', ['products' => $products])
+      @include('partials.data-series-table')
+      @include('partials.download-buttons')
+  </main>
+
+  <footer style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+    <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets" style="height: 50px;">
+    <div>
+        <h2>DATAGRO LINKS</h2>
+        <ul>
+            <li><a href="https://www.datagro.com/en/" target="_blank">www.datagro.com</a></li>
+            <li><a href="https://portal.datagro.com/" target="_blank">portal.datagro.com</a></li>
+            <li><a href="https://www.linkedin.com/company/datagro" target="_blank">Datagro LinkedIn</a></li>
+        </ul>
+    </div>
+  </footer>
+
+
+  <!-- Include the JavaScript files -->
+  <script type="module" src="{{ asset('js/ProductsTable.js') }}"></script>
+  <script type="module" src="{{ asset('js/DropdownFilter.js') }}"></script>
+  <script type="module" src="{{ asset('js/DataSeriesTable.js') }}"></script>
+  <script type="module" src="{{ asset('js/DownloadButtons.js') }}"></script>
+  <script>console.log('[app.blade.php] Main application view loaded');</script>
+</body>
+</html>
+
+```
+## app/Http/Controllers/DownloadController.php
+```
 <?php
 
 namespace App\Http\Controllers;
@@ -858,101 +934,45 @@ class DownloadController extends Controller
 }
 
 ```
-
-## app\Http\Controllers\ProductController.php
-```php
+## routes/web.php
+```
 <?php
 
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\DataSeriesController;
+use App\Http\Controllers\DownloadController;
+use Illuminate\Support\Facades\Log;
 use App\Models\ExtendedProductList;
-use Illuminate\Support\Facades\Log;
-
-class ProductController extends Controller
-{
-    public function index()
-    {
-        Log::info('ProductController: index method called');
-        $products = ExtendedProductList::paginate(10); // Default to 10 per page
-        Log::info('Products Retrieved: ' . $products->count());
-        return response()->json($products);
-    }
-
-    public function paginate($page, $perPage)
-    {
-        Log::info("ProductController: paginate method called with page {$page} and perPage {$perPage}");
-        $products = ExtendedProductList::paginate($perPage, ['*'], 'page', $page);
-        Log::info('Paginated Products Retrieved');
-        return response()->json($products);
-    }
-
-    // Adjusted to handle POST requests for filtering
-    public function filter(Request $request)
-    {
-        // Ensure your method is equipped to handle the request appropriately
-        $query = ExtendedProductList::query();
-
-        if ($request->filled('produto')) {
-            $query->where('Código_Produto', 'like', '%' . $request->produto . '%');
-        }
-        if ($request->filled('subproduto')) {
-            $query->where('Subproduto', 'like', '%' . $request->subproduto . '%');
-        }
-        // Add other filters similarly...
-
-        $products = $query->paginate(10); // Or the perPage value sent from the front-end
-        return response()->json($products);
-    }
-}
-
-```
-
-## app\Http\Controllers\DataSeriesController.php
-```php
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
 use App\Models\DataSeries;
-use Illuminate\Support\Facades\Log;
 
-class DataSeriesController extends Controller
-{
-   public function show($productId)
-   {
-      Log::info("DataSeriesController: show method called for productId {$productId}");
-      $dataSeries = DataSeries::where('extended_product_list_id', $productId)->get();
-      Log::info('DataSeries Retrieved: ' . $dataSeries->count());
-      return response()->json($dataSeries);
-   }
+Route::get('/', function () {
+    $products = ExtendedProductList::all();
+    return view('app', compact('products'));
+});
 
-   public function paginate($productId, $page, $perPage)
-   {
-      Log::info("DataSeriesController: paginate method called for productId {$productId} with page {$page} and perPage {$perPage}");
-      $dataSeries = DataSeries::where('extended_product_list_id', $productId)->paginate($perPage);
-      Log::info('Paginated DataSeries Retrieved');
-      return response()->json($dataSeries);
-   }
-}
+// Products related routes
+Route::get('/products', [ProductController::class, 'index']);
+Route::get('/products/{page}/{perPage}', [ProductController::class, 'paginate']);
 
-```
+// Data Series related routes
+Route::get('/data-series/{productId}', [DataSeriesController::class, 'show']);
+Route::get('/data-series/{productId}/{page}/{perPage}', [DataSeriesController::class, 'paginate']);
 
-## app\Http\Controllers\Controller.php
-```php
-<?php
+// Download routes
+Route::get('/download/csv', [DownloadController::class, 'downloadCSV']);
+Route::get('/download/pdf', [DownloadController::class, 'downloadPDF']);
 
-namespace App\Http\Controllers;
 
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Routing\Controller as BaseController;
+// Add a route to handle CSRF token generation
+Route::get('/csrf-token', function() {
+    return csrf_token();
+});
 
-class Controller extends BaseController
-{
-    use AuthorizesRequests, ValidatesRequests;
-}
+// New route for fetching dropdown data
+Route::get('/api/get-dropdown-data', [FilterController::class, 'getDropdownData']);
+
+// Filter products
+Route::post('/filter-products', [ProductController::class, 'filter']); // Changed to POST
 
 ```
-

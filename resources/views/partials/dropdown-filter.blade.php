@@ -16,5 +16,4 @@
         <!-- Options will be populated via JavaScript -->
     </select>
 </div>
-<script src="{{ asset('js/DropdownFilter.js') }}"></script>
 <script>console.log('[dropdown-filter.blade.php] Dropdown filter view loaded');</script>

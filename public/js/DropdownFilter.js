@@ -3,7 +3,6 @@
 function updateFilters() {
     console.log("[DropdownFilter] Updating filters");
     const produto = document.getElementById('produto-select').value;
-    // Ensure that the IDs match the ones in the HTML
     const subproduto = document.getElementById('subproduct-select').value;
     const local = document.getElementById('local-select').value;
     const freq = document.getElementById('freq-select').value;
@@ -11,7 +10,6 @@ function updateFilters() {
 
     console.log(`[DropdownFilter] Filter parameters - Produto: ${produto}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
 
-    // Make sure the endpoint and method are correct
     fetch('/filter-products', {
         method: 'POST',
         headers: {
@@ -35,7 +33,6 @@ function updateFilters() {
     })
     .then(data => {
         console.log("[DropdownFilter] Filter products API Response:", data);
-        // Call a function to update the products table
         updateProductsTable(data.products);
     })
     .catch(error => {
@@ -45,14 +42,11 @@ function updateFilters() {
 
 // Function to update the products table based on filters
 function updateProductsTable(products) {
-    console.log("[DropdownFilter] Updating products table with products:", products);
-    // Make sure the table body exists in your HTML with this ID
     let tableBody = document.getElementById('products-table-body');
-    // Ensure the properties of product match what you expect (e.g., product.nome)
     tableBody.innerHTML = products.map(product => `
         <tr onclick="selectProduct(${product.id})">
-            <td>${product.nome}</td>
-            <td>${product.freq}</td>
+            <td>${product.Código_Produto}</td>
+            <td>${product.descr}</td>
             <td>${product.inserido}</td>
             <td>${product.alterado}</td>
         </tr>
@@ -60,21 +54,30 @@ function updateProductsTable(products) {
     console.log("[DropdownFilter] Products table updated");
 }
 
+// Function to populate dropdowns
+function populateDropdowns(products) {
+    const uniqueValues = (products, key) => [...new Set(products.map(product => product[key]))];
 
+    const populateDropdown = (dropdownId, values) => {
+        const dropdown = document.getElementById(dropdownId);
+        values.forEach(value => {
+            dropdown.add(new Option(value, value));
+        });
+    };
 
-// Event listeners for dropdown filters
+    populateDropdown('produto-select', uniqueValues(products, 'Código_Produto'));
+    populateDropdown('subproduto-select', uniqueValues(products, 'Subproduto'));
+    populateDropdown('local-select', uniqueValues(products, 'Local'));
+    populateDropdown('freq-select', uniqueValues(products, 'Freq'));
+
+    // Special logic for 'proprietario' dropdown
+    const proprietarioOptions = uniqueValues(products, 'bolsa').map(value => value === 2 ? 'Sim' : 'Não');
+    populateDropdown('proprietario-select', [...new Set(proprietarioOptions)]);
+}
+
+// This function should be called after products table is populated
+// For now, it's called here for demonstration purposes
 document.addEventListener('DOMContentLoaded', function () {
-    console.log("[DropdownFilter] Setting up filter dropdown event listeners");
-    const filters = ['produto-select', 'subproduct-select', 'local-select', 'freq-select', 'proprietario-select'];
-    filters.forEach(filterId => {
-        const filterElement = document.getElementById(filterId);
-        if (filterElement) {
-            filterElement.addEventListener('change', updateFilters);
-        } else {
-            console.error(`[DropdownFilter] Element with ID ${filterId} not found.`);
-        }
-    });
-
-    // Trigger filter update on load to populate the products table
-    updateFilters();
+    // Assuming products data is available here as 'productsData'
+    // populateDropdowns(productsData);
 });

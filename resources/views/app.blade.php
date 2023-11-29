@@ -34,8 +34,8 @@
 
 
   <!-- Include the JavaScript files -->
-  <script type="module" src="{{ asset('js/DropdownFilter.js') }}"></script>
   <script type="module" src="{{ asset('js/ProductsTable.js') }}"></script>
+  <script type="module" src="{{ asset('js/DropdownFilter.js') }}"></script>
   <script type="module" src="{{ asset('js/DataSeriesTable.js') }}"></script>
   <script type="module" src="{{ asset('js/DownloadButtons.js') }}"></script>
   <script>console.log('[app.blade.php] Main application view loaded');</script>
