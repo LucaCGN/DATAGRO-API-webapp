@@ -5,24 +5,24 @@ base_path = 'C:/Users/lnonino/OneDrive - DATAGRO/Documentos/GitHub/DataAgro/Lara
 
 # List of relative paths of the files to be included in the document
 file_paths = [
-    'public/js/DataSeriesTable.js',
+ #  'public/js/DataSeriesTable.js',
     'public/js/DownloadButtons.js',
-    'public/js/DropdownFilter.js',
+   'public/js/DropdownFilter.js',
     'public/js/ProductsTable.js',
     'resources/views/partials/data-series-table.blade.php',
     'resources/views/partials/download-buttons.blade.php',
     'resources/views/partials/dropdown-filter.blade.php',
     'resources/views/partials/products-table.blade.php',
     'resources/views/app.blade.php',
-    'public/css/app.css',
+ #   'public/css/app.css',
     'app/Models/DataSeries.php',
     'app/Models/ExtendedProductList.php',
-    'app/Console/Commands/FetchDatagroData.php',
+ #   'app/Console/Commands/FetchDatagroData.php',
     'routes\web.php',
-    'app\Http\Controllers\DownloadController.php',
+#    'app\Http\Controllers\DownloadController.php',
     'app\Http\Controllers\ProductController.php',
-    'app\Http\Controllers\DataSeriesController.php',
-    'app\Http\Controllers\Controller.php'
+ #  'app\Http\Controllers\DataSeriesController.php',
+ #   'app\Http\Controllers\Controller.php'
 ]
 
 # Path to the output Markdown file

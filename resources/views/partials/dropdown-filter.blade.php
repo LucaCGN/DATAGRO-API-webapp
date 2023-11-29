@@ -16,5 +16,5 @@
         <!-- Proprietário options populated server-side -->
     </select>
 </div>
-<script src="{{ asset('js/dropdown-filter.js') }}"></script>
+<script src="{{ asset('js/DropdownFilter.js') }}"></script>
 <script>console.log('[dropdown-filter.blade.php] Dropdown filter view loaded');</script>

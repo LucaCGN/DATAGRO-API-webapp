@@ -17,4 +17,4 @@
         <!-- Pagination Controls populated by ProductsTable.js -->
     </div>
 </div>
-<script src="{{ asset('js/products-table.js') }}"></script>
+<script src="{{ asset('js/ProductsTable.js') }}"></script>
