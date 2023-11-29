@@ -11,17 +11,17 @@ class ProductController extends Controller
     public function index()
     {
         Log::info('ProductController: index method called');
-        $products = ExtendedProductList::all();
+        $products = ExtendedProductList::paginate(10); // Default to 10 per page
         Log::info('Products Retrieved: ' . $products->count());
-        return view('partials.products-table')->with('products', $products);
+        return response()->json($products);
     }
 
     public function paginate($page, $perPage)
     {
         Log::info("ProductController: paginate method called with page {$page} and perPage {$perPage}");
-        $products = ExtendedProductList::paginate($perPage);
+        $products = ExtendedProductList::paginate($perPage, ['*'], 'page', $page);
         Log::info('Paginated Products Retrieved');
-        return view('partials.products-table')->with('products', $products);
+        return response()->json($products);
     }
 
     public function filter(Request $request)
@@ -29,8 +29,8 @@ class ProductController extends Controller
         Log::info("ProductController: filter method called with request: ", $request->all());
         $products = ExtendedProductList::where('Código_Produto', $request->Código_Produto)
                     ->orWhere('descr', $request->descr)
-                    ->get();
+                    ->paginate(10); // Assuming default 10 per page for filters as well
         Log::info('Filtered Products Retrieved: ' . $products->count());
-        return view('partials.products-table')->with('products', $products);
+        return response()->json($products);
     }
 }

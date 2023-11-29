@@ -2,21 +2,13 @@
 function fetchAndPopulateProducts(page = 1, perPage = 10) {
     console.log(`[ProductsTable] Fetching products for page: ${page}, perPage: ${perPage}`);
     fetch(`/products?page=${page}&perPage=${perPage}`)
-        .then(response => {
-            if (!response.ok) {
-                console.error(`[ProductsTable] Error fetching products: ${response.statusText}`);
-                throw new Error(`Error fetching products: ${response.statusText}`);
-            }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
             console.log("[ProductsTable] Products API Response received:", data);
             populateProductsTable(data.data);
-            renderPagination(data.pagination);
+            renderPagination(data);
         })
-        .catch(error => {
-            console.error("[ProductsTable] Products API Error:", error);
-        });
+        .catch(error => console.error("[ProductsTable] Products API Error:", error));
 }
 
 // Function to populate products table
@@ -24,7 +16,8 @@ function populateProductsTable(products) {
     console.log("[ProductsTable] Populating products table with:", products);
     let tableBody = document.getElementById('products-table-body');
     tableBody.innerHTML = products.map(product => `
-        <tr onclick="selectProduct(${product.id})">
+        <tr>
+            <td><input type="checkbox" name="selectedProduct" value="${product.id}"></td>
             <td>${product.Código_Produto}</td>
             <td>${product.descr}</td>
             <td>${product.inserido}</td>
@@ -40,18 +33,19 @@ function renderPagination(paginationData) {
     let paginationDiv = document.getElementById('products-pagination');
     paginationDiv.innerHTML = '';
 
+    // Previous button
     if (paginationData.current_page > 1) {
-        let prevButton = document.createElement('button');
-        prevButton.textContent = 'Previous';
-        prevButton.onclick = () => fetchAndPopulateProducts(paginationData.current_page - 1);
-        paginationDiv.appendChild(prevButton);
+        paginationDiv.innerHTML += `<button onclick="fetchAndPopulateProducts(${paginationData.current_page - 1})">Previous</button>`;
     }
 
+    // Page numbers
+    for (let page = 1; page <= paginationData.last_page; page++) {
+        paginationDiv.innerHTML += `<button onclick="fetchAndPopulateProducts(${page})">${page}</button>`;
+    }
+
+    // Next button
     if (paginationData.current_page < paginationData.last_page) {
-        let nextButton = document.createElement('button');
-        nextButton.textContent = 'Next';
-        nextButton.onclick = () => fetchAndPopulateProducts(paginationData.current_page + 1);
-        paginationDiv.appendChild(nextButton);
+        paginationDiv.innerHTML += `<button onclick="fetchAndPopulateProducts(${paginationData.current_page + 1})">Next</button>`;
     }
     console.log("[ProductsTable] Pagination controls rendered");
 }

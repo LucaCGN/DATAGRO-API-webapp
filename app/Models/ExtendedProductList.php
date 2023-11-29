@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class ExtendedProductList extends Model
 {
     protected $table = 'extended_product_list_tables';
-    protected $fillable = ['Código_Produto', 'Classificação', 'Subproduto', 'Local', 'Fetch_Status',
-    'bolsa', 'roda', 'fonte', 'tav', 'subtav', 'decimais', 'correlatos',
-    'empresa', 'contrato', 'subproduto_id', 'entcode', 'nome', 'longo', 'descr',
-    'codf', 'bd', 'palavras', 'habilitado', 'lote', 'rep', 'vln', 'dia',
-    'freq', 'dex', 'inserido', 'alterado'];
+    protected $fillable = [
+        'Código_Produto', 'Classificação', 'Subproduto', 'Local', 'Fetch_Status',
+        'bolsa', 'roda', 'fonte', 'tav', 'subtav', 'decimais', 'correlatos',
+        'empresa', 'contrato', 'subproduto_id', 'entcode', 'nome', 'longo', 'descr',
+        'codf', 'bd', 'palavras', 'habilitado', 'lote', 'rep', 'vln', 'dia',
+        'freq', 'dex', 'inserido', 'alterado'
+    ];
     public $timestamps = true;
-
-    protected $with = ['dataSeries']; // Eager loading
 
     public function dataSeries()
     {
