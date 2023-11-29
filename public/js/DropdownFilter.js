@@ -1,14 +1,44 @@
 // DropdownFilter.js
-// Function to update filters and fetch filtered products
+
+// Function to dynamically populate dropdowns
+function populateDropdowns(productsData) {
+    console.log("[DropdownFilter] Populating dropdowns with products data");
+
+    const getUniqueValues = (data, key) => [...new Set(data.map(item => item[key]))];
+
+    // Populate each dropdown
+    const dropdowns = {
+        'produto-select': getUniqueValues(productsData, 'Código_Produto'),
+        'subproduto-select': getUniqueValues(productsData, 'Subproduto'),
+        'local-select': getUniqueValues(productsData, 'Local'),
+        'freq-select': getUniqueValues(productsData, 'Freq'),
+        // 'proprietario-select': Add logic if needed
+    };
+
+    Object.entries(dropdowns).forEach(([dropdownId, values]) => {
+        const dropdown = document.getElementById(dropdownId);
+        if (dropdown) {
+            values.forEach(value => {
+                dropdown.add(new Option(value, value));
+            });
+            console.log(`[DropdownFilter] Dropdown populated: ${dropdownId}`);
+        } else {
+            console.error(`[DropdownFilter] Dropdown not found: ${dropdownId}`);
+        }
+    });
+}
+
+// Function to handle filter changes and fetch filtered products
 function updateFilters() {
     console.log("[DropdownFilter] Updating filters");
+
     const produto = document.getElementById('produto-select').value;
-    const subproduto = document.getElementById('subproduct-select').value;
+    const subproduto = document.getElementById('subproduto-select').value;
     const local = document.getElementById('local-select').value;
     const freq = document.getElementById('freq-select').value;
     const proprietario = document.getElementById('proprietario-select').value;
 
-    console.log(`[DropdownFilter] Filter parameters - Produto: ${produto}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
+    console.log(`[DropdownFilter] Filter parameters: Produto: ${produto}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
 
     fetch('/filter-products', {
         method: 'POST',
@@ -17,13 +47,7 @@ function updateFilters() {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        body: JSON.stringify({
-            produto: produto,
-            subproduto: subproduto,
-            local: local,
-            freq: freq,
-            proprietario: proprietario
-        })
+        body: JSON.stringify({ produto, subproduto, local, freq, proprietario })
     })
     .then(response => {
         if (!response.ok) {
@@ -32,52 +56,34 @@ function updateFilters() {
         return response.json();
     })
     .then(data => {
-        console.log("[DropdownFilter] Filter products API Response:", data);
-        updateProductsTable(data.products);
+        console.log("[DropdownFilter] Filtered products received:", data.products);
+        if (data.products) {
+            populateProductsTable(data.products);
+        } else {
+            console.error("[DropdownFilter] No products received after filter update");
+        }
     })
     .catch(error => {
         console.error("[DropdownFilter] Filter products API Error:", error);
     });
 }
 
-// Function to update the products table based on filters
-function updateProductsTable(products) {
-    let tableBody = document.getElementById('products-table-body');
-    tableBody.innerHTML = products.map(product => `
-        <tr onclick="selectProduct(${product.id})">
-            <td>${product.Código_Produto}</td>
-            <td>${product.descr}</td>
-            <td>${product.inserido}</td>
-            <td>${product.alterado}</td>
-        </tr>
-    `).join('');
-    console.log("[DropdownFilter] Products table updated");
-}
-
-// Function to populate dropdowns
-function populateDropdowns(products) {
-    const uniqueValues = (products, key) => [...new Set(products.map(product => product[key]))];
-
-    const populateDropdown = (dropdownId, values) => {
-        const dropdown = document.getElementById(dropdownId);
-        values.forEach(value => {
-            dropdown.add(new Option(value, value));
-        });
-    };
-
-    populateDropdown('produto-select', uniqueValues(products, 'Código_Produto'));
-    populateDropdown('subproduto-select', uniqueValues(products, 'Subproduto'));
-    populateDropdown('local-select', uniqueValues(products, 'Local'));
-    populateDropdown('freq-select', uniqueValues(products, 'Freq'));
-
-    // Special logic for 'proprietario' dropdown
-    const proprietarioOptions = uniqueValues(products, 'bolsa').map(value => value === 2 ? 'Sim' : 'Não');
-    populateDropdown('proprietario-select', [...new Set(proprietarioOptions)]);
-}
-
-// This function should be called after products table is populated
-// For now, it's called here for demonstration purposes
+// Setting up event listeners for each filter
 document.addEventListener('DOMContentLoaded', function () {
-    // Assuming products data is available here as 'productsData'
-    // populateDropdowns(productsData);
+    const filters = ['produto-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
+    filters.forEach(filterId => {
+        const filterElement = document.getElementById(filterId);
+        if (filterElement) {
+            filterElement.addEventListener('change', () => {
+                console.log(`[DropdownFilter] Filter changed: ${filterId}`);
+                updateFilters();
+            });
+            console.log(`[DropdownFilter] Event listener added for: ${filterId}`);
+        } else {
+            console.error(`[DropdownFilter] Filter element not found: ${filterId}`);
+        }
+    });
+
+    // Initialize dropdowns with static or prefetched data if needed
+    // fetch('/api/get-dropdown-data').then(...).then(data => populateDropdowns(data));
 });

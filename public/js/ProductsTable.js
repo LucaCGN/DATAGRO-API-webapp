@@ -1,71 +1,81 @@
-// Function to update filters and fetch filtered products
-function updateFilters() {
-    console.log("[DropdownFilter] Updating filters");
-    const produto = document.getElementById('produto-select').value;
-    const subproduto = document.getElementById('subproduct-select').value;
-    const local = document.getElementById('local-select').value;
-    const freq = document.getElementById('freq-select').value;
-    const proprietario = document.getElementById('proprietario-select').value;
+// ProductsTable.js
 
-    console.log(`[DropdownFilter] Filter parameters - Produto: ${produto}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
+console.log('ProductsTable.js loaded');
 
-    // Updated to handle CSRF token and content type
-    fetch('/filter-products', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), // Assumes a meta tag with the CSRF token is present
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            produto: produto,
-            subproduto: subproduto,
-            local: local,
-            freq: freq,
-            proprietario: proprietario
+// Variable to keep track of the currently selected product code
+let selectedProductCode = null;
+
+// Attaching loadProducts to window to make it globally accessible
+window.loadProducts = function(page = 1) {
+    console.log(`Fetching products for page: ${page}`);
+    fetch(`/products?page=${page}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            console.log('Products fetched successfully');
+            return response.json();
         })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("[DropdownFilter] Filter products API Response:", data);
-        updateProductsTable(data.products);
-    })
-    .catch(error => {
-        console.error("[DropdownFilter] Filter products API Error:", error);
-    });
-}
+        .then(response => {
+            window.currentPage = response.current_page;
+            window.totalPages = response.last_page;
+            console.log(`Current page: ${window.currentPage}, Total pages: ${window.totalPages}`);
+            populateProductsTable(response.data);
+            renderPagination();
+        })
+        .catch(error => {
+            console.error("Failed to load products", error);
+        });
+};
 
-// Function to populate products table
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM fully loaded and parsed');
+    window.loadProducts();
+});
+
 function populateProductsTable(products) {
-    console.log("[ProductsTable] Populating products table with:", products);
+    console.log('Populating products table with products:', products);
     let tableBody = document.getElementById('products-table-body');
+    if (!tableBody) {
+        console.error("Table body not found");
+        return;
+    }
     tableBody.innerHTML = products.map(product => `
-        <tr onclick="selectProduct(${product.id})">
+        <tr>
+            <td><input type="radio" name="productSelect" value="${product.Código_Produto}" ${selectedProductCode === product.Código_Produto ? 'checked' : ''} onchange="selectProduct('${product.Código_Produto}')"></td>
             <td>${product.Código_Produto}</td>
             <td>${product.descr}</td>
             <td>${product.inserido}</td>
             <td>${product.alterado}</td>
         </tr>
     `).join('');
-    console.log("[ProductsTable] Products table populated");
 }
 
-// Event listeners for dropdown filters
-document.addEventListener('DOMContentLoaded', function () {
-    console.log("[DropdownFilter] Setting up filter dropdown event listeners");
-    const filters = ['produto-select', 'subproduct-select', 'local-select', 'freq-select', 'proprietario-select'];
-    filters.forEach(filterId => {
-        const filterElement = document.getElementById(filterId);
-        if (filterElement) {
-            filterElement.addEventListener('change', updateFilters);
-        }
-    });
+function selectProduct(productCode) {
+    console.log(`Product selected: ${productCode}`);
+    selectedProductCode = productCode;
+    console.log("Product selection updated to:", selectedProductCode);
+}
 
-    // Trigger filter update on load to populate the products table
-    updateFilters();
-});
+function renderPagination() {
+    console.log('Rendering pagination controls');
+    const paginationDiv = document.getElementById('products-pagination');
+    if (!paginationDiv) {
+        console.error("Pagination div not found");
+        return;
+    }
+
+    let html = '';
+    if (window.currentPage > 1) {
+        html += `<button onclick="window.loadProducts(${window.currentPage - 1})">Previous</button>`;
+    }
+    html += `<span>Page ${window.currentPage} of ${window.totalPages}</span>`;
+    if (window.currentPage < window.totalPages) {
+        html += `<button onclick="window.loadProducts(${window.currentPage + 1})">Next</button>`;
+    }
+
+    paginationDiv.innerHTML = html;
+    console.log("Pagination rendered with HTML:", html);
+}
+
+// Add logic for other functions (setupFilterEventListeners, etc.) as necessary
