@@ -13,12 +13,16 @@
         <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
     </header>
 
-  <main>
-      @include('partials.dropdown-filter')
-      @include('partials.products-table', ['products' => $products])
-      @include('partials.data-series-table')
-      @include('partials.download-buttons')
-  </main>
+    <main>
+        <div class="content">
+            @include('partials.dropdown-filter')
+            <div class="tables-container">
+                @include('partials.products-table', ['products' => $products])
+                @include('partials.data-series-table')
+            </div>
+        </div>
+        @include('partials.download-buttons')
+    </main>
 
   <footer style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
     <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets" style="height: 50px;">
@@ -31,7 +35,6 @@
         </ul>
     </div>
   </footer>
-
 
   <!-- Include the JavaScript files -->
   <script type="module" src="{{ asset('js/ProductsTable.js') }}"></script>

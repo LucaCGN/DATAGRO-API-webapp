@@ -1,98 +1,243 @@
-Current code and logic related to export/download buttons:
+I need to make some additions and updates to the css formating!
+
+	1. I need to style the login page in the same way as the app! I want a centered overlayed green box in a lighbrown background with the general color scheme we used!
+
+	2. I need to reposition and reorganize the filters element in the html.
+
+		2.1 - Reorganization:
+		
+		2.2 - Repositioning:
 
 
-// Functions to handle download actions
-function downloadCSV() {
-    console.log("[DownloadButtons] Initiating CSV download");
-    window.location.href = '/download/csv';
+#<!-- resources/views/auth/login.blade.php -->
+<!DOCTYPE html>
+<form method="POST" action="{{ route('login') }}">
+    @csrf
+
+    <div>
+        <label for="email">Login:</label>
+        <input type="text" name="email" id="email" required autofocus>
+    </div>
+
+    <div>
+        <label for="password">Password:</label>
+        <input type="password" name="password" id="password" required>
+    </div>
+
+    <div>
+        <button type="submit">Login</button>
+    </div>
+
+    @if ($errors->any())
+        <div>
+            <ul>
+                @foreach ($errors->all() as $error)
+                   <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+ </form>
+
+
+```
+## resources/views/partials/products-table.blade.php
+```
+<!-- Products Table -->
+<div class="responsive-table animated" id="products-table">
+    <table>
+        <thead>
+            <tr>
+                <th> [Carregar Data Series] </th>
+                <th>Produto  ('Classificação')  </th>
+                <th>Nome ('longo')  </th>
+                <th>Frequência</th>
+                <th>Primeira Data</th>
+            </tr>
+        </thead>
+        <tbody id="products-table-body">
+            <!-- Data populated by ProductsTable.js -->
+        </tbody>
+    </table>
+</div>
+<div id="products-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by ProductsTable.js -->
+</div>
+
+
+```
+## public/css/app.css
+```
+body {
+    font-family: Arial, sans-serif;
+    color: #4f4f4f; /* Dark grey for text, softer than pure white */
+    background-color: #f8f8f8; /* Light grey background for a clean look */
 }
 
-function downloadPDF() {
-    console.log("[DownloadButtons] Initiating PDF download");
-    window.location.href = '/download/pdf';
+header {
+    background-color: #fff; /* White background for header */
+    color: #4f4f4f; /* Dark grey for text */
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
 }
 
-// Event listeners for download buttons
-document.addEventListener('DOMContentLoaded', function () {
-    console.log("[DownloadButtons] Setting up event listeners for download buttons");
-    const csvBtn = document.getElementById('download-csv-btn');
-    const pdfBtn = document.getElementById('download-pdf-btn');
+main {
+    margin: 15px;
+}
 
-    if (csvBtn) {
-        csvBtn.addEventListener('click', function() {
-            console.log("[DownloadButtons] CSV Download button clicked");
-            downloadCSV();
-        });
+footer {
+    background-color: #fff; /* White background for footer */
+    color: #4f4f4f; /* Dark grey for text */
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+.button {
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border: none; /* Removed border for a cleaner look */
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
+
+ @media screen and (max-width: 600px) {
+    body {
+        font-size: 18px;
     }
 
-    if (pdfBtn) {
-        pdfBtn.addEventListener('click', function() {
-            console.log("[DownloadButtons] PDF Download button clicked");
-            downloadPDF();
-        });
+    header, footer {
+        text-align: left;
+        padding: 10px 20px;
     }
-});
 
-<?php
+    /* Responsive table styles */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-namespace App\Http\Controllers;
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
 
-use Illuminate\Http\Request;
-use App\Models\ExtendedProductList;
-use Illuminate\Support\Facades\Log;
-use PDF;
+    /* Scrollable table on small screens */
+    .responsive-table {
+        overflow-x: auto;
+    }
+ }
 
-class DownloadController extends Controller
-{
-   public function downloadCSV()
-   {
-      Log::info('DownloadController: downloadCSV method called');
-      $headers = array(
-          "Content-type" => "text/csv",
-          "Content-Disposition" => "attachment; filename=file.csv",
-          "Pragma" => "no-cache",
-          "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-          "Expires" => "0"
-      );
+ /* Add animation classes */
+ .animated {
+    animation: fadeIn 1s ease-in;
+ }
 
-      $products = ExtendedProductList::all()->toArray();
-      $file_name = 'products.csv';
-      $file_path = public_path($file_name);
+ @keyframes fadeIn {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+ }
 
-      Log::info('Creating CSV file for download');
-      $file_open = fopen($file_path, 'w');
-      $content = array_keys($products[0]);
-      fputcsv($file_open, $content);
-      foreach ($products as $product) {
-          fputcsv($file_open, $product);
-      }
-      fclose($file_open);
+ /* Pagination styles */
+ .pagination-controls {
+    text-align: center;
+    padding: 10px;
+ }
 
-      Log::info('CSV file created and ready for download');
-      return response()->download($file_path, $file_name, $headers);
-   }
-
-   public function downloadPDF()
-   {
-      Log::info('DownloadController: downloadPDF method called');
-      $products = ExtendedProductList::all();
-      Log::info('Creating PDF file for download');
-      $pdf = PDF::loadView('products.pdf', compact('products'));
-      return $pdf->download('products.pdf');
-   }
+ .pagination-controls button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
+    border: none; /* Removed border for a cleaner look */
+    border-radius: 5px;
+    cursor: pointer;
 }
 
-----//----
+.pagination-controls button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
 
+```
+## resources/views/partials/dropdown-filter.blade.php
+```
+<!DOCTYPE html>
+<div class="animated" id="dropdown-filter">
+    <label for="classificacao-select">Classificação</label>
+    <select class="button" id="classificacao-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
 
-Dowload CSV:
+    <label for="subproduto-select">Subproduto</label>
+    <select class="button" id="subproduto-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
 
-Lets review the current logic. This is simply doaling a preview of the products table as it is, we must adjust it too:
+    <label for="local-select">Local</label>
+    <select class="button" id="local-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
 
-1- Download both the dataseries and download  table
-2- Download only the tables loaded in the frontend, the ones which had filters logic applyed too.
-3- Compile both csv resultant files in a excel spreadsheet before downloading.
+    <label for="freq-select">Frequência</label>
+    <select class="button" id="freq-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
 
-Download PDF:
+    <label for="proprietario-select">Proprietário</label>
+    <select class="button" id="proprietario-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+</div>
+<script>console.log('[dropdown-filter.blade.php] Dropdown filter view loaded');</script>
 
-1- Print the contents of the page as pdf, only convert the layout slightly in the process so we can have a more clean and organized vertical layout for the pdf.
+```
+## resources/views/partials/download-buttons.blade.php
+```
+<!DOCTYPE html>
+<div class="animated">
+    <button class="button" id="download-csv-btn">Download CSV</button>
+    <button class="button" id="download-pdf-btn">Download PDF</button>
+</div>
+<script>console.log('[download-buttons.blade.php] Download buttons view loaded');</script>
+
+```
+## resources/views/partials/data-series-table.blade.php
+```
+<!-- Data Series Table -->
+<div class="responsive-table animated" id="data-series-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Cod</th>
+                <th>data</th>
+                <th>ult</th>
+                <th>mini</th>
+                <th>maxi</th>
+                <th>abe</th>
+                <th>volumes</th>
+                <th>med</th>
+                <th>aju</th>
+            </tr>
+        </thead>
+        <tbody id="data-series-body">
+            <!-- Data populated by DataSeriesTable.js -->
+        </tbody>
+    </table>
+</div>
+<div id="data-series-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by DataSeriesTable.js -->
+</div>
+<script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>
+
+```

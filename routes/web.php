@@ -5,12 +5,15 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DataSeriesController;
 use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\FilterController;
+use App\Http\Controllers\LoginController;
 use App\Models\ExtendedProductList;
+
 
 Route::get('/', function () {
     $products = ExtendedProductList::all();
     return view('app', compact('products'));
-});
+ })->middleware('auth');
+
 
 // Products related routes
 Route::get('/products', [ProductController::class, 'index']); // For initial load and pagination without filters
@@ -33,6 +36,5 @@ Route::get('/csrf-token', function() {
 Route::get('/api/get-dropdown-data', [FilterController::class, 'getDropdownData']);
 
 // Login Route
-Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
-Route::post('/login', 'Auth\LoginController@login');
-
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);

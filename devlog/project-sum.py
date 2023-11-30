@@ -23,7 +23,9 @@ file_paths = [
     'app/Http/Controllers/ProductController.php',
     'app/Http/Controllers/DataSeriesController.php',
     'app/Http/Controllers/Controller.php',
-    'app/Http/Controllers/FilterController.php'
+    'app/Http/Controllers/FilterController.php',
+    'app/Http/Controllers/LoginController.php',
+    'resources/views/auth/login.blade.php'
 ]
 
 # Define preset groups of files
@@ -74,6 +76,15 @@ file_groups = {
         'resources/views/partials/dropdown-filter.blade.php',
         'app\Http\Controllers\FilterController.php'
     ],
+    'templates-css': [ 
+        'resources/views/partials/data-series-table.blade.php',
+        'resources/views/partials/download-buttons.blade.php',
+        'resources/views/partials/dropdown-filter.blade.php',
+        'resources/views/partials/products-table.blade.php',
+        'resources/views/auth/login.blade.php',
+        'public/css/app.css',
+    ],
+    
     'all': file_paths  # The 'all' group contains all the files
 }
 

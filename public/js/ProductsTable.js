@@ -82,14 +82,14 @@ window.populateProductsTable = function(products) {
     } else {
         // If products exist or we are already showing all records, populate the table with products
         tableBody.innerHTML = products.map(product => `
-            <tr>
-                <td><input type="radio" name="productSelect" value="${product.Classificação}" onchange="selectProduct('${product.Classificação}')"></td>
-                <td>${product.Classificação}</td>
-                <td>${product.longo}</td>
-                <td>${product.freq}</td>
-                <td>${product.alterado}</td>
-            </tr>
-        `).join('');
+        <tr>
+            <td><input type="radio" name="productSelect" value="${product['Código_Produto']}" onchange="selectProduct('${product['Código_Produto']}')"></td>
+            <td>${product.Classificação}</td>
+            <td>${product.longo}</td>
+            <td>${product.freq}</td>
+            <td>${product.alterado}</td>
+        </tr>
+    `).join('');
 
         // Reset the flag if filters are applied and products are found
         window.showingAllRecords = products.length > 0;
@@ -98,7 +98,7 @@ window.populateProductsTable = function(products) {
 
 window.selectProduct = function(productCode) {
     console.log("Selected product code: ", productCode);
-    window.loadDataSeries(productCode); // existing code
+    window.loadDataSeries(productCode);
 };
 
 

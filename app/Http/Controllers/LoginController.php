@@ -1,25 +1,33 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-   public function showLoginForm()
-   {
-       return view('auth.login');
-   }
+    public function showLoginForm()
+    {
+        Log::info('showLoginForm method called');
+        return view('auth.login');
+    }
 
-   public function login(Request $request)
-   {
-       $credentials = $request->only('login', 'password');
+    public function login(Request $request)
+    {
+        Log::info('login method called');
+        $credentials = $request->only('email', 'password'); // Use 'email' and 'password' fields
 
-       if ($credentials['login'] === config('app.login') && $credentials['password'] === config('app.password')) {
-           return redirect()->route('main');
-       }
+        Log::info('Credentials: ', $credentials);
 
-       return redirect()->back()->withErrors(['login' => 'Invalid login credentials.']);
-   }
+        if (Auth::attempt($credentials)) {
+            Log::info('Login successful');
+            return redirect()->intended('/');
+        }
+
+        Log::info('Login failed');
+        return redirect()->back()->withErrors(['login' => 'Invalid login credentials.']);
+    }
+
 }

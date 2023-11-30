@@ -1,9 +1,10 @@
 // Function to load data series for a product with pagination
 window.loadDataSeries = function(productCode, page = 1, perPage = 10) {
     console.log(`Initiating fetch to /data-series/${productCode}?page=${page}&perPage=${perPage}`);
-    // Replace `productCode` with `productCode` in the fetch call
+
     fetch(`/data-series/${productCode}?page=${page}&perPage=${perPage}`)
         .then(response => {
+            console.log("Raw fetch response:", response);
             if (!response.ok) {
                 console.error(`[DataSeriesTable] Error fetching data series: ${response.statusText}`);
                 throw new Error(`Error fetching data series: ${response.statusText}`);
@@ -13,7 +14,7 @@ window.loadDataSeries = function(productCode, page = 1, perPage = 10) {
         .then(data => {
             console.log("[DataSeriesTable] DataSeries API Response received:", data);
             let tableBody = document.getElementById('data-series-body');
-            tableBody.innerHTML = data.data.map(series => `
+            tableBody.innerHTML = data.map(series => `
                 <tr>
                     <td>${series.cod}</td>
                     <td>${series.data}</td>
@@ -28,12 +29,15 @@ window.loadDataSeries = function(productCode, page = 1, perPage = 10) {
             `).join('');
             console.log("[DataSeriesTable] Data series successfully rendered in table");
 
-            renderPagination(data.pagination, (newPage) => loadDataSeries(productCode, newPage));
+            // Update this function if pagination data is included in the response
+            // or handle pagination differently if the response structure is different
+            renderDataSeriesPagination(data, productCode);
         })
         .catch(error => {
             console.error("Fetch request failed: ", error);
         });
 };
+
 
 // Function to render pagination for data series
 // Ensure the renderPagination is specific for DataSeries and does not overlap with ProductsTable
