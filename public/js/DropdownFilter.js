@@ -76,18 +76,17 @@ function updateFilters() {
         return response.json();
     })
     .then(data => {
-        console.log("[DropdownFilter] Filtered products received:", data.products);
-        if (data.products) {
-            populateProductsTable(data.products);
+        console.log("[DropdownFilter] Filtered products received:", data);
+        if (data && data.data && Array.isArray(data.data)) {
+            window.populateProductsTable(data.data);
         } else {
-            console.error("[DropdownFilter] No products received after filter update");
+            console.error("[DropdownFilter] No products received or invalid data format after filter update", data);
         }
     })
     .catch(error => {
         console.error("[DropdownFilter] Filter products API Error:", error);
     });
 }
-
 // Setting up event listeners for each filter
 document.addEventListener('DOMContentLoaded', function () {
     const filters = ['classificacao-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];

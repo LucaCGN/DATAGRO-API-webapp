@@ -28,7 +28,10 @@ document.addEventListener('DOMContentLoaded', function () {
     window.loadProducts();
 });
 
-function populateProductsTable(products) {
+
+window.populateProductsTable = function(products) {
+    console.log("[ProductsTable] populateProductsTable called with products:", products);
+
     let tableBody = document.getElementById('products-table-body');
     if (!tableBody) {
         console.error("Table body not found");
@@ -44,7 +47,7 @@ function populateProductsTable(products) {
             <td>${product.alterado}</td>
         </tr>
     `).join('');
-}
+};
 
 function selectProduct(productCode) {
     selectedProductCode = productCode;
