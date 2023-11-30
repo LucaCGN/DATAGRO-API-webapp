@@ -24,7 +24,7 @@ window.loadProducts = function(page = 1) {
             renderPagination();
         })
         .catch(error => {
-            console.error("Failed to load products", error);
+            console.error("Failed to load pwroducts", error);
         });
 };
 
@@ -78,4 +78,31 @@ function renderPagination() {
     console.log("Pagination rendered with HTML:", html);
 }
 
-// Add logic for other functions (setupFilterEventListeners, etc.) as necessary
+// Add logic for integrating with dropdown filters
+function setupDropdownFilters() {
+    console.log("[ProductsTable] Setting up dropdown filters");
+
+    // Fetch dropdown data from the server
+    fetch('/api/get-dropdown-data')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error while fetching dropdown data! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Assuming populateDropdowns is a global function from DropdownFilter.js
+            populateDropdowns(data);
+            console.log("[ProductsTable] Dropdowns populated with server data");
+        })
+        .catch(error => {
+            console.error("Failed to fetch dropdown data", error);
+        });
+}
+
+// Ensure this is called after the DOM is fully loaded
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM fully loaded and parsed');
+    window.loadProducts();
+    setupDropdownFilters(); // Setup dropdown filters after loading products
+});

@@ -7,6 +7,7 @@ use App\Http\Controllers\DownloadController;
 use Illuminate\Support\Facades\Log;
 use App\Models\ExtendedProductList;
 use App\Models\DataSeries;
+use App\Http\Controllers\FilterController;
 
 Route::get('/', function () {
     $products = ExtendedProductList::all();

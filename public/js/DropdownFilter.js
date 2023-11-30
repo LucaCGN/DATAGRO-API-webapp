@@ -1,18 +1,26 @@
 // DropdownFilter.js
 
+// Convert frequency codes to full words at the top level so it's accessible by all functions
+const freqToWord = {
+    'D': 'Diário',
+    'W': 'Semanal',
+    'M': 'Mensal',
+    'A': 'Anual'
+};
+
 // Function to dynamically populate dropdowns
-function populateDropdowns(productsData) {
+window.populateDropdowns = function(data) {
     console.log("[DropdownFilter] Populating dropdowns with products data");
 
-    const getUniqueValues = (data, key) => [...new Set(data.map(item => item[key]))];
+    const getUniqueValues = (values) => [...new Set(values)];
 
     // Populate each dropdown
     const dropdowns = {
-        'produto-select': getUniqueValues(productsData, 'Código_Produto'),
-        'subproduto-select': getUniqueValues(productsData, 'Subproduto'),
-        'local-select': getUniqueValues(productsData, 'Local'),
-        'freq-select': getUniqueValues(productsData, 'Freq'),
-        // 'proprietario-select': Add logic if needed
+        'classificacao-select': getUniqueValues(Object.values(data.classificacao)),
+        'subproduto-select': getUniqueValues(Object.values(data.subproduto)),
+        'local-select': getUniqueValues(Object.values(data.local)),
+        'freq-select': getUniqueValues(Object.values(data.freq).map(code => freqToWord[code] || code)),
+        'proprietario-select': getUniqueValues(Object.values(data.proprietario))
     };
 
     Object.entries(dropdowns).forEach(([dropdownId, values]) => {
@@ -26,19 +34,22 @@ function populateDropdowns(productsData) {
             console.error(`[DropdownFilter] Dropdown not found: ${dropdownId}`);
         }
     });
-}
+};
 
 // Function to handle filter changes and fetch filtered products
 function updateFilters() {
     console.log("[DropdownFilter] Updating filters");
 
-    const produto = document.getElementById('produto-select').value;
+    const classificacao = document.getElementById('classificacao-select').value;
     const subproduto = document.getElementById('subproduto-select').value;
     const local = document.getElementById('local-select').value;
-    const freq = document.getElementById('freq-select').value;
+    const freqValue = document.getElementById('freq-select').value;
     const proprietario = document.getElementById('proprietario-select').value;
 
-    console.log(`[DropdownFilter] Filter parameters: Produto: ${produto}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
+    // Find the key for the selected frequency word
+    const freq = Object.keys(freqToWord).find(key => freqToWord[key] === freqValue);
+
+    console.log(`[DropdownFilter] Filter parameters: Classificação: ${classificacao}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
 
     fetch('/filter-products', {
         method: 'POST',
@@ -47,7 +58,7 @@ function updateFilters() {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        body: JSON.stringify({ produto, subproduto, local, freq, proprietario })
+        body: JSON.stringify({ classificacao, subproduto, local, freq, proprietario })
     })
     .then(response => {
         if (!response.ok) {
@@ -70,7 +81,7 @@ function updateFilters() {
 
 // Setting up event listeners for each filter
 document.addEventListener('DOMContentLoaded', function () {
-    const filters = ['produto-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
+    const filters = ['classificacao-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
     filters.forEach(filterId => {
         const filterElement = document.getElementById(filterId);
         if (filterElement) {
@@ -83,7 +94,4 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error(`[DropdownFilter] Filter element not found: ${filterId}`);
         }
     });
-
-    // Initialize dropdowns with static or prefetched data if needed
-    // fetch('/api/get-dropdown-data').then(...).then(data => populateDropdowns(data));
 });
