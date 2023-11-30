@@ -1,0 +1,7 @@
+I need you to structure everysingle point of this tutorial so I can proceed with deployn the laravel app I have developed to hostinger for testing!
+
+<Link Laravel on Hostinger in 12 min>
+
+Be sure to get all crucial points, like ftp process, folder setup, composer version setup, domain setup.
+
+I need a clear and detailed tutorial, bringing together the best of your logic capabilites and knowledge and the full video cotnents.

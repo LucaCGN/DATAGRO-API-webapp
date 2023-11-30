@@ -13,9 +13,8 @@ Route::get('/', function () {
 });
 
 // Products related routes
-Route::get('/products', [ProductController::class, 'index']);
-Route::post('/filter-products', [ProductController::class, 'index']); // Use index method for filtering
-Route::get('/products/{page}/{perPage}', [ProductController::class, 'paginate']);
+Route::get('/products', [ProductController::class, 'index']); // For initial load and pagination without filters
+Route::match(['get', 'post'], '/filter-products', [ProductController::class, 'index']); // For filtered requests, allow both GET and POST
 
 // Data Series related routes
 Route::get('/data-series/{productId}', [DataSeriesController::class, 'show']);
@@ -25,12 +24,15 @@ Route::get('/data-series/{productId}/{page}/{perPage}', [DataSeriesController::c
 Route::get('/download/csv', [DownloadController::class, 'downloadCSV']);
 Route::get('/download/pdf', [DownloadController::class, 'downloadPDF']);
 
-
-// Add a route to handle CSRF token generation
+// CSRF token generation
 Route::get('/csrf-token', function() {
     return csrf_token();
 });
 
-// New route for fetching dropdown data
+// Fetching dropdown data
 Route::get('/api/get-dropdown-data', [FilterController::class, 'getDropdownData']);
+
+// Login Route
+Route::get('/login', 'Auth\LoginController@showLoginForm')->name('login');
+Route::post('/login', 'Auth\LoginController@login');
 

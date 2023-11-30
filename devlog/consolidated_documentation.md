@@ -1,3 +1,62 @@
+## app/Models/DataSeries.php
+```
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class DataSeries extends Model
+{
+    protected $table = 'data_series_tables';
+
+    protected $fillable = [
+        'extended_product_list_id', 'cod', 'data', 'ult', 'mini', 'maxi',
+        'abe', 'volumes', 'cab', 'med', 'aju'
+    ];
+
+    public $timestamps = true;
+
+    // Define the relationship with ExtendedProductList
+    public function extendedProductList()
+    {
+        return $this->belongsTo(ExtendedProductList::class, 'extended_product_list_id');
+    }
+}
+
+```
+## app/Models/ExtendedProductList.php
+```
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class ExtendedProductList extends Model
+{
+    protected $table = 'extended_product_list_tables';
+    protected $fillable = [
+        'Código_Produto', 'Classificação', 'Subproduto', 'Local', 'Fetch_Status',
+        'bolsa', 'roda', 'fonte', 'tav', 'subtav', 'decimais', 'correlatos',
+        'empresa', 'contrato', 'subproduto_id', 'entcode', 'nome', 'longo', 'descr',
+        'codf', 'bd', 'palavras', 'habilitado', 'lote', 'rep', 'vln', 'dia',
+        'freq', 'dex', 'inserido', 'alterado'
+    ];
+    public $timestamps = true;
+
+    public function dataSeries()
+    {
+        return $this->hasOne(DataSeries::class, 'extended_product_list_id');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('active', 1);
+    }
+}
+
+```
 ## public/js/DownloadButtons.js
 ```
 // Functions to handle download actions
@@ -31,6 +90,74 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+```
+## app/Http/Controllers/DownloadController.php
+```
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\ExtendedProductList;
+use Illuminate\Support\Facades\Log;
+use PDF;
+
+class DownloadController extends Controller
+{
+   public function downloadCSV()
+   {
+      Log::info('DownloadController: downloadCSV method called');
+      $headers = array(
+          "Content-type" => "text/csv",
+          "Content-Disposition" => "attachment; filename=file.csv",
+          "Pragma" => "no-cache",
+          "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+          "Expires" => "0"
+      );
+
+      $products = ExtendedProductList::all()->toArray();
+      $file_name = 'products.csv';
+      $file_path = public_path($file_name);
+
+      Log::info('Creating CSV file for download');
+      $file_open = fopen($file_path, 'w');
+      $content = array_keys($products[0]);
+      fputcsv($file_open, $content);
+      foreach ($products as $product) {
+          fputcsv($file_open, $product);
+      }
+      fclose($file_open);
+
+      Log::info('CSV file created and ready for download');
+      return response()->download($file_path, $file_name, $headers);
+   }
+
+   public function downloadPDF()
+   {
+      Log::info('DownloadController: downloadPDF method called');
+      $products = ExtendedProductList::all();
+      Log::info('Creating PDF file for download');
+      $pdf = PDF::loadView('products.pdf', compact('products'));
+      return $pdf->download('products.pdf');
+   }
+}
+
+```
+## app/Http/Controllers/Controller.php
+```
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Routing\Controller as BaseController;
+
+class Controller extends BaseController
+{
+    use AuthorizesRequests, ValidatesRequests;
+}
 
 ```
 ## app/Http/Controllers/ProductController.php
@@ -80,58 +207,140 @@ class ProductController extends Controller
 }
 
 ```
-## resources/views/partials/data-series-table.blade.php
+## public/css/app.css
 ```
-<!-- Data Series Table -->
-<div class="responsive-table animated" id="data-series-table">
-    <table>
-        <thead>
-            <tr>
-                <th>Cod</th>
-                <th>data</th>
-                <th>ult</th>
-                <th>mini</th>
-                <th>maxi</th>
-                <th>abe</th>
-                <th>volumes</th>
-                <th>med</th>
-                <th>aju</th>
-            </tr>
-        </thead>
-        <tbody id="data-series-body">
-            <!-- Data populated by DataSeriesTable.js -->
-        </tbody>
-    </table>
-</div>
-<div id="data-series-pagination" class="pagination-controls">
-    <!-- Pagination Controls populated by DataSeriesTable.js -->
-</div>
-<script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>
+body {
+    font-family: Arial, sans-serif;
+    color: #4f4f4f; /* Dark grey for text, softer than pure white */
+    background-color: #f8f8f8; /* Light grey background for a clean look */
+}
+
+header {
+    background-color: #fff; /* White background for header */
+    color: #4f4f4f; /* Dark grey for text */
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+main {
+    margin: 15px;
+}
+
+footer {
+    background-color: #fff; /* White background for footer */
+    color: #4f4f4f; /* Dark grey for text */
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+.button {
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border: none; /* Removed border for a cleaner look */
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
+
+ @media screen and (max-width: 600px) {
+    body {
+        font-size: 18px;
+    }
+
+    header, footer {
+        text-align: left;
+        padding: 10px 20px;
+    }
+
+    /* Responsive table styles */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
+
+    /* Scrollable table on small screens */
+    .responsive-table {
+        overflow-x: auto;
+    }
+ }
+
+ /* Add animation classes */
+ .animated {
+    animation: fadeIn 1s ease-in;
+ }
+
+ @keyframes fadeIn {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+ }
+
+ /* Pagination styles */
+ .pagination-controls {
+    text-align: center;
+    padding: 10px;
+ }
+
+ .pagination-controls button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
+    border: none; /* Removed border for a cleaner look */
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.pagination-controls button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
 
 ```
-## resources/views/partials/products-table.blade.php
+## resources/views/partials/dropdown-filter.blade.php
 ```
-<!-- Products Table -->
-<div class="responsive-table animated" id="products-table">
-    <table>
-        <thead>
-            <tr>
-                <th> [Carregar Data Series] </th>
-                <th>Produto  ('Classificação')  </th>
-                <th>Nome ('longo')  </th>
-                <th>Frequência</th>
-                <th>Primeira Data</th>
-            </tr>
-        </thead>
-        <tbody id="products-table-body">
-            <!-- Data populated by ProductsTable.js -->
-        </tbody>
-    </table>
-</div>
-<div id="products-pagination" class="pagination-controls">
-    <!-- Pagination Controls populated by ProductsTable.js -->
-</div>
+<!DOCTYPE html>
+<div class="animated" id="dropdown-filter">
+    <label for="classificacao-select">Classificação</label>
+    <select class="button" id="classificacao-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
 
+    <label for="subproduto-select">Subproduto</label>
+    <select class="button" id="subproduto-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+
+    <label for="local-select">Local</label>
+    <select class="button" id="local-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+
+    <label for="freq-select">Frequência</label>
+    <select class="button" id="freq-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+
+    <label for="proprietario-select">Proprietário</label>
+    <select class="button" id="proprietario-select">
+        <!-- Options will be populated via JavaScript -->
+    </select>
+</div>
+<script>console.log('[dropdown-filter.blade.php] Dropdown filter view loaded');</script>
 
 ```
 ## resources/views/partials/download-buttons.blade.php
@@ -142,212 +351,6 @@ class ProductController extends Controller
     <button class="button" id="download-pdf-btn">Download PDF</button>
 </div>
 <script>console.log('[download-buttons.blade.php] Download buttons view loaded');</script>
-
-```
-## public/js/ProductsTable.js
-```
-// ProductsTable.js
-
-console.log('ProductsTable.js loaded');
-
-let selectedProductCode = null;
-
-window.loadProducts = function(page = 1) {
-    console.log(`Fetching products for page: ${page}`);
-    fetch(`/products?page=${page}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(response => {
-            window.currentPage = response.current_page;
-            window.totalPages = response.last_page;
-            populateProductsTable(response.data);
-            renderPagination();
-        })
-        .catch(error => {
-            console.error("Failed to load products", error);
-        });
-};
-
-document.addEventListener('DOMContentLoaded', function () {
-    window.loadProducts();
-});
-
-function populateProductsTable(products) {
-    let tableBody = document.getElementById('products-table-body');
-    if (!tableBody) {
-        console.error("Table body not found");
-        return;
-    }
-
-    tableBody.innerHTML = products.map(product => `
-        <tr>
-            <td><input type="radio" name="productSelect" value="${product.Classificação}" onchange="selectProduct('${product.Classificação}')"></td>
-            <td>${product.Classificação}</td>
-            <td>${product.longo}</td>
-            <td>${product.freq}</td>
-            <td>${product.alterado}</td>
-        </tr>
-    `).join('');
-}
-
-function selectProduct(productCode) {
-    selectedProductCode = productCode;
-}
-
-function renderPagination() {
-    const paginationDiv = document.getElementById('products-pagination');
-    if (!paginationDiv) {
-        console.error("Pagination div not found");
-        return;
-    }
-
-    let html = '';
-    if (window.currentPage > 1) {
-        html += `<button onclick="window.loadProducts(${window.currentPage - 1})">Previous</button>`;
-    }
-    html += `<span>Page ${window.currentPage} of ${window.totalPages}</span>`;
-    if (window.currentPage < window.totalPages) {
-        html += `<button onclick="window.loadProducts(${window.currentPage + 1})">Next</button>`;
-    }
-
-    paginationDiv.innerHTML = html;
-}
-
-
-// Add logic for integrating with dropdown filters
-function setupDropdownFilters() {
-    console.log("[ProductsTable] Setting up dropdown filters");
-
-    // Fetch dropdown data from the server
-    fetch('/api/get-dropdown-data')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error while fetching dropdown data! Status: ${response.status}`); // Corrected this line
-            }
-            return response.json();
-        })
-        .then(data => {
-            populateDropdowns(data);
-            console.log("[ProductsTable] Dropdowns populated with server data");
-        })
-        .catch(error => {
-            console.error("Failed to fetch dropdown data", error);
-        });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM fully loaded and parsed');
-    window.loadProducts();
-    setupDropdownFilters(); // Setup dropdown filters after loading products
-});
-
-```
-## public/js/DataSeriesTable.js
-```
-// Function to load data series for a product with pagination
-function loadDataSeries(productId, page = 1, perPage = 10) {
-    console.log(`[DataSeriesTable] Start loading data series for productId: ${productId}, page: ${page}, perPage: ${perPage}`);
-    fetch(`/data-series/${productId}?page=${page}&perPage=${perPage}`)
-        .then(response => {
-            if (!response.ok) {
-                console.error(`[DataSeriesTable] Error fetching data series: ${response.statusText}`);
-                throw new Error(`Error fetching data series: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log("[DataSeriesTable] DataSeries API Response received:", data);
-            let tableBody = document.getElementById('data-series-body');
-            tableBody.innerHTML = data.data.map(series => `
-                <tr>
-                    <td>${series.cod}</td>
-                    <td>${series.data}</td>
-                    <td>${series.ult}</td>
-                    <td>${series.mini}</td>
-                    <td>${series.maxi}</td>
-                    <td>${series.abe}</td>
-                    <td>${series.volumes}</td>
-                    <td>${series.med}</td>
-                    <td>${series.aju}</td>
-                </tr>
-            `).join('');
-            console.log("[DataSeriesTable] Data series successfully rendered in table");
-
-            renderPagination(data.pagination, (newPage) => loadDataSeries(productId, newPage));
-        })
-        .catch(error => {
-            console.error("[DataSeriesTable] DataSeries API Error:", error);
-        });
-}
-
-// Function to render pagination for data series
-// Ensure the renderPagination is specific for DataSeries and does not overlap with ProductsTable
-function renderDataSeriesPagination(paginationData, productId) {
-    let paginationDiv = document.getElementById('data-series-pagination');
-    paginationDiv.innerHTML = ''; // Clear existing pagination controls
-
-    // Previous button
-    if (paginationData.current_page > 1) {
-        paginationDiv.innerHTML += `<button onclick="loadDataSeries(${productId}, ${paginationData.current_page - 1}, ${paginationData.per_page})">Previous</button>`;
-    }
-
-    // Current Page Indicator
-    paginationDiv.innerHTML += `<span>Page ${paginationData.current_page} of ${paginationData.last_page}</span>`;
-
-    // Next button
-    if (paginationData.current_page < paginationData.last_page) {
-        paginationDiv.innerHTML += `<button onclick="loadDataSeries(${productId}, ${paginationData.current_page + 1}, ${paginationData.per_page})">Next</button>`;
-    }
-}
-
-// Call this function wherever you need to render pagination for data series
-
-```
-## app/Http/Controllers/Controller.php
-```
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-use Illuminate\Foundation\Validation\ValidatesRequests;
-use Illuminate\Routing\Controller as BaseController;
-
-class Controller extends BaseController
-{
-    use AuthorizesRequests, ValidatesRequests;
-}
-
-```
-## app/Models/DataSeries.php
-```
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class DataSeries extends Model
-{
-    protected $table = 'data_series_tables';
-
-    protected $fillable = [
-        'extended_product_list_id', 'cod', 'data', 'ult', 'mini', 'maxi',
-        'abe', 'volumes', 'cab', 'med', 'aju'
-    ];
-
-    public $timestamps = true;
-
-    // Define the relationship with ExtendedProductList
-    public function extendedProductList()
-    {
-        return $this->belongsTo(ExtendedProductList::class, 'extended_product_list_id');
-    }
-}
 
 ```
 ## app/Console/Commands/FetchDatagroData.php
@@ -596,331 +599,6 @@ class FetchDatagroData extends Command
 }
 
 ```
-## public/js/DropdownFilter.js
-```
-// DropdownFilter.js
-
-// Convert frequency codes to full words at the top level so it's accessible by all functions
-const freqToWord = {
-    'D': 'Diário',
-    'W': 'Semanal',
-    'M': 'Mensal',
-    'A': 'Anual'
-};
-
-// Function to dynamically populate dropdowns
-window.populateDropdowns = function(data) {
-    console.log("[DropdownFilter] Populating dropdowns with products data");
-
-    const getUniqueValues = (values) => [...new Set(values)];
-
-    // Populate each dropdown
-    const dropdowns = {
-        'classificacao-select': getUniqueValues(Object.values(data.classificacao)),
-        'subproduto-select': getUniqueValues(Object.values(data.subproduto)),
-        'local-select': getUniqueValues(Object.values(data.local)),
-        'freq-select': getUniqueValues(Object.values(data.freq).map(code => freqToWord[code] || code)),
-        'proprietario-select': getUniqueValues(Object.values(data.proprietario))
-    };
-
-    Object.entries(dropdowns).forEach(([dropdownId, values]) => {
-        const dropdown = document.getElementById(dropdownId);
-        if (dropdown) {
-            values.forEach(value => {
-                dropdown.add(new Option(value, value));
-            });
-            console.log(`[DropdownFilter] Dropdown populated: ${dropdownId}`);
-        } else {
-            console.error(`[DropdownFilter] Dropdown not found: ${dropdownId}`);
-        }
-    });
-};
-
-// Function to handle filter changes and fetch filtered products
-
-// Function to handle filter changes and fetch filtered products
-function updateFilters() {
-    console.log("[DropdownFilter] Updating filters");
-
-    // Existing filter values retrieval
-    const classificacao = document.getElementById('classificacao-select').value;
-    const subproduto = document.getElementById('subproduto-select').value;
-    const local = document.getElementById('local-select').value;
-    const freqValue = document.getElementById('freq-select').value;
-
-    // Convert 'Proprietário' back to 'bolsa' value
-    const proprietarioValue = document.getElementById('proprietario-select').value;
-    const bolsa = proprietarioValue === 'sim' ? 2 : (proprietarioValue === 'nao' ? 1 : '');
-
-    // Convert frequency word to code
-    const freq = Object.keys(freqToWord).find(key => freqToWord[key] === freqValue);
-
-    console.log(`[DropdownFilter] Filter parameters: Classificação: ${classificacao}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Bolsa: ${bolsa}`);
-
-    const requestBody = JSON.stringify({ classificacao, subproduto, local, freq, bolsa }); // Use 'bolsa' instead of 'proprietario'
-    console.log(`[DropdownFilter] AJAX request body: ${requestBody}`);
-
-    fetch('/filter-products', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: requestBody
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("[DropdownFilter] Filtered products received:", data.products);
-        if (data.products) {
-            populateProductsTable(data.products);
-        } else {
-            console.error("[DropdownFilter] No products received after filter update");
-        }
-    })
-    .catch(error => {
-        console.error("[DropdownFilter] Filter products API Error:", error);
-    });
-}
-
-// Setting up event listeners for each filter
-document.addEventListener('DOMContentLoaded', function () {
-    const filters = ['classificacao-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
-    filters.forEach(filterId => {
-        const filterElement = document.getElementById(filterId);
-        if (filterElement) {
-            filterElement.addEventListener('change', () => {
-                console.log(`[DropdownFilter] Filter changed: ${filterId}`);
-                updateFilters();
-            });
-            console.log(`[DropdownFilter] Event listener added for: ${filterId}`);
-        } else {
-            console.error(`[DropdownFilter] Filter element not found: ${filterId}`);
-        }
-    });
-});
-
-```
-## resources/views/app.blade.php
-```
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Datagro Comercial Team Web Application</title>
-  <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- CSRF token meta tag added -->
-  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-</head>
-<body>
-    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
-        <h1>API Mercado Físico - SALES TOOL</h1>
-        <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
-    </header>
-
-  <main>
-      @include('partials.dropdown-filter')
-      @include('partials.products-table', ['products' => $products])
-      @include('partials.data-series-table')
-      @include('partials.download-buttons')
-  </main>
-
-  <footer style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
-    <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets" style="height: 50px;">
-    <div>
-        <h2>DATAGRO LINKS</h2>
-        <ul>
-            <li><a href="https://www.datagro.com/en/" target="_blank">www.datagro.com</a></li>
-            <li><a href="https://portal.datagro.com/" target="_blank">portal.datagro.com</a></li>
-            <li><a href="https://www.linkedin.com/company/datagro" target="_blank">Datagro LinkedIn</a></li>
-        </ul>
-    </div>
-  </footer>
-
-
-  <!-- Include the JavaScript files -->
-  <script type="module" src="{{ asset('js/ProductsTable.js') }}"></script>
-  <script type="module" src="{{ asset('js/DropdownFilter.js') }}"></script>
-  <script type="module" src="{{ asset('js/DataSeriesTable.js') }}"></script>
-  <script type="module" src="{{ asset('js/DownloadButtons.js') }}"></script>
-  <script>console.log('[app.blade.php] Main application view loaded');</script>
-</body>
-</html>
-
-```
-## resources/views/partials/dropdown-filter.blade.php
-```
-<!DOCTYPE html>
-<div class="animated" id="dropdown-filter">
-    <label for="classificacao-select">Classificação</label>
-    <select class="button" id="classificacao-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-
-    <label for="subproduto-select">Subproduto</label>
-    <select class="button" id="subproduto-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-
-    <label for="local-select">Local</label>
-    <select class="button" id="local-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-
-    <label for="freq-select">Frequência</label>
-    <select class="button" id="freq-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-
-    <label for="proprietario-select">Proprietário</label>
-    <select class="button" id="proprietario-select">
-        <!-- Options will be populated via JavaScript -->
-    </select>
-</div>
-<script>console.log('[dropdown-filter.blade.php] Dropdown filter view loaded');</script>
-
-```
-## app/Models/ExtendedProductList.php
-```
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class ExtendedProductList extends Model
-{
-    protected $table = 'extended_product_list_tables';
-    protected $fillable = [
-        'Código_Produto', 'Classificação', 'Subproduto', 'Local', 'Fetch_Status',
-        'bolsa', 'roda', 'fonte', 'tav', 'subtav', 'decimais', 'correlatos',
-        'empresa', 'contrato', 'subproduto_id', 'entcode', 'nome', 'longo', 'descr',
-        'codf', 'bd', 'palavras', 'habilitado', 'lote', 'rep', 'vln', 'dia',
-        'freq', 'dex', 'inserido', 'alterado'
-    ];
-    public $timestamps = true;
-
-    public function dataSeries()
-    {
-        return $this->hasOne(DataSeries::class, 'extended_product_list_id');
-    }
-
-    public function scopeActive($query)
-    {
-        return $query->where('active', 1);
-    }
-}
-
-```
-## public/css/app.css
-```
-body {
-    font-family: Arial, sans-serif;
-    color: #4f4f4f; /* Dark grey for text, softer than pure white */
-    background-color: #f8f8f8; /* Light grey background for a clean look */
-}
-
-header {
-    background-color: #fff; /* White background for header */
-    color: #4f4f4f; /* Dark grey for text */
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-}
-
-main {
-    margin: 15px;
-}
-
-footer {
-    background-color: #fff; /* White background for footer */
-    color: #4f4f4f; /* Dark grey for text */
-    text-align: center;
-    padding: 10px;
-    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-}
-
-.button {
-    background-color: #8dbf42; /* Muted green for buttons */
-    color: #fff;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border: none; /* Removed border for a cleaner look */
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.button:hover {
-    background-color: #6e9830; /* Darker green on hover */
-}
-
- @media screen and (max-width: 600px) {
-    body {
-        font-size: 18px;
-    }
-
-    header, footer {
-        text-align: left;
-        padding: 10px 20px;
-    }
-
-    /* Responsive table styles */
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 10px;
-        text-align: left;
-    }
-
-    /* Scrollable table on small screens */
-    .responsive-table {
-        overflow-x: auto;
-    }
- }
-
- /* Add animation classes */
- .animated {
-    animation: fadeIn 1s ease-in;
- }
-
- @keyframes fadeIn {
-    0% {opacity: 0;}
-    100% {opacity: 1;}
- }
-
- /* Pagination styles */
- .pagination-controls {
-    text-align: center;
-    padding: 10px;
- }
-
- .pagination-controls button {
-    margin: 0 5px;
-    padding: 5px 10px;
-    background-color: #8dbf42; /* Muted green for buttons */
-    color: #fff;
-    border: none; /* Removed border for a cleaner look */
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.pagination-controls button:hover {
-    background-color: #6e9830; /* Darker green on hover */
-}
-
-```
 ## routes/web.php
 ```
 <?php
@@ -938,9 +616,8 @@ Route::get('/', function () {
 });
 
 // Products related routes
-Route::get('/products', [ProductController::class, 'index']);
-Route::post('/filter-products', [ProductController::class, 'index']); // Use index method for filtering
-Route::get('/products/{page}/{perPage}', [ProductController::class, 'paginate']);
+Route::get('/products', [ProductController::class, 'index']); // For initial load and pagination without filters
+Route::match(['get', 'post'], '/filter-products', [ProductController::class, 'index']); // For filtered requests, allow both GET and POST
 
 // Data Series related routes
 Route::get('/data-series/{productId}', [DataSeriesController::class, 'show']);
@@ -950,14 +627,162 @@ Route::get('/data-series/{productId}/{page}/{perPage}', [DataSeriesController::c
 Route::get('/download/csv', [DownloadController::class, 'downloadCSV']);
 Route::get('/download/pdf', [DownloadController::class, 'downloadPDF']);
 
-
-// Add a route to handle CSRF token generation
+// CSRF token generation
 Route::get('/csrf-token', function() {
     return csrf_token();
 });
 
-// New route for fetching dropdown data
+// Fetching dropdown data
 Route::get('/api/get-dropdown-data', [FilterController::class, 'getDropdownData']);
+
+```
+## public/js/ProductsTable.js
+```
+// ProductsTable.js
+
+console.log('ProductsTable.js loaded');
+
+let selectedProductCode = null;
+window.currentFilters = {};
+
+window.loadProducts = function(page = 1, filters = window.currentFilters) {
+    console.log(`Fetching products for page: ${page} with filters`, filters);
+    const method = Object.keys(filters).length > 0 ? 'POST' : 'GET';
+    const query = new URLSearchParams({ ...filters, page }).toString();
+    const url = method === 'POST' ? '/filter-products' : `/products?page=${page}`;
+
+    fetch(url, {
+        method: method,
+        headers: method === 'POST' ? {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        } : {},
+        body: method === 'POST' ? JSON.stringify(filters) : null
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(response => {
+        window.currentPage = response.current_page;
+        window.totalPages = response.last_page;
+        populateProductsTable(response.data || []); // Fallback to empty array if data is undefined
+        renderPagination();
+    })
+    .catch(error => {
+        console.error("Failed to load products", error);
+        populateProductsTable([]); // Handle error by calling populateProductsTable with an empty array
+    });
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    window.loadProducts();
+});
+
+
+window.populateProductsTable = function(products, noMatches = false) {
+    console.log("[ProductsTable] populateProductsTable called with products:", products);
+
+    let tableBody = document.getElementById('products-table-body');
+    if (!tableBody) {
+        console.error("Table body not found");
+        return;
+    }
+
+    if (products.length === 0 && noMatches) {
+        // Show all products and display no matches message
+        window.loadProducts();
+        alert("No matches found with the current filters. Displaying all records.");
+    } else {
+        // Populate table with products
+        tableBody.innerHTML = products.map(product => `
+            <tr>
+                <td><input type="radio" name="productSelect" value="${product.Classificação}" onchange="selectProduct('${product.Classificação}')"></td>
+                <td>${product.Classificação}</td>
+                <td>${product.longo}</td>
+                <td>${product.freq}</td>
+                <td>${product.alterado}</td>
+            </tr>
+        `).join('');
+    }
+};
+
+function selectProduct(productCode) {
+    selectedProductCode = productCode;
+}
+
+function renderPagination() {
+    const paginationDiv = document.getElementById('products-pagination');
+    if (!paginationDiv) {
+        console.error("Pagination div not found");
+        return;
+    }
+
+    let html = '';
+    if (window.currentPage > 1) {
+        html += `<button onclick="window.loadProducts(${window.currentPage - 1}, window.currentFilters)">Previous</button>`;
+    }
+
+    html += `<span>Page ${window.currentPage} of ${window.totalPages}</span>`;
+
+    if (window.currentPage < window.totalPages) {
+        html += `<button onclick="window.loadProducts(${window.currentPage + 1}, window.currentFilters)">Next</button>`;
+    }
+
+    paginationDiv.innerHTML = html;
+}
+
+function setupDropdownFilters() {
+    console.log("[ProductsTable] Setting up dropdown filters");
+
+    fetch('/api/get-dropdown-data')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error while fetching dropdown data! Status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        populateDropdowns(data);
+        console.log("[ProductsTable] Dropdowns populated with server data");
+    })
+    .catch(error => {
+        console.error("Failed to fetch dropdown data", error);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOM fully loaded and parsed');
+    window.loadProducts();
+    setupDropdownFilters();
+});
+
+```
+## resources/views/partials/products-table.blade.php
+```
+<!-- Products Table -->
+<div class="responsive-table animated" id="products-table">
+    <table>
+        <thead>
+            <tr>
+                <th> [Carregar Data Series] </th>
+                <th>Produto  ('Classificação')  </th>
+                <th>Nome ('longo')  </th>
+                <th>Frequência</th>
+                <th>Primeira Data</th>
+            </tr>
+        </thead>
+        <tbody id="products-table-body">
+            <!-- Data populated by ProductsTable.js -->
+        </tbody>
+    </table>
+</div>
+<div id="products-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by ProductsTable.js -->
+</div>
 
 
 ```
@@ -1013,6 +838,260 @@ class FilterController extends Controller
 }
 
 ```
+## public/js/DataSeriesTable.js
+```
+// Function to load data series for a product with pagination
+function loadDataSeries(productId, page = 1, perPage = 10) {
+    console.log(`[DataSeriesTable] Start loading data series for productId: ${productId}, page: ${page}, perPage: ${perPage}`);
+    fetch(`/data-series/${productId}?page=${page}&perPage=${perPage}`)
+        .then(response => {
+            if (!response.ok) {
+                console.error(`[DataSeriesTable] Error fetching data series: ${response.statusText}`);
+                throw new Error(`Error fetching data series: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("[DataSeriesTable] DataSeries API Response received:", data);
+            let tableBody = document.getElementById('data-series-body');
+            tableBody.innerHTML = data.data.map(series => `
+                <tr>
+                    <td>${series.cod}</td>
+                    <td>${series.data}</td>
+                    <td>${series.ult}</td>
+                    <td>${series.mini}</td>
+                    <td>${series.maxi}</td>
+                    <td>${series.abe}</td>
+                    <td>${series.volumes}</td>
+                    <td>${series.med}</td>
+                    <td>${series.aju}</td>
+                </tr>
+            `).join('');
+            console.log("[DataSeriesTable] Data series successfully rendered in table");
+
+            renderPagination(data.pagination, (newPage) => loadDataSeries(productId, newPage));
+        })
+        .catch(error => {
+            console.error("[DataSeriesTable] DataSeries API Error:", error);
+        });
+}
+
+// Function to render pagination for data series
+// Ensure the renderPagination is specific for DataSeries and does not overlap with ProductsTable
+function renderDataSeriesPagination(paginationData, productId) {
+    let paginationDiv = document.getElementById('data-series-pagination');
+    paginationDiv.innerHTML = ''; // Clear existing pagination controls
+
+    // Previous button
+    if (paginationData.current_page > 1) {
+        paginationDiv.innerHTML += `<button onclick="loadDataSeries(${productId}, ${paginationData.current_page - 1}, ${paginationData.per_page})">Previous</button>`;
+    }
+
+    // Current Page Indicator
+    paginationDiv.innerHTML += `<span>Page ${paginationData.current_page} of ${paginationData.last_page}</span>`;
+
+    // Next button
+    if (paginationData.current_page < paginationData.last_page) {
+        paginationDiv.innerHTML += `<button onclick="loadDataSeries(${productId}, ${paginationData.current_page + 1}, ${paginationData.per_page})">Next</button>`;
+    }
+}
+
+// Call this function wherever you need to render pagination for data series
+
+```
+## resources/views/partials/data-series-table.blade.php
+```
+<!-- Data Series Table -->
+<div class="responsive-table animated" id="data-series-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Cod</th>
+                <th>data</th>
+                <th>ult</th>
+                <th>mini</th>
+                <th>maxi</th>
+                <th>abe</th>
+                <th>volumes</th>
+                <th>med</th>
+                <th>aju</th>
+            </tr>
+        </thead>
+        <tbody id="data-series-body">
+            <!-- Data populated by DataSeriesTable.js -->
+        </tbody>
+    </table>
+</div>
+<div id="data-series-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by DataSeriesTable.js -->
+</div>
+<script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>
+
+```
+## resources/views/app.blade.php
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Datagro Comercial Team Web Application</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- CSRF token meta tag added -->
+  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+</head>
+<body>
+    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+        <h1>API Mercado Físico - SALES TOOL</h1>
+        <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
+    </header>
+
+  <main>
+      @include('partials.dropdown-filter')
+      @include('partials.products-table', ['products' => $products])
+      @include('partials.data-series-table')
+      @include('partials.download-buttons')
+  </main>
+
+  <footer style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+    <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets" style="height: 50px;">
+    <div>
+        <h2>DATAGRO LINKS</h2>
+        <ul>
+            <li><a href="https://www.datagro.com/en/" target="_blank">www.datagro.com</a></li>
+            <li><a href="https://portal.datagro.com/" target="_blank">portal.datagro.com</a></li>
+            <li><a href="https://www.linkedin.com/company/datagro" target="_blank">Datagro LinkedIn</a></li>
+        </ul>
+    </div>
+  </footer>
+
+
+  <!-- Include the JavaScript files -->
+  <script type="module" src="{{ asset('js/ProductsTable.js') }}"></script>
+  <script type="module" src="{{ asset('js/DropdownFilter.js') }}"></script>
+  <script type="module" src="{{ asset('js/DataSeriesTable.js') }}"></script>
+  <script type="module" src="{{ asset('js/DownloadButtons.js') }}"></script>
+  <script>console.log('[app.blade.php] Main application view loaded');</script>
+</body>
+</html>
+
+```
+## public/js/DropdownFilter.js
+```
+// DropdownFilter.js
+
+// Convert frequency codes to full words at the top level so it's accessible by all functions
+const freqToWord = {
+    'D': 'Diário',
+    'W': 'Semanal',
+    'M': 'Mensal',
+    'A': 'Anual'
+};
+
+// Function to dynamically populate dropdowns
+window.populateDropdowns = function(data) {
+    console.log("[DropdownFilter] Populating dropdowns with products data");
+
+    const getUniqueValues = (values) => [...new Set(values)];
+
+    // Populate each dropdown
+    const dropdowns = {
+        'classificacao-select': getUniqueValues(Object.values(data.classificacao)),
+        'subproduto-select': getUniqueValues(Object.values(data.subproduto)),
+        'local-select': getUniqueValues(Object.values(data.local)),
+        'freq-select': getUniqueValues(Object.values(data.freq).map(code => freqToWord[code] || code)),
+        'proprietario-select': getUniqueValues(Object.values(data.proprietario))
+    };
+
+    Object.entries(dropdowns).forEach(([dropdownId, values]) => {
+        const dropdown = document.getElementById(dropdownId);
+        if (dropdown) {
+            values.forEach(value => {
+                dropdown.add(new Option(value, value));
+            });
+            console.log(`[DropdownFilter] Dropdown populated: ${dropdownId}`);
+        } else {
+            console.error(`[DropdownFilter] Dropdown not found: ${dropdownId}`);
+        }
+    });
+};
+
+// Function to handle filter changes and fetch filtered products
+function updateFilters() {
+    console.log("[DropdownFilter] Updating filters");
+
+    // Existing filter values retrieval
+    const classificacao = document.getElementById('classificacao-select').value;
+    const subproduto = document.getElementById('subproduto-select').value;
+    const local = document.getElementById('local-select').value;
+    const freqValue = document.getElementById('freq-select').value;
+
+    // Convert 'Proprietário' back to 'bolsa' value
+    const proprietarioValue = document.getElementById('proprietario-select').value;
+    const bolsa = proprietarioValue === 'sim' ? 2 : (proprietarioValue === 'nao' ? 1 : '');
+
+    // Convert frequency word to code
+    const freq = Object.keys(freqToWord).find(key => freqToWord[key] === freqValue);
+
+    console.log(`[DropdownFilter] Filter parameters: Classificação: ${classificacao}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Bolsa: ${bolsa}`);
+
+    const requestBody = JSON.stringify({ classificacao, subproduto, local, freq, bolsa });
+
+    // Store current filters
+    window.currentFilters = { classificacao, subproduto, local, freq, bolsa };
+
+    console.log(`[DropdownFilter] AJAX request body: ${requestBody}`);
+
+    fetch('/filter-products', {
+        method: 'POST',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        },
+        body: requestBody
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log("[DropdownFilter] Filtered products received:", data);
+        if (data && data.data && Array.isArray(data.data)) {
+            if (data.data.length === 0) {
+                // No matches found, load all products and show alert
+                window.loadProducts();
+                alert("No matches found with the current filters. Displaying all records.");
+            } else {
+                window.populateProductsTable(data.data);
+            }
+        } else {
+            console.error("[DropdownFilter] No products received or invalid data format after filter update", data);
+        }
+    })
+    .catch(error => {
+        console.error("[DropdownFilter] Filter products API Error:", error);
+    });
+}
+// Setting up event listeners for each filter
+document.addEventListener('DOMContentLoaded', function () {
+    const filters = ['classificacao-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
+    filters.forEach(filterId => {
+        const filterElement = document.getElementById(filterId);
+        if (filterElement) {
+            filterElement.addEventListener('change', () => {
+                console.log(`[DropdownFilter] Filter changed: ${filterId}`);
+                updateFilters();
+            });
+            console.log(`[DropdownFilter] Event listener added for: ${filterId}`);
+        } else {
+            console.error(`[DropdownFilter] Filter element not found: ${filterId}`);
+        }
+    });
+});
+
+```
 ## app/Http/Controllers/DataSeriesController.php
 ```
 <?php
@@ -1039,58 +1118,6 @@ class DataSeriesController extends Controller
       $dataSeries = DataSeries::where('extended_product_list_id', $productId)->paginate($perPage);
       Log::info('Paginated DataSeries Retrieved');
       return response()->json($dataSeries);
-   }
-}
-
-```
-## app/Http/Controllers/DownloadController.php
-```
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\ExtendedProductList;
-use Illuminate\Support\Facades\Log;
-use PDF;
-
-class DownloadController extends Controller
-{
-   public function downloadCSV()
-   {
-      Log::info('DownloadController: downloadCSV method called');
-      $headers = array(
-          "Content-type" => "text/csv",
-          "Content-Disposition" => "attachment; filename=file.csv",
-          "Pragma" => "no-cache",
-          "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-          "Expires" => "0"
-      );
-
-      $products = ExtendedProductList::all()->toArray();
-      $file_name = 'products.csv';
-      $file_path = public_path($file_name);
-
-      Log::info('Creating CSV file for download');
-      $file_open = fopen($file_path, 'w');
-      $content = array_keys($products[0]);
-      fputcsv($file_open, $content);
-      foreach ($products as $product) {
-          fputcsv($file_open, $product);
-      }
-      fclose($file_open);
-
-      Log::info('CSV file created and ready for download');
-      return response()->download($file_path, $file_name, $headers);
-   }
-
-   public function downloadPDF()
-   {
-      Log::info('DownloadController: downloadPDF method called');
-      $products = ExtendedProductList::all();
-      Log::info('Creating PDF file for download');
-      $pdf = PDF::loadView('products.pdf', compact('products'));
-      return $pdf->download('products.pdf');
    }
 }
 

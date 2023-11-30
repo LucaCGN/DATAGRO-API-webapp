@@ -1,0 +1,6 @@
+
+
+Download PDF.
+
+Not working, but we can complete refactor the logic, here we want to simply get a "save as pdf" page and set a download request as we are doing with the product table.
+

@@ -37,8 +37,6 @@ window.populateDropdowns = function(data) {
 };
 
 // Function to handle filter changes and fetch filtered products
-
-// Function to handle filter changes and fetch filtered products
 function updateFilters() {
     console.log("[DropdownFilter] Updating filters");
 
@@ -57,7 +55,11 @@ function updateFilters() {
 
     console.log(`[DropdownFilter] Filter parameters: Classificação: ${classificacao}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Bolsa: ${bolsa}`);
 
-    const requestBody = JSON.stringify({ classificacao, subproduto, local, freq, bolsa }); // Use 'bolsa' instead of 'proprietario'
+    const requestBody = JSON.stringify({ classificacao, subproduto, local, freq, bolsa });
+
+    // Store current filters
+    window.currentFilters = { classificacao, subproduto, local, freq, bolsa };
+
     console.log(`[DropdownFilter] AJAX request body: ${requestBody}`);
 
     fetch('/filter-products', {
@@ -78,7 +80,19 @@ function updateFilters() {
     .then(data => {
         console.log("[DropdownFilter] Filtered products received:", data);
         if (data && data.data && Array.isArray(data.data)) {
-            window.populateProductsTable(data.data);
+            if (data.data.length === 0) {
+                // No matches found, alert and show all products
+                alert("No matches found with the current filters. Displaying all records.");
+
+                    // After confirming no matches found and showing the alert
+                    if (data.data.length === 0) {
+                        window.currentFilters = {};
+                        window.loadProducts();
+                    }
+                window.populateProductsTable([], true); // Pass a flag for no matches
+            } else {
+                window.populateProductsTable(data.data);
+            }
         } else {
             console.error("[DropdownFilter] No products received or invalid data format after filter update", data);
         }

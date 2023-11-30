@@ -1,0 +1,5 @@
+Daily Routines on 5 am:
+
+app\Console\Commands\FetchDatagroData.php this needs to run every 24 hours at 5 am. 
+
+storage\logs\laravel.log this need to be cleaned of its contents every 24 hours at 5 am

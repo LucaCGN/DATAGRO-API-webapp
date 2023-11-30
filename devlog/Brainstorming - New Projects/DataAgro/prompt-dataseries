@@ -1,0 +1,49 @@
+CURRENT FUNCTIONALITY WE MUST CODE:
+
+- On select, we must retrieve all rows from the dataseries model where the selected row 'Código_Produto' is = to 'cod' on the data series table.
+Then, we must display this fetched rows in the currently table that is positioned bellow the product  table.
+Changing the selected row must dinamically change the loaded table.
+
+
+
+CURRENT FRONTEND LOGS:
+
+[dropdown-filter.blade.php] Dropdown filter view loaded 127.0.0.1:8000:44:17
+[data-series-table.blade.php] Data series table view loaded 127.0.0.1:8000:90:17
+[download-buttons.blade.php] Download buttons view loaded 127.0.0.1:8000:96:17
+[app.blade.php] Main application view loaded 127.0.0.1:8000:117:19
+ProductsTable.js loaded ProductsTable.js:3:9
+Fetching products for page: 1 with filters 
+Object {  }
+ProductsTable.js:11:13
+Fetching products for page: 1 with filters 
+Object {  }
+ProductsTable.js:11:13
+[ProductsTable] Setting up dropdown filters ProductsTable.js:125:13
+[DropdownFilter] Event listener added for: classificacao-select DropdownFilter.js:114:21
+[DropdownFilter] Event listener added for: subproduto-select DropdownFilter.js:114:21
+[DropdownFilter] Event listener added for: local-select DropdownFilter.js:114:21
+[DropdownFilter] Event listener added for: freq-select DropdownFilter.js:114:21
+[DropdownFilter] Event listener added for: proprietario-select DropdownFilter.js:114:21
+[DownloadButtons] Setting up event listeners for download buttons DownloadButtons.js:14:13
+[ProductsTable] populateProductsTable called with products: 
+Array(10) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+ProductsTable.js:64:13
+[ProductsTable] populateProductsTable called with products: 
+Array(10) [ {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…} ]
+ProductsTable.js:64:13
+[DropdownFilter] Populating dropdowns with products data DropdownFilter.js:13:13
+[DropdownFilter] Dropdown populated: classificacao-select DropdownFilter.js:32:21
+[DropdownFilter] Dropdown populated: subproduto-select DropdownFilter.js:32:21
+[DropdownFilter] Dropdown populated: local-select DropdownFilter.js:32:21
+[DropdownFilter] Dropdown populated: freq-select DropdownFilter.js:32:21
+[DropdownFilter] Dropdown populated: proprietario-select DropdownFilter.js:32:21
+[ProductsTable] Dropdowns populated with server data ProductsTable.js:136:17
+Uncaught ReferenceError: selectProduct is not defined
+    onchange http://127.0.0.1:8000/:1
+127.0.0.1:8000:1:1
+
+
+CURRENT BACKEND LOGS:
+
+No logs, last recorded logs are the popualtion of the dropdown filters.

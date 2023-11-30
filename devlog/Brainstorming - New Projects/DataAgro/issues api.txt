@@ -1,0 +1,31 @@
+ISSUE 1:
+
+1. **Base URL**: `https://precos.api.datagro.com/base/`
+2. **Products**: `https://precos.api.datagro.com/base/?raiz=produtos`
+3. **Series**: `https://precos.api.datagro.com/base/?raiz=series`
+4. **Exchanges**: `https://precos.api.datagro.com/base/?raiz=bolsas`
+
+These are the only 4 working endpoints for the Base primitive.
+
+
+ISSUE 2:
+
+The Python script was executed to test different format types for fetching data from the Datagro API. Here are the results:
+
+1. **Format 'j' (JSON)**: 
+   - **Result**: Success
+   - **Data Sample**: Data was successfully fetched and parsed. A sample of the data includes fields like `cod`, `bolsa`, `roda`, `fonte`, `subproduto`, `nome`, `longo`, `descr`, `habilitado`, and others.
+
+2. **Formats 'cjs', 'g', 'c', 'x', 'js'**:
+   - **Result**: Failure for all these formats
+   - **Observation**: No data was returned for these formats, indicating either these formats are not supported or there is an issue with the API's handling of these formats.
+
+Based on these results, it appears that the API is currently only able to return data in the JSON format ('j'). For other formats, either the API does not support them, or additional configuration might be required to fetch data in those formats. If you require data in a specific format other than JSON, it may be necessary to convert the JSON data post-fetch or to consult the API documentation for further guidance on supported formats.
+
+ISSUE 3:
+
+D_COPR_PAV_BR	Milho	Corn Grain
+D_SBFW_XAP_BR	Soja	Soybean Grain
+D_SBPR_XAP_BR	Soja	Soybean Grain
+
+These 3 product codes were not found in the database through the API  cad primitive request

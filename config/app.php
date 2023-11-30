@@ -5,6 +5,10 @@ use Illuminate\Support\ServiceProvider;
 
 return [
 
+    'login' => env('APP_LOGIN', 'Markets'),
+    'password' => env('APP_PASSWORD', 'api@2023v0'),
+
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
