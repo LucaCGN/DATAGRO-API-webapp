@@ -2,10 +2,8 @@
 
 console.log('ProductsTable.js loaded');
 
-// Variable to keep track of the currently selected product code
 let selectedProductCode = null;
 
-// Attaching loadProducts to window to make it globally accessible
 window.loadProducts = function(page = 1) {
     console.log(`Fetching products for page: ${page}`);
     fetch(`/products?page=${page}`)
@@ -13,52 +11,46 @@ window.loadProducts = function(page = 1) {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            console.log('Products fetched successfully');
             return response.json();
         })
         .then(response => {
             window.currentPage = response.current_page;
             window.totalPages = response.last_page;
-            console.log(`Current page: ${window.currentPage}, Total pages: ${window.totalPages}`);
             populateProductsTable(response.data);
             renderPagination();
         })
         .catch(error => {
-            console.error("Failed to load pwroducts", error);
+            console.error("Failed to load products", error);
         });
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    console.log('DOM fully loaded and parsed');
     window.loadProducts();
 });
 
 function populateProductsTable(products) {
-    console.log('Populating products table with products:', products);
     let tableBody = document.getElementById('products-table-body');
     if (!tableBody) {
         console.error("Table body not found");
         return;
     }
+
     tableBody.innerHTML = products.map(product => `
         <tr>
-            <td><input type="radio" name="productSelect" value="${product.Código_Produto}" ${selectedProductCode === product.Código_Produto ? 'checked' : ''} onchange="selectProduct('${product.Código_Produto}')"></td>
-            <td>${product.Código_Produto}</td>
-            <td>${product.descr}</td>
-            <td>${product.inserido}</td>
+            <td><input type="radio" name="productSelect" value="${product.Classificação}" onchange="selectProduct('${product.Classificação}')"></td>
+            <td>${product.Classificação}</td>
+            <td>${product.longo}</td>
+            <td>${product.freq}</td>
             <td>${product.alterado}</td>
         </tr>
     `).join('');
 }
 
 function selectProduct(productCode) {
-    console.log(`Product selected: ${productCode}`);
     selectedProductCode = productCode;
-    console.log("Product selection updated to:", selectedProductCode);
 }
 
 function renderPagination() {
-    console.log('Rendering pagination controls');
     const paginationDiv = document.getElementById('products-pagination');
     if (!paginationDiv) {
         console.error("Pagination div not found");
@@ -75,8 +67,8 @@ function renderPagination() {
     }
 
     paginationDiv.innerHTML = html;
-    console.log("Pagination rendered with HTML:", html);
 }
+
 
 // Add logic for integrating with dropdown filters
 function setupDropdownFilters() {
@@ -86,12 +78,11 @@ function setupDropdownFilters() {
     fetch('/api/get-dropdown-data')
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP error while fetching dropdown data! Status: ${response.status}`);
+                throw new Error(`HTTP error while fetching dropdown data! Status: ${response.status}`); // Corrected this line
             }
             return response.json();
         })
         .then(data => {
-            // Assuming populateDropdowns is a global function from DropdownFilter.js
             populateDropdowns(data);
             console.log("[ProductsTable] Dropdowns populated with server data");
         })
@@ -100,7 +91,6 @@ function setupDropdownFilters() {
         });
 }
 
-// Ensure this is called after the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DOM fully loaded and parsed');
     window.loadProducts();

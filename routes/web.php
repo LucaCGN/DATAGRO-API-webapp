@@ -4,10 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\DataSeriesController;
 use App\Http\Controllers\DownloadController;
-use Illuminate\Support\Facades\Log;
-use App\Models\ExtendedProductList;
-use App\Models\DataSeries;
 use App\Http\Controllers\FilterController;
+use App\Models\ExtendedProductList;
 
 Route::get('/', function () {
     $products = ExtendedProductList::all();
@@ -16,6 +14,7 @@ Route::get('/', function () {
 
 // Products related routes
 Route::get('/products', [ProductController::class, 'index']);
+Route::post('/filter-products', [ProductController::class, 'index']); // Use index method for filtering
 Route::get('/products/{page}/{perPage}', [ProductController::class, 'paginate']);
 
 // Data Series related routes
@@ -35,5 +34,3 @@ Route::get('/csrf-token', function() {
 // New route for fetching dropdown data
 Route::get('/api/get-dropdown-data', [FilterController::class, 'getDropdownData']);
 
-// Filter products
-Route::post('/filter-products', [ProductController::class, 'filter']); // Changed to POST

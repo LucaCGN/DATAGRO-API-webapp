@@ -37,19 +37,28 @@ window.populateDropdowns = function(data) {
 };
 
 // Function to handle filter changes and fetch filtered products
+
+// Function to handle filter changes and fetch filtered products
 function updateFilters() {
     console.log("[DropdownFilter] Updating filters");
 
+    // Existing filter values retrieval
     const classificacao = document.getElementById('classificacao-select').value;
     const subproduto = document.getElementById('subproduto-select').value;
     const local = document.getElementById('local-select').value;
     const freqValue = document.getElementById('freq-select').value;
-    const proprietario = document.getElementById('proprietario-select').value;
 
-    // Find the key for the selected frequency word
+    // Convert 'Proprietário' back to 'bolsa' value
+    const proprietarioValue = document.getElementById('proprietario-select').value;
+    const bolsa = proprietarioValue === 'sim' ? 2 : (proprietarioValue === 'nao' ? 1 : '');
+
+    // Convert frequency word to code
     const freq = Object.keys(freqToWord).find(key => freqToWord[key] === freqValue);
 
-    console.log(`[DropdownFilter] Filter parameters: Classificação: ${classificacao}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Proprietário: ${proprietario}`);
+    console.log(`[DropdownFilter] Filter parameters: Classificação: ${classificacao}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Bolsa: ${bolsa}`);
+
+    const requestBody = JSON.stringify({ classificacao, subproduto, local, freq, bolsa }); // Use 'bolsa' instead of 'proprietario'
+    console.log(`[DropdownFilter] AJAX request body: ${requestBody}`);
 
     fetch('/filter-products', {
         method: 'POST',
@@ -58,7 +67,7 @@ function updateFilters() {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         },
-        body: JSON.stringify({ classificacao, subproduto, local, freq, proprietario })
+        body: requestBody
     })
     .then(response => {
         if (!response.ok) {

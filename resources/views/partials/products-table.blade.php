@@ -3,11 +3,11 @@
     <table>
         <thead>
             <tr>
-                <th>Select</th>
-                <th>Código_Produto</th>
-                <th>Descr</th>
-                <th>Data Inserido</th>
-                <th>Data Alterado</th>
+                <th> [Carregar Data Series] </th>
+                <th>Produto  ('Classificação')  </th>
+                <th>Nome ('longo')  </th>
+                <th>Frequência</th>
+                <th>Primeira Data</th>
             </tr>
         </thead>
         <tbody id="products-table-body">
