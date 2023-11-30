@@ -72,19 +72,10 @@ file_groups = {
         'public/js/DropdownFilter.js',
         'app/Models/ExtendedProductList.php',
         'resources/views/partials/dropdown-filter.blade.php',
-        'app/Http/Controllers/FilterController.php'
+        'app\Http\Controllers\FilterController.php'
     ],
     'all': file_paths  # The 'all' group contains all the files
 }
-
-# Function to display the file groups
-def display_file_groups():
-    print("File Groups:")
-    for i, group in enumerate(file_groups.keys(), start=1):
-        print(f"({i}) - {group.capitalize()}")
-
-# Call the function before asking for user input
-display_file_groups()
 
 # Ask the user which group to process
 group_names = input("Which group(s) do you want to process? Separate multiple groups with ';': ")
