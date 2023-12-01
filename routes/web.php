@@ -24,8 +24,8 @@ Route::get('/data-series/{productId}', [DataSeriesController::class, 'show']);
 Route::get('/data-series/{productId}/{page}/{perPage}', [DataSeriesController::class, 'paginate']);
 
 // Download routes
-Route::get('/download/csv', [DownloadController::class, 'downloadCSV']);
-Route::get('/download/pdf', [DownloadController::class, 'downloadPDF']);
+Route::post('/download/visible-csv', [DownloadController::class, 'downloadVisibleCSV']);
+
 
 // CSRF token generation
 Route::get('/csrf-token', function() {

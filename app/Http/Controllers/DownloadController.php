@@ -9,40 +9,59 @@ use PDF;
 
 class DownloadController extends Controller
 {
-   public function downloadCSV()
-   {
-      Log::info('DownloadController: downloadCSV method called');
-      $headers = array(
-          "Content-type" => "text/csv",
-          "Content-Disposition" => "attachment; filename=file.csv",
-          "Pragma" => "no-cache",
-          "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
-          "Expires" => "0"
-      );
+    public function downloadVisibleCSV(Request $request)
+    {
+        Log::info('DownloadController: downloadVisibleCSV method called');
 
-      $products = ExtendedProductList::all()->toArray();
-      $file_name = 'products.csv';
-      $file_path = public_path($file_name);
+        // Decode the JSON data received from the frontend
+        $data = json_decode($request->getContent(), true);
+        $products = $data['products'];
+        $dataSeries = $data['dataSeries'];
 
-      Log::info('Creating CSV file for download');
-      $file_open = fopen($file_path, 'w');
-      $content = array_keys($products[0]);
-      fputcsv($file_open, $content);
-      foreach ($products as $product) {
-          fputcsv($file_open, $product);
-      }
-      fclose($file_open);
+        // Create a CSV file in memory
+        $file = fopen('php://temp', 'w+');
 
-      Log::info('CSV file created and ready for download');
-      return response()->download($file_path, $file_name, $headers);
-   }
+        // Set the headers for proper UTF-8 encoding
+        fputs($file, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
 
-   public function downloadPDF()
-   {
-      Log::info('DownloadController: downloadPDF method called');
-      $products = ExtendedProductList::all();
-      Log::info('Creating PDF file for download');
-      $pdf = PDF::loadView('products.pdf', compact('products'));
-      return $pdf->download('products.pdf');
-   }
+        // Manually add headers for the products table
+        $productHeaders = ['Produto', 'Nome', 'Frequência', 'Primeira Data'];
+        fputcsv($file, $productHeaders);
+
+        // Add product rows
+        foreach ($products as $product) {
+            fputcsv($file, $product);
+        }
+
+        // Add a separator line and a blank line for spacing
+        fputcsv($file, array_fill(0, count($productHeaders), ''));
+        fputcsv($file, array_fill(0, count($productHeaders), ''));
+
+        // Manually add headers for the data series table
+        $dataSeriesHeaders = ['Cod', 'data', 'ult', 'mini', 'maxi', 'abe', 'volumes', 'med', 'aju'];
+        fputcsv($file, $dataSeriesHeaders);
+
+        // Add data series rows
+        foreach ($dataSeries as $series) {
+            fputcsv($file, $series);
+        }
+
+        // Reset the file pointer to the start
+        rewind($file);
+
+        // Build the CSV from the file pointer
+        $csv = stream_get_contents($file);
+        fclose($file);
+
+        // Create a response and add headers for file download
+        $response = response($csv)
+            ->header('Content-Type', 'text/csv; charset=UTF-8')
+            ->header('Content-Disposition', 'attachment; filename="api-preview-data.csv"')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+
+        return $response;
+    }
+
+
 }
