@@ -1,4 +1,3 @@
-<!-- Products Table -->
 <div class="responsive-table animated" id="products-table">
     <table>
         <thead>
@@ -18,4 +17,3 @@
 <div id="products-pagination" class="pagination-controls">
     <!-- Pagination Controls populated by ProductsTable.js -->
 </div>
-

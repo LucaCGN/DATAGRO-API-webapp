@@ -1,4 +1,3 @@
-<!-- Data Series Table -->
 <div class="responsive-table animated" id="data-series-table">
     <table>
         <thead>

@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Markets Team Data Tools</title>
-  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+  <link href="{{ asset('css/login.css') }}" rel="stylesheet"> <!-- Link to the new login.css -->
 </head>
-<body>
-  <header>
+<body class="login-page">
+  <header class="login-header">
     <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo">
     <h2>Markets Team Data Tools</h2>
   </header>
@@ -24,9 +24,7 @@
               <label for="password">Password:</label>
               <input type="password" name="password" id="password" required>
           </div>
-          <div>
-              <button type="submit" class="button">Login</button>
-          </div>
+          <button type="submit" class="button login-button">Login</button> <!-- Modified class name -->
           @if ($errors->any())
               <div class="error-messages">
                   <ul>
@@ -40,7 +38,7 @@
     </div>
   </main>
 
-  <footer>
+  <footer class="login-footer"> <!-- Modified class name -->
     <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets Logo">
     <div>
       <h2>DATAGRO LINKS</h2>

@@ -1,28 +1,35 @@
-<!DOCTYPE html>
-<div class="animated" id="dropdown-filter">
-    <div class="animated" id="dropdown-filter" style="display: flex; flex-direction: column;">
+<div class="animated filters-container">
+    <div class="filter-group">
         <label for="classificacao-select">Classificação</label>
-        <select class="button" id="classificacao-select">
+        <select id="classificacao-select">
             <!-- Options will be populated via JavaScript -->
         </select>
+    </div>
 
+    <div class="filter-group">
         <label for="subproduto-select">Subproduto</label>
-        <select class="button" id="subproduto-select">
+        <select id="subproduto-select">
             <!-- Options will be populated via JavaScript -->
         </select>
+    </div>
 
+    <div class="filter-group">
         <label for="local-select">Local</label>
-        <select class="button" id="local-select">
+        <select id="local-select">
             <!-- Options will be populated via JavaScript -->
         </select>
+    </div>
 
+    <div class="filter-group">
         <label for="freq-select">Frequência</label>
-        <select class="button" id="freq-select">
+        <select id="freq-select">
             <!-- Options will be populated via JavaScript -->
         </select>
+    </div>
 
+    <div class="filter-group">
         <label for="proprietario-select">Proprietário</label>
-        <select class="button" id="proprietario-select">
+        <select id="proprietario-select">
             <!-- Options will be populated via JavaScript -->
         </select>
     </div>

@@ -1,0 +1,84 @@
+/* login.css - specific styles for the login page to match the main application's design */
+
+.login-page {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8; /* Light grey background to match the main app */
+    color: #4f4f4f; /* Dark grey for text */
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribute space between header, main and footer */
+}
+
+.login-header, .login-footer {
+    background-color: #fff; /* White background */
+    padding: 10px 20px; /* Padding for larger screens */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    text-align: center; /* Center text for smaller screens */
+}
+
+.login-container {
+    flex-grow: 1; /* Flex grow to take available space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+}
+
+.login-box {
+    background-color: #fff; /* White background */
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    width: 100%;
+    max-width: 320px; /* Max width for the box */
+}
+
+.input-group label, .input-group input {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px; /* Space between the inputs */
+}
+
+.input-group input {
+    padding: 10px;
+    border: 1px solid #ddd; /* Light border color */
+    border-radius: 5px; /* Rounded borders for inputs */
+}
+
+.button.login-button {
+    width: 100%; /* Full width button */
+    padding: 10px; /* Padding for the button */
+    margin-top: 20px; /* Space from the last input group */
+}
+
+.error-messages ul {
+    list-style-type: none;
+    color: red;
+    padding: 0;
+    margin-top: 10px;
+}
+
+/* Footer links style */
+.login-footer ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.login-footer ul li a {
+    color: #8dbf42; /* Green color to match the main app */
+    text-decoration: none;
+}
+
+.login-footer ul li a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+@media screen and (max-width: 600px) {
+    .login-header, .login-footer {
+        padding: 10px; /* Smaller padding on smaller screens */
+    }
+}
