@@ -178,3 +178,29 @@ footer {
         margin-bottom: 10px; /* Space between stacked buttons */
     }
 }
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns items to the left */
+}
+
+.tables-container {
+    width: 100%; /* Ensures the container takes full width */
+}
+
+/* Ensure filters and buttons are in a flex container if they need to be horizontal */
+.filters-container,
+.download-buttons-container {
+    display: flex;
+    justify-content: flex-start; /* Aligns items to the left */
+    gap: 10px; /* Provides a gap between items */
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 600px) {
+    .filters-container,
+    .download-buttons-container {
+        flex-direction: column;
+    }
+}

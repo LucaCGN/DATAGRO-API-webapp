@@ -8,23 +8,22 @@
   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-    <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+    <header style="display: flex; justify-content: center; align-items: center; padding: 10px;">
         <h1>API Mercado Físico - SALES TOOL</h1>
         <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
     </header>
 
-    <main>
-        <div class="content">
-            @include('partials.dropdown-filter')
-            <div class="tables-container">
-                @include('partials.products-table', ['products' => $products])
-                @include('partials.data-series-table')
-            </div>
+    <main class="main-content">
+        @include('partials.dropdown-filter') <!-- Ensure this partial does not contain conflicting styles -->
+        <div class="tables-container">
+            @include('partials.products-table', ['products' => $products])
+            @include('partials.data-series-table')
         </div>
         @include('partials.download-buttons')
     </main>
 
-  <footer style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+
+  <footer style="display: flex; justify-content: center; align-items: center; padding: 10px;">
     <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets" style="height: 50px;">
     <div>
         <h2>DATAGRO LINKS</h2>

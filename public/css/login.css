@@ -14,6 +14,8 @@
     background-color: #fff; /* White background */
     padding: 10px 20px; /* Padding for larger screens */
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    display: flex; /* Use flexbox for alignment */
+    justify-content: center; /* Center items horizontally */
     text-align: center; /* Center text for smaller screens */
 }
 
@@ -37,14 +39,10 @@
 .input-group label, .input-group input {
     display: block;
     width: 100%;
+    text-align: center;
     margin-bottom: 10px; /* Space between the inputs */
 }
 
-.input-group input {
-    padding: 10px;
-    border: 1px solid #ddd; /* Light border color */
-    border-radius: 5px; /* Rounded borders for inputs */
-}
 
 .button.login-button {
     width: 100%; /* Full width button */

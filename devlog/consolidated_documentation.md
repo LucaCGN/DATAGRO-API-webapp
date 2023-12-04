@@ -1,505 +1,430 @@
-## app/Http/Controllers/ProductController.php
+## resources/views/partials/data-series-table.blade.php
 ```
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\ExtendedProductList;
-use Illuminate\Support\Facades\Log;
-
-class ProductController extends Controller
-{
-    public function index(Request $request)
-    {
-        Log::info('ProductController: index method called', $request->all());
-        $perPage = 10;
-
-        try {
-            $query = ExtendedProductList::query();
-
-            // Dynamically apply filters if provided in the request, skip if null
-            $filters = $request->only(['classificacao', 'subproduto', 'local', 'freq', 'bolsa']);
-            foreach ($filters as $key => $value) {
-                if (!is_null($value) && $value !== '') {
-                    $query->where($key, $value);
-                }
-            }
-
-            // Paginate the query result
-            $products = $query->paginate($perPage, ['*'], 'page', $request->get('page', 1));
-
-            Log::info('Products fetched successfully', ['count' => $products->count()]);
-            return response()->json($products);
-        } catch (\Exception $e) {
-            Log::error('Error fetching products', ['message' => $e->getMessage()]);
-            return response()->json(['error' => 'Error fetching products'], 500);
-        }
-    }
-}
-
-```
-## routes/web.php
-```
-<?php
-
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\DataSeriesController;
-use App\Http\Controllers\DownloadController;
-use App\Http\Controllers\FilterController;
-use App\Http\Controllers\LoginController;
-use App\Models\ExtendedProductList;
-
-Route::get('/', function () {
-    $products = ExtendedProductList::all();
-    return view('app', compact('products'));
-})->middleware('auth');
-
-// Products related routes
-Route::get('/products', [ProductController::class, 'index']); // For initial load and pagination without filters
-
-// Updated route for filtered products, only POST requests
-Route::post('/api/filter-products', [ProductController::class, 'index']);
-
-// Data Series related routes
-Route::get('/data-series/{productId}', [DataSeriesController::class, 'show']);
-Route::get('/data-series/{productId}/{page}/{perPage}', [DataSeriesController::class, 'paginate']);
-
-// Download routes
-Route::post('/download/visible-csv', [DownloadController::class, 'downloadVisibleCSV']);
-
-// CSRF token generation
-Route::get('/csrf-token', function() {
-    return csrf_token();
-});
-
-// New route for initial filter data
-Route::get('/api/filters', [FilterController::class, 'getInitialFilterData']);
-
-// New route for updated filter options based on selections
-Route::post('/api/filters/updated', [FilterController::class, 'getUpdatedFilterOptions']);
-
-// Login Route
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-
-```
-## public/js/DropdownFilter.js
-```
-// DropdownFilter.js
-
-// Convert frequency codes to full words at the top level so it's accessible by all functions
-const freqToWord = {
-    'D': 'Diário',
-    'W': 'Semanal',
-    'M': 'Mensal',
-    'A': 'Anual'
-};
-
-// Function to dynamically populate dropdowns with null selection
-window.populateDropdowns = function(data) {
-    console.log("[DropdownFilter] Populating dropdowns with products data", JSON.stringify(data, null, 2));
-
-    const nullOptionHTML = '<option value="">Select...</option>';
-    const dropdowns = {
-        'classificacao-select': [nullOptionHTML].concat(data.classificacao),
-        'subproduto-select': [nullOptionHTML].concat(data.subproduto),
-        'local-select': [nullOptionHTML].concat(data.local),
-        'freq-select': [nullOptionHTML].concat(data.freq.map(code => freqToWord[code] || code)),
-        'proprietario-select': [nullOptionHTML].concat(data.proprietario.map(item => item === 2 ? 'Sim' : 'Não'))
-    };
-
-    Object.entries(dropdowns).forEach(([dropdownId, values]) => {
-        const dropdown = document.getElementById(dropdownId);
-        if (dropdown) {
-            console.log(`[DropdownFilter] Processing Dropdown: ${dropdownId}`);
-            const html = values.map(value => `<option value="${value}">${value}</option>`).join('');
-            dropdown.innerHTML = html;
-            console.log(`[DropdownFilter] Dropdown populated: ${dropdownId} with values:`, values);
-        } else {
-            console.error(`[DropdownFilter] Dropdown not found: ${dropdownId}`);
-        }
-    });
-};
-
-
-// Function to handle filter changes and fetch filtered products
-window.updateFilters = async function() {
-    console.log("[DropdownFilter] Starting filter update process");
-
-    const classificacao = document.getElementById('classificacao-select').value || null;
-    const subproduto = document.getElementById('subproduto-select').value || null;
-    const local = document.getElementById('local-select').value || null;
-    const freqValue = document.getElementById('freq-select').value || null;
-    const proprietarioValue = document.getElementById('proprietario-select').value || null;
-
-    console.log("[DropdownFilter] Current filter values:", {
-        classificacao,
-        subproduto,
-        local,
-        freqValue,
-        proprietarioValue
-    });
-
-    const bolsa = proprietarioValue === 'Sim' ? 2 : (proprietarioValue === 'Não' ? 1 : null);
-    const freq = freqValue ? Object.keys(freqToWord).find(key => freqToWord[key] === freqValue) : null;
-
-    const filterValues = { classificacao, subproduto, local, freq, bolsa };
-
-    console.log("[DropdownFilter] Filters to be applied:", filterValues);
-
-    Object.keys(filterValues).forEach(key => filterValues[key] == null && delete filterValues[key]);
-
-    console.log("[DropdownFilter] Filter values after removing nulls:", filterValues);
-
-    window.currentFilters = filterValues;
-
-    console.log("[DropdownFilter] Stored current filters:", window.currentFilters);
-
-    try {
-        console.log("[DropdownFilter] Sending request to filter products with filters:", filterValues);
-
-        const response = await fetch('/api/filter-products', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(filterValues)
-        });
-
-        console.log("[DropdownFilter] Received response status:", response.status);
-
-        if (!response.ok) {
-            console.error(`[DropdownFilter] HTTP error! status: ${response.status}`);
-            return;
-        }
-
-        const data = await response.json();
-        console.log("[DropdownFilter] Filtered products received:", JSON.stringify(data, null, 2));
-        await window.populateProductsTable(data.data);
-    } catch (error) {
-        console.error("[DropdownFilter] Filter products API Error:", error);
-    }
-};
-
-
-// Event listeners for each filter dropdown
-document.addEventListener('DOMContentLoaded', function () {
-    const filters = ['classificacao-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
-    filters.forEach(filterId => {
-        const filterElement = document.getElementById(filterId);
-        if (filterElement) {
-            filterElement.addEventListener('change', window.updateFilters);
-            console.log(`[DropdownFilter] Event listener added for: ${filterId}`);
-        } else {
-            console.error(`[DropdownFilter] Filter element not found: ${filterId}`);
-        }
-    });
-});
-
-```
-## app/Http/Controllers/FilterController.php
-```
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\ExtendedProductList;
-use Illuminate\Support\Facades\Log;
-
-class FilterController extends Controller
-{
-    public function getInitialFilterData()
-    {
-        Log::info('[FilterController] Fetching initial filter data');
-        try {
-            $classificacao = ExtendedProductList::distinct()->pluck('Classificação');
-            $subproduto = ExtendedProductList::distinct()->pluck('Subproduto');
-            $local = ExtendedProductList::distinct()->pluck('Local');
-            $freq = ExtendedProductList::distinct()->pluck('freq');
-            $bolsa = ExtendedProductList::distinct()->pluck('bolsa');
-
-            $proprietario = $bolsa->map(function ($item) {
-                return $item == 2 ? 'Sim' : 'Não';
-            })->unique()->values();
-
-            Log::info('[FilterController] Filter data fetched successfully', [
-                'classificacao' => $classificacao,
-                'subproduto' => $subproduto,
-                'local' => $local,
-                'freq' => $freq,
-                'proprietario' => $proprietario,
-            ]);
-
-            return response()->json([
-                'classificacao' => $classificacao,
-                'subproduto' => $subproduto,
-                'local' => $local,
-                'freq' => $freq,
-                'proprietario' => $proprietario,
-            ]);
-        } catch (\Exception $e) {
-            Log::error('[FilterController] Error fetching initial filter data: ' . $e’sgetMessage());
-            return response()->json(['error' => 'Error fetching initial filter data'], 500);
-        }
-    }
-
-    public function getDropdownData(Request $request)
-    {
-        Log::info('[FilterController] Fetching dropdown data');
-        try {
-            $query = ExtendedProductList::query();
-
-            // Apply the filters if any are provided in the request
-            foreach ($request->all() as $key => $value) {
-                if (!empty($value)) {
-                    $query->where($key, $value);
-                }
-            }
-
-            // Fetch the data for dropdowns applying distinct to avoid duplicates
-            $classificacao = $query->distinct()->pluck('Classificação');
-            $subproduto = $query->distinct()->pluck('Subproduto');
-            $local = $query->distinct()->pluck('Local');
-            $freq = $query->distinct()->pluck('freq');
-            $proprietario = $query->distinct()->pluck('bolsa');
-
-            return response()->json([
-                'classificacao' => $classificacao,
-                'subproduto' => $subproduto,
-                'local' => $local,
-                'freq' => $freq,
-                'proprietario' => $proprietario->mapWithKeys(function ($item) {
-                    return [$item => $item == 2 ? 'sim' : 'nao'];
-                }),
-            ]);
-        } catch (\Exception $e) {
-            Log::error('[FilterController] Error fetching dropdown data: ' . $e->getMessage());
-            return response()->json(['error' => 'Error fetching dropdown data'], 500);
-        }
-    }
-    public function getUpdatedFilterOptions(Request $request)
-    {
-        Log::info('[FilterController] Fetching updated filter options based on current selections');
-        try {
-            // Initialize the base query
-            $query = ExtendedProductList::query();
-
-            // Dynamically build the query based on provided filters, except for the one being updated
-            $filters = $request->all();
-            foreach ($filters as $key => $value) {
-                // Skip empty filters
-                if (!empty($value)) {
-                    $query->where($key, $value);
-                }
-            }
-
-            // Fetch the distinct values for each filter, excluding the keys present in the request
-            $data = [
-                'classificacao' => $request->has('classificacao') ? [] : $query->distinct()->pluck('Classificação'),
-                'subproduto' => $request->has('subproduto') ? [] : $query->distinct()->pluck('Subproduto'),
-                'local' => $request->has('local') ? [] : $query->distinct()->pluck('Local'),
-                'freq' => $request->has('freq') ? [] : $query->distinct()->pluck('freq'),
-            ];
-
-            // Special handling for 'proprietario' based on 'bolsa'
-            if (!$request->has('proprietario')) {
-                $bolsaValues = $query->distinct()->pluck('bolsa');
-                $data['proprietario'] = $bolsaValues->mapWithKeys(function ($item) {
-                    return [$item => $item == 2 ? 'Sim' : 'Não'];
-                });
-            } else {
-                $data['proprietario'] = [];
-            }
-
-            return response()->json($data);
-        } catch (\Exception $e) {
-            Log::error('[FilterController] Error fetching updated filter options: ' . $e->getMessage());
-            return response()->json(['error' => 'Error fetching updated filter options'], 500);
-        }
-    }
-
-}
-
-
-```
-## public/js/ProductsTable.js
-```
-// ProductsTable.js
-
-console.log('ProductsTable.js loaded');
-
-let selectedProductCode = null;
-window.currentFilters = {};
-window.showingAllRecords = false;
-
-// Function to load products based on the current page and filters
-window.loadProducts = async function(page = 1, filters = window.currentFilters) {
-    console.log(`Fetching products for page: ${page} with filters`, filters);
-
-    const hasFilters = Object.keys(filters).length > 0;
-    const query = new URLSearchParams({ ...filters, page }).toString();
-    const url = hasFilters ? `/api/filter-products` : `/products?page=${page}`;
-    const method = hasFilters ? 'POST' : 'GET';
-
-    const headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-    };
-
-    console.log("[ProductsTable] Sending request to:", url, " with method:", method, " and headers:", headers);
-
-    try {
-        const response = await fetch(url, {
-            method: method,
-            headers: headers,
-            body: hasFilters ? JSON.stringify(filters) : null
-        });
-
-        console.log("[ProductsTable] Response received with status:", response.status);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("[ProductsTable] Products data received:", data);
-
-        window.populateProductsTable(data.data || []);
-        window.currentPage = data.current_page;
-        window.totalPages = data.last_page;
-        window.renderPagination();
-    } catch (error) {
-        console.error("Failed to load products", error);
-        window.populateProductsTable([]); // Show empty state or handle error appropriately
-    }
-};
-
-// Populate the products table
-window.populateProductsTable = function(products) {
-    console.log("[ProductsTable] Populating products table with data:", products);
-
-    let tableBody = document.getElementById('products-table-body');
-    if (!tableBody) {
-        console.error("Table body not found");
-        return;
-    }
-
-    // Clear the table before populating new data
-    tableBody.innerHTML = '';
-
-    // Only populate if there are products
-    if (products.length > 0) {
-        tableBody.innerHTML = products.map(product => `
+<div class="responsive-table animated" id="data-series-table">
+    <table>
+        <thead>
             <tr>
-                <td><input type="radio" name="productSelect" value="${product['Código_Produto']}" onchange="selectProduct('${product['Código_Produto']}')"></td>
-                <td>${product.Classificação}</td>
-                <td>${product.longo}</td>
-                <td>${product.freq}</td>
-                <td>${product.alterado}</td>
+                <th>Cod</th>
+                <th>data</th>
+                <th>ult</th>
+                <th>mini</th>
+                <th>maxi</th>
+                <th>abe</th>
+                <th>volumes</th>
+                <th>med</th>
+                <th>aju</th>
             </tr>
-        `).join('');
-        console.log("[ProductsTable] Products table populated with products.");
-    } else {
-        // Show a message or an empty state if there are no products
-        tableBody.innerHTML = `<tr><td colspan="5">No products found.</td></tr>`;
-        console.log("[ProductsTable] No products found message displayed.");
+        </thead>
+        <tbody id="data-series-body">
+            <!-- Data populated by DataSeriesTable.js -->
+        </tbody>
+    </table>
+</div>
+<script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>
+
+
+```
+## public/css/login.css
+```
+/* login.css - specific styles for the login page to match the main application's design */
+
+.login-page {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8; /* Light grey background to match the main app */
+    color: #4f4f4f; /* Dark grey for text */
+    height: 100vh; /* Full viewport height */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Distribute space between header, main and footer */
+}
+
+.login-header, .login-footer {
+    background-color: #fff; /* White background */
+    padding: 10px 20px; /* Padding for larger screens */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+    text-align: center; /* Center text for smaller screens */
+}
+
+.login-container {
+    flex-grow: 1; /* Flex grow to take available space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center vertically */
+    align-items: center; /* Center horizontally */
+}
+
+.login-box {
+    background-color: #fff; /* White background */
+    padding: 20px;
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+    width: 100%;
+    max-width: 320px; /* Max width for the box */
+}
+
+.input-group label, .input-group input {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px; /* Space between the inputs */
+}
+
+.input-group input {
+    padding: 10px;
+    border: 1px solid #ddd; /* Light border color */
+    border-radius: 5px; /* Rounded borders for inputs */
+}
+
+.button.login-button {
+    width: 100%; /* Full width button */
+    padding: 10px; /* Padding for the button */
+    margin-top: 20px; /* Space from the last input group */
+}
+
+.error-messages ul {
+    list-style-type: none;
+    color: red;
+    padding: 0;
+    margin-top: 10px;
+}
+
+/* Footer links style */
+.login-footer ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.login-footer ul li a {
+    color: #8dbf42; /* Green color to match the main app */
+    text-decoration: none;
+}
+
+.login-footer ul li a:hover {
+    text-decoration: underline; /* Underline on hover */
+}
+
+@media screen and (max-width: 600px) {
+    .login-header, .login-footer {
+        padding: 10px; /* Smaller padding on smaller screens */
     }
-};
+}
 
-// Pagination rendering function
-window.renderPagination = function() {
-    console.log("[ProductsTable] Rendering pagination.");
+```
+## public/css/app.css
+```
+/* Main application styles */
+body {
+    font-family: Arial, sans-serif;
+    color: #4f4f4f; /* Dark grey for text */
+    background-color: #f8f8f8; /* Light grey background for a clean look */
+}
 
-    const paginationDiv = document.getElementById('products-pagination');
-    if (!paginationDiv) {
-        console.error("Pagination div not found");
-        return;
+header {
+    background-color: #fff; /* White background for header */
+    color: #4f4f4f; /* Dark grey for text */
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+main {
+    margin: 15px;
+}
+
+footer {
+    background-color: #fff; /* White background for footer */
+    color: #4f4f4f; /* Dark grey for text */
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
+.button {
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border: none; /* Removed border for a cleaner look */
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
+
+@media screen and (max-width: 600px) {
+    body {
+        font-size: 18px;
     }
 
-    let html = '';
-    if (window.currentPage > 1) {
-        html += `<button onclick="window.loadProducts(${window.currentPage - 1}, window.currentFilters)">Previous</button>`;
+    header, footer {
+        text-align: center;
+        padding: 10px 20px;
     }
 
-    html += `<span>Page ${window.currentPage} of ${window.totalPages}</span>`;
+    .responsive-table {
+        overflow-x: auto;
+    }
+}
 
-    if (window.currentPage < window.totalPages) {
-        html += `<button onclick="window.loadProducts(${window.currentPage + 1}, window.currentFilters)">Next</button>`;
+.animated {
+    animation: fadeIn 1s ease-in;
+}
+
+@keyframes fadeIn {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+}
+
+.pagination-controls {
+    text-align: center;
+    padding: 10px;
+}
+
+.pagination-controls button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
+    border: none; /* Removed border for a cleaner look */
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.pagination-controls button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
+
+/* Styles for the filters to be positioned to the left of the tables */
+.content {
+    display: flex;
+    flex-wrap: wrap; /* Ensure wrapping on smaller screens */
+}
+
+.tables-container {
+    margin-left: 20px;
+}
+
+/* Filter container and group styles */
+.filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    margin-bottom: 10px;
+}
+
+.filter-group label,
+.filter-group select {
+    width: 100%; /* Full width for mobile, adjust as needed */
+    margin-bottom: 5px; /* Vertical margin for spacing */
+}
+
+.filter-group select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #4f4f4f;
+}
+
+/* Table styles for consistency */
+.responsive-table table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.responsive-table th,
+.responsive-table td {
+    border: 1px solid #ddd; /* Light grey border */
+    padding: 8px;
+    text-align: left;
+}
+
+/* Download button container styles */
+.download-buttons-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.download-buttons-container button {
+    background-color: #8dbf42; /* Muted green */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.download-buttons-container button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
+
+@media screen and (max-width: 600px) {
+    .filters-container {
+        flex-direction: column; /* Stack filters vertically on small screens */
     }
 
-    paginationDiv.innerHTML = html;
-    console.log("[ProductsTable] Pagination rendered.");
-};
-
-// Setting up dropdown filters
-window.setupDropdownFilters = async function() {
-    console.log("[ProductsTable] Setting up dropdown filters");
-
-    try {
-        const response = await fetch('/api/filters', {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' }
-        });
-
-        console.log("[ProductsTable] Fetching filter data with response status:", response.status);
-
-        if (!response.ok) {
-            console.error(`[ProductsTable] HTTP error while fetching dropdown data! Status: ${response.status}`);
-            return;
-        }
-
-        const data = await response.json();
-        console.log("[ProductsTable] Dropdown filters set up with data:", JSON.stringify(data, null, 2));
-        window.populateDropdowns(data);
-    } catch (error) {
-        console.error("[ProductsTable] Failed to fetch dropdown data", error);
+    .filter-group {
+        width: 100%; /* Full width for filter groups on small screens */
     }
-};
 
-
-document.addEventListener('DOMContentLoaded', function () {
-    console.log("[ProductsTable] DOMContentLoaded - Starting to load products and set up filters.");
-    window.loadProducts();
-    window.setupDropdownFilters();
-});
-
-// New function to update dropdowns based on current filters
-window.updateDropdowns = async function(currentFilters) {
-    console.log("[ProductsTable] Updating dropdowns based on current filters", currentFilters);
-
-    // Remove any null or empty filter values
-    const nonNullFilters = Object.fromEntries(Object.entries(currentFilters).filter(([_, v]) => v != null));
-    console.log("[ProductsTable] Filters after removing nulls:", nonNullFilters);
-
-    try {
-        const response = await fetch('/api/filters/updated', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify(nonNullFilters)
-        });
-
-        console.log("[ProductsTable] Fetching updated dropdown data with response status:", response.status);
-
-        if (!response.ok) {
-            throw new Error(`HTTP error while fetching updated dropdown data! Status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        window.populateDropdowns(data);
-        console.log("[ProductsTable] Dropdowns updated with new data:", data);
-    } catch (error) {
-        console.error("Failed to fetch updated dropdown data", error);
+    .content,
+    .tables-container {
+        margin-left: 0;
     }
-};
+
+    .download-buttons-container {
+        flex-direction: column; /* Stack buttons vertically on small screens */
+    }
+
+    .download-buttons-container button {
+        width: 100%; /* Full width for buttons on small screens */
+        margin-bottom: 10px; /* Space between stacked buttons */
+    }
+}
+
+```
+## resources/views/partials/products-table.blade.php
+```
+<div class="responsive-table animated" id="products-table">
+    <table>
+        <thead>
+            <tr>
+                <th> [Carregar Data Series] </th>
+                <th>Produto  ('Classificação')  </th>
+                <th>Nome ('longo')  </th>
+                <th>Frequência</th>
+                <th>Primeira Data</th>
+            </tr>
+        </thead>
+        <tbody id="products-table-body">
+            <!-- Data populated by ProductsTable.js -->
+        </tbody>
+    </table>
+</div>
+<div id="products-pagination" class="pagination-controls">
+    <!-- Pagination Controls populated by ProductsTable.js -->
+</div>
+
+```
+## resources/views/partials/dropdown-filter.blade.php
+```
+<div class="animated filters-container">
+    <div class="filter-group">
+        <label for="classificacao-select">Classificação</label>
+        <select id="classificacao-select">
+            <!-- Options will be populated via JavaScript -->
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="subproduto-select">Subproduto</label>
+        <select id="subproduto-select">
+            <!-- Options will be populated via JavaScript -->
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="local-select">Local</label>
+        <select id="local-select">
+            <!-- Options will be populated via JavaScript -->
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="freq-select">Frequência</label>
+        <select id="freq-select">
+            <!-- Options will be populated via JavaScript -->
+        </select>
+    </div>
+
+    <div class="filter-group">
+        <label for="proprietario-select">Proprietário</label>
+        <select id="proprietario-select">
+            <!-- Options will be populated via JavaScript -->
+        </select>
+    </div>
+</div>
+<script>console.log('[dropdown-filter.blade.php] Dropdown filter view loaded');</script>
+
+```
+## resources/views/auth/login.blade.php
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Markets Team Data Tools</title>
+  <link href="{{ asset('css/login.css') }}" rel="stylesheet"> <!-- Link to the new login.css -->
+</head>
+<body class="login-page">
+  <header class="login-header">
+    <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo">
+    <h2>Markets Team Data Tools</h2>
+  </header>
+
+  <main class="login-container">
+    <div class="login-box">
+      <form method="POST" action="{{ route('login') }}" class="login-form">
+          @csrf
+          <div class="input-group">
+              <label for="email">Login:</label>
+              <input type="text" name="email" id="email" required autofocus>
+          </div>
+          <div class="input-group">
+              <label for="password">Password:</label>
+              <input type="password" name="password" id="password" required>
+          </div>
+          <button type="submit" class="button login-button">Login</button> <!-- Modified class name -->
+          @if ($errors->any())
+              <div class="error-messages">
+                  <ul>
+                      @foreach ($errors->all() as $error)
+                          <li>{{ $error }}</li>
+                      @endforeach
+                  </ul>
+              </div>
+          @endif
+      </form>
+    </div>
+  </main>
+
+  <footer class="login-footer"> <!-- Modified class name -->
+    <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets Logo">
+    <div>
+      <h2>DATAGRO LINKS</h2>
+      <ul>
+          <li><a href="https://www.datagro.com/en/" target="_blank">www.datagro.com</a></li>
+          <li><a href="https://portal.datagro.com/" target="_blank">portal.datagro.com</a></li>
+          <li><a href="https://www.linkedin.com/company/datagro" target="_blank">Datagro LinkedIn</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>console.log('[login.blade.php] Login view loaded');</script>
+</body>
+</html>
+
+```
+## resources/views/partials/download-buttons.blade.php
+```
+<div class="animated download-buttons-container">
+    <button id="download-csv-btn" class="button">Download CSV</button>
+    <button id="download-pdf-btn" class="button">Download PDF</button>
+</div>
+<script>console.log('[download-buttons.blade.php] Download buttons view loaded');</script>
 
 ```

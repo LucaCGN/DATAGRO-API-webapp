@@ -23,6 +23,7 @@ window.loadDataSeries = function(productCode) {
                     <td>${series.maxi}</td>
                     <td>${series.abe}</td>
                     <td>${series.volumes}</td>
+                    <td>${series.cab}</td>
                     <td>${series.med}</td>
                     <td>${series.aju}</td>
                 </tr>

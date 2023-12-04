@@ -81,8 +81,9 @@ file_groups = {
         'resources/views/partials/download-buttons.blade.php',
         'resources/views/partials/dropdown-filter.blade.php',
         'resources/views/partials/products-table.blade.php',
- #       'resources/views/auth/login.blade.php',
+        'resources/views/auth/login.blade.php',
         'public/css/app.css',
+        'public/css/login.css',
     ],
     'filter-enhancement': [
         'app/Http/Controllers/ProductController.php',
