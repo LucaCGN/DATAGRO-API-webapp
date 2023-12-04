@@ -84,7 +84,15 @@ file_groups = {
  #       'resources/views/auth/login.blade.php',
         'public/css/app.css',
     ],
-    
+    'filter-enhancement': [
+        'app/Http/Controllers/ProductController.php',
+        'app/Http/Controllers/FilterController.php',
+        'public/js/DropdownFilter.js',
+        'public/js/ProductsTable.js',
+        'routes/web.php',
+    #    'resources/views/partials/dropdown-filter.blade.php',
+    #    'resources/views/partials/products-table.blade.php',
+    ],    
     'all': file_paths  # The 'all' group contains all the files
 }
 
@@ -131,3 +139,9 @@ with open(output_md_file, 'w') as md_file:
     print("Documentation consolidation completed.")
 
 
+# php artisan cache:clear
+# php artisan route:clear
+# php artisan config:clear
+# php artisan view:clear
+# php artisan optimize
+# php artisan serv

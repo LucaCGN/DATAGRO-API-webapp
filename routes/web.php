@@ -8,16 +8,16 @@ use App\Http\Controllers\FilterController;
 use App\Http\Controllers\LoginController;
 use App\Models\ExtendedProductList;
 
-
 Route::get('/', function () {
     $products = ExtendedProductList::all();
     return view('app', compact('products'));
- })->middleware('auth');
-
+})->middleware('auth');
 
 // Products related routes
 Route::get('/products', [ProductController::class, 'index']); // For initial load and pagination without filters
-Route::match(['get', 'post'], '/filter-products', [ProductController::class, 'index']); // For filtered requests, allow both GET and POST
+
+// Updated route for filtered products, only POST requests
+Route::post('/api/filter-products', [ProductController::class, 'index']);
 
 // Data Series related routes
 Route::get('/data-series/{productId}', [DataSeriesController::class, 'show']);
@@ -26,14 +26,16 @@ Route::get('/data-series/{productId}/{page}/{perPage}', [DataSeriesController::c
 // Download routes
 Route::post('/download/visible-csv', [DownloadController::class, 'downloadVisibleCSV']);
 
-
 // CSRF token generation
 Route::get('/csrf-token', function() {
     return csrf_token();
 });
 
-// Fetching dropdown data
-Route::get('/api/get-dropdown-data', [FilterController::class, 'getDropdownData']);
+// New route for initial filter data
+Route::get('/api/filters', [FilterController::class, 'getInitialFilterData']);
+
+// New route for updated filter options based on selections
+Route::post('/api/filters/updated', [FilterController::class, 'getUpdatedFilterOptions']);
 
 // Login Route
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');

@@ -4,64 +4,54 @@ console.log('ProductsTable.js loaded');
 
 let selectedProductCode = null;
 window.currentFilters = {};
+window.showingAllRecords = false;
 
-// ProductsTable.js
-
-window.loadProducts = function(page = 1, filters = window.currentFilters) {
+// Function to load products based on the current page and filters
+window.loadProducts = async function(page = 1, filters = window.currentFilters) {
     console.log(`Fetching products for page: ${page} with filters`, filters);
 
-    const hasFilters = Object.keys(filters).some(key => filters[key]);
+    const hasFilters = Object.keys(filters).length > 0;
     const query = new URLSearchParams({ ...filters, page }).toString();
-    const url = hasFilters ? `/filter-products?${query}` : `/products?page=${page}`;
+    const url = hasFilters ? `/api/filter-products` : `/products?page=${page}`;
     const method = hasFilters ? 'POST' : 'GET';
 
-    // Define headers based on whether filters are applied
-    const headers = hasFilters ? {
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+    const headers = {
+        'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
-    } : {};
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    };
 
-    // Use the defined headers in the fetch call
-    fetch(url, {
-        method: method,
-        headers: headers,
-        body: hasFilters ? JSON.stringify(filters) : null
-    })
-    .then(response => {
+    console.log("[ProductsTable] Sending request to:", url, " with method:", method, " and headers:", headers);
+
+    try {
+        const response = await fetch(url, {
+            method: method,
+            headers: headers,
+            body: hasFilters ? JSON.stringify(filters) : null
+        });
+
+        console.log("[ProductsTable] Response received with status:", response.status);
+
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        return response.json();
-    })
-    .then(response => {
-        window.currentPage = response.current_page;
-        window.totalPages = response.last_page;
 
-        // If no matches and we're not already showing all records
-        if (hasFilters && response.data.length === 0 && !window.showingAllRecords) {
-            window.showingAllRecords = true; // Set a flag that we're now showing all records
-            alert("No matches found with the current filters. Displaying all records.");
-            window.loadProducts(); // Load all products without filters
-        } else {
-            populateProductsTable(response.data || []);
-            window.showingAllRecords = false; // Reset the flag if we are applying filters
-        }
-        renderPagination();
-    })
-    .catch(error => {
+        const data = await response.json();
+        console.log("[ProductsTable] Products data received:", data);
+
+        window.populateProductsTable(data.data || []);
+        window.currentPage = data.current_page;
+        window.totalPages = data.last_page;
+        window.renderPagination();
+    } catch (error) {
         console.error("Failed to load products", error);
-        populateProductsTable([]); // Show empty state or handle error appropriately
-    });
+        window.populateProductsTable([]); // Show empty state or handle error appropriately
+    }
 };
 
-document.addEventListener('DOMContentLoaded', function () {
-    window.loadProducts();
-});
-
-
+// Populate the products table
 window.populateProductsTable = function(products) {
-    console.log("[ProductsTable] populateProductsTable called with products:", products);
+    console.log("[ProductsTable] Populating products table with data:", products);
 
     let tableBody = document.getElementById('products-table-body');
     if (!tableBody) {
@@ -69,40 +59,32 @@ window.populateProductsTable = function(products) {
         return;
     }
 
-    // Check if we are already showing all records to prevent redundant loads
-    if (products.length === 0 && !window.showingAllRecords) {
-        // Display a message when there are no matches with current filters
-        tableBody.innerHTML = `<tr><td colspan="5">No matches found. Showing all records.</td></tr>`;
+    // Clear the table before populating new data
+    tableBody.innerHTML = '';
 
-        // Set the flag to indicate we are now showing all records
-        window.showingAllRecords = true;
-
-        // Call loadProducts to load all records without any filters
-        window.loadProducts();
-    } else {
-        // If products exist or we are already showing all records, populate the table with products
+    // Only populate if there are products
+    if (products.length > 0) {
         tableBody.innerHTML = products.map(product => `
-        <tr>
-            <td><input type="radio" name="productSelect" value="${product['Código_Produto']}" onchange="selectProduct('${product['Código_Produto']}')"></td>
-            <td>${product.Classificação}</td>
-            <td>${product.longo}</td>
-            <td>${product.freq}</td>
-            <td>${product.alterado}</td>
-        </tr>
-    `).join('');
-
-        // Reset the flag if filters are applied and products are found
-        window.showingAllRecords = products.length > 0;
+            <tr>
+                <td><input type="radio" name="productSelect" value="${product['Código_Produto']}" onchange="selectProduct('${product['Código_Produto']}')"></td>
+                <td>${product.Classificação}</td>
+                <td>${product.longo}</td>
+                <td>${product.freq}</td>
+                <td>${product.alterado}</td>
+            </tr>
+        `).join('');
+        console.log("[ProductsTable] Products table populated with products.");
+    } else {
+        // Show a message or an empty state if there are no products
+        tableBody.innerHTML = `<tr><td colspan="5">No products found.</td></tr>`;
+        console.log("[ProductsTable] No products found message displayed.");
     }
 };
 
-window.selectProduct = function(productCode) {
-    console.log("Selected product code: ", productCode);
-    window.loadDataSeries(productCode);
-};
+// Pagination rendering function
+window.renderPagination = function() {
+    console.log("[ProductsTable] Rendering pagination.");
 
-
-function renderPagination() {
     const paginationDiv = document.getElementById('products-pagination');
     if (!paginationDiv) {
         console.error("Pagination div not found");
@@ -121,26 +103,78 @@ function renderPagination() {
     }
 
     paginationDiv.innerHTML = html;
-}
+    console.log("[ProductsTable] Pagination rendered.");
+};
 
-
-function setupDropdownFilters() {
+// Setting up dropdown filters
+window.setupDropdownFilters = async function() {
     console.log("[ProductsTable] Setting up dropdown filters");
 
-    fetch('/api/get-dropdown-data')
-    .then(response => {
+    try {
+        const response = await fetch('/api/filters', {
+            method: 'GET',
+            headers: { 'Accept': 'application/json' }
+        });
+
+        console.log("[ProductsTable] Fetching filter data with response status:", response.status);
+
         if (!response.ok) {
-            throw new Error(`HTTP error while fetching dropdown data! Status: ${response.status}`);
+            console.error(`[ProductsTable] HTTP error while fetching dropdown data! Status: ${response.status}`);
+            return;
         }
-        return response.json();
-    })
-    .then(data => {
-        populateDropdowns(data);
-        console.log("[ProductsTable] Dropdowns populated with server data");
-    })
-    .catch(error => {
-        console.error("Failed to fetch dropdown data", error);
-    });
+
+        const data = await response.json();
+        console.log("[ProductsTable] Dropdown filters set up with data:", JSON.stringify(data, null, 2));
+        window.populateDropdowns(data);
+    } catch (error) {
+        console.error("[ProductsTable] Failed to fetch dropdown data", error);
+    }
+};
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    console.log("[ProductsTable] DOMContentLoaded - Starting to load products and set up filters.");
+    window.loadProducts();
+    window.setupDropdownFilters();
+});
+
+
+window.selectProduct = function(productCode) {
+    console.log("Selected product code: ", productCode);
+    window.loadDataSeries(productCode);
+};
+
+// New function to update dropdowns based on current filters
+window.updateDropdowns = async function(currentFilters) {
+    console.log("[ProductsTable] Updating dropdowns based on current filters", currentFilters);
+
+    // Remove any null or empty filter values
+    const nonNullFilters = Object.fromEntries(Object.entries(currentFilters).filter(([_, v]) => v != null));
+    console.log("[ProductsTable] Filters after removing nulls:", nonNullFilters);
+
+    try {
+        const response = await fetch('/api/filters/updated', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify(nonNullFilters)
+        });
+
+        console.log("[ProductsTable] Fetching updated dropdown data with response status:", response.status);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error while fetching updated dropdown data! Status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        window.populateDropdowns(data);
+        console.log("[ProductsTable] Dropdowns updated with new data:", data);
+    } catch (error) {
+        console.error("Failed to fetch updated dropdown data", error);
+    }
 }
 
 // Ensure that on document ready we reset the flag

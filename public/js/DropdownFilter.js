@@ -8,109 +8,115 @@ const freqToWord = {
     'A': 'Anual'
 };
 
-// Function to dynamically populate dropdowns
+// Function to dynamically populate dropdowns with null selection
 window.populateDropdowns = function(data) {
-    console.log("[DropdownFilter] Populating dropdowns with products data");
+    console.log("[DropdownFilter] Populating dropdowns with products data", JSON.stringify(data, null, 2));
 
-    const getUniqueValues = (values) => [...new Set(values)];
+    // Define null option HTML
+    const nullOptionHTML = '<option value="">Select...</option>';
 
-    // Populate each dropdown
     const dropdowns = {
-        'classificacao-select': getUniqueValues(Object.values(data.classificacao)),
-        'subproduto-select': getUniqueValues(Object.values(data.subproduto)),
-        'local-select': getUniqueValues(Object.values(data.local)),
-        'freq-select': getUniqueValues(Object.values(data.freq).map(code => freqToWord[code] || code)),
-        'proprietario-select': getUniqueValues(Object.values(data.proprietario))
+        'classificacao-select': [nullOptionHTML].concat(data.classificacao),
+        'subproduto-select': [nullOptionHTML].concat(data.subproduto),
+        'local-select': [nullOptionHTML].concat(data.local),
+        'freq-select': [nullOptionHTML].concat(data.freq.map(code => freqToWord[code] || code)),
+        'proprietario-select': [nullOptionHTML].concat(data.proprietario.map(item => item === 'Sim' ? 'Sim' : 'Não'))
+
     };
 
     Object.entries(dropdowns).forEach(([dropdownId, values]) => {
         const dropdown = document.getElementById(dropdownId);
         if (dropdown) {
-            values.forEach(value => {
-                dropdown.add(new Option(value, value));
+            // Ensure only one 'Select...' option is present
+            dropdown.innerHTML = '';
+            dropdown.appendChild(document.createElement('option')).setAttribute('value', '');
+
+            // Append the rest of the options
+            values.slice(1).forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                dropdown.appendChild(option);
             });
-            console.log(`[DropdownFilter] Dropdown populated: ${dropdownId}`);
+
+            console.log(`[DropdownFilter] Dropdown populated: ${dropdownId} with values:`, values);
         } else {
             console.error(`[DropdownFilter] Dropdown not found: ${dropdownId}`);
         }
     });
 };
 
+
+
 // Function to handle filter changes and fetch filtered products
-function updateFilters() {
-    console.log("[DropdownFilter] Updating filters");
+window.updateFilters = async function() {
+    console.log("[DropdownFilter] Starting filter update process");
 
-    // Existing filter values retrieval
-    const classificacao = document.getElementById('classificacao-select').value;
-    const subproduto = document.getElementById('subproduto-select').value;
-    const local = document.getElementById('local-select').value;
-    const freqValue = document.getElementById('freq-select').value;
+    const classificacao = document.getElementById('classificacao-select').value || null;
+    const subproduto = document.getElementById('subproduto-select').value || null;
+    const local = document.getElementById('local-select').value || null;
+    const freqValue = document.getElementById('freq-select').value || null;
+    const proprietarioValue = document.getElementById('proprietario-select').value || null;
 
-    // Convert 'Proprietário' back to 'bolsa' value
-    const proprietarioValue = document.getElementById('proprietario-select').value;
-    const bolsa = proprietarioValue === 'sim' ? 2 : (proprietarioValue === 'nao' ? 1 : '');
-
-    // Convert frequency word to code
-    const freq = Object.keys(freqToWord).find(key => freqToWord[key] === freqValue);
-
-    console.log(`[DropdownFilter] Filter parameters: Classificação: ${classificacao}, Subproduto: ${subproduto}, Local: ${local}, Frequência: ${freq}, Bolsa: ${bolsa}`);
-
-    const requestBody = JSON.stringify({ classificacao, subproduto, local, freq, bolsa });
-
-    // Store current filters
-    window.currentFilters = { classificacao, subproduto, local, freq, bolsa };
-
-    console.log(`[DropdownFilter] AJAX request body: ${requestBody}`);
-
-    fetch('/filter-products', {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        },
-        body: requestBody
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log("[DropdownFilter] Filtered products received:", data);
-        if (data && data.data && Array.isArray(data.data)) {
-            if (data.data.length === 0) {
-                // No matches found, alert and show all products
-                alert("No matches found with the current filters. Displaying all records.");
-
-                    // After confirming no matches found and showing the alert
-                    if (data.data.length === 0) {
-                        window.currentFilters = {};
-                        window.loadProducts();
-                    }
-                window.populateProductsTable([], true); // Pass a flag for no matches
-            } else {
-                window.populateProductsTable(data.data);
-            }
-        } else {
-            console.error("[DropdownFilter] No products received or invalid data format after filter update", data);
-        }
-    })
-    .catch(error => {
-        console.error("[DropdownFilter] Filter products API Error:", error);
+    console.log("[DropdownFilter] Current filter values:", {
+        classificacao,
+        subproduto,
+        local,
+        freqValue,
+        proprietarioValue
     });
-}
-// Setting up event listeners for each filter
+
+    const bolsa = proprietarioValue === 'Sim' ? 2 : (proprietarioValue === 'Não' ? 1 : null);
+    const freq = freqValue ? Object.keys(freqToWord).find(key => freqToWord[key] === freqValue) : null;
+
+    const filterValues = { classificacao, subproduto, local, freq, bolsa };
+
+    console.log("[DropdownFilter] Filters to be applied:", filterValues);
+
+    Object.keys(filterValues).forEach(key => filterValues[key] == null && delete filterValues[key]);
+
+    console.log("[DropdownFilter] Filter values after removing nulls:", filterValues);
+
+    window.currentFilters = filterValues;
+
+    console.log("[DropdownFilter] Stored current filters:", window.currentFilters);
+
+    try {
+        console.log("[DropdownFilter] Sending request to filter products with filters:", filterValues);
+
+        const response = await fetch('/api/filter-products', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(filterValues)
+        });
+
+        console.log("[DropdownFilter] Received response status:", response.status);
+
+        if (!response.ok) {
+            console.error(`[DropdownFilter] HTTP error! status: ${response.status}`);
+            return;
+        }
+
+        const data = await response.json();
+        console.log("[DropdownFilter] Filtered products received:", JSON.stringify(data, null, 2));
+        await window.populateProductsTable(data.data);
+    } catch (error) {
+        console.error("[DropdownFilter] Filter products API Error:", error);
+    }
+};
+
+
+// Event listeners for each filter dropdown
 document.addEventListener('DOMContentLoaded', function () {
     const filters = ['classificacao-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
     filters.forEach(filterId => {
         const filterElement = document.getElementById(filterId);
         if (filterElement) {
-            filterElement.addEventListener('change', () => {
-                console.log(`[DropdownFilter] Filter changed: ${filterId}`);
-                updateFilters();
-            });
+            filterElement.addEventListener('change', window.updateFilters);
             console.log(`[DropdownFilter] Event listener added for: ${filterId}`);
         } else {
             console.error(`[DropdownFilter] Filter element not found: ${filterId}`);
