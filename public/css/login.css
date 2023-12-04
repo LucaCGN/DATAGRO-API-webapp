@@ -1,82 +1,106 @@
-/* login.css - specific styles for the login page to match the main application's design */
+/* login.css - Cleaned and optimized styles for the login page */
 
-.login-page {
+body {
     font-family: Arial, sans-serif;
-    background-color: #f8f8f8; /* Light grey background to match the main app */
-    color: #4f4f4f; /* Dark grey for text */
-    height: 100vh; /* Full viewport height */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Distribute space between header, main and footer */
-}
-
-.login-header, .login-footer {
-    background-color: #fff; /* White background */
-    padding: 10px 20px; /* Padding for larger screens */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-    display: flex; /* Use flexbox for alignment */
-    justify-content: center; /* Center items horizontally */
-    text-align: center; /* Center text for smaller screens */
-}
-
-.login-container {
-    flex-grow: 1; /* Flex grow to take available space */
-    display: flex;
-    flex-direction: column;
-    justify-content: center; /* Center vertically */
-    align-items: center; /* Center horizontally */
-}
-
-.login-box {
-    background-color: #fff; /* White background */
-    padding: 20px;
-    border-radius: 10px; /* Rounded corners */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Shadow for depth */
-    width: 100%;
-    max-width: 320px; /* Max width for the box */
-}
-
-.input-group label, .input-group input {
-    display: block;
-    width: 100%;
-    text-align: center;
-    margin-bottom: 10px; /* Space between the inputs */
-}
-
-
-.button.login-button {
-    width: 100%; /* Full width button */
-    padding: 10px; /* Padding for the button */
-    margin-top: 20px; /* Space from the last input group */
-}
-
-.error-messages ul {
-    list-style-type: none;
-    color: red;
-    padding: 0;
-    margin-top: 10px;
-}
-
-/* Footer links style */
-.login-footer ul {
-    list-style-type: none;
-    padding: 0;
+    background-color: #f8f8f8;
+    color: #4f4f4f;
     margin: 0;
     display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header, footer {
+    background-color: #fff;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+main {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
     justify-content: center;
 }
 
-.login-footer ul li a {
-    color: #8dbf42; /* Green color to match the main app */
+.login-box {
+    background-color: #fff;
+    padding: 1.25rem;
+    border-radius: 0.625rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 20rem;
+}
+
+.input-group {
+    margin-bottom: 1rem;
+}
+
+.input-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+}
+
+.button {
+    display: block;
+    width: 100%;
+    padding: 0.625rem;
+    margin-top: 1.25rem;
+    border: none;
+    border-radius: 0.25rem;
+    background-color: #8dbf42;
+    color: white;
+    cursor: pointer;
+}
+
+.error-messages {
+    color: red;
+    padding: 0;
+    list-style-type: none;
+}
+
+footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.links-container, .links-container ul {
+    width: 100%;
+    padding: 0;
+    list-style-type: none;
+}
+
+.links-container h2, .links-container ul li {
+    margin-bottom: 0.3125rem;
+}
+
+.links-container ul li a {
+    color: #8dbf42;
     text-decoration: none;
 }
 
-.login-footer ul li a:hover {
-    text-decoration: underline; /* Underline on hover */
+.links-container ul li a:hover {
+    text-decoration: underline;
 }
 
 @media screen and (max-width: 600px) {
-    .login-header, .login-footer {
-        padding: 10px; /* Smaller padding on smaller screens */
+    header, footer {
+        padding: 1rem;
+    }
+    .input-group label, .input-group input {
+        text-align: left;
     }
 }
