@@ -77,10 +77,10 @@ class DownloadController extends Controller
         $products = $data['products'];
         $dataSeries = $data['dataSeries'];
 
-
         // Load the view file 'pdf_view', passing in the products and data series
         $pdf = PDF::loadView('pdf_view', ['products' => $products, 'dataSeries' => $dataSeries]);
 
-        return view('pdf_view', ['products' => $products, 'dataSeries' => $dataSeries]);
+        // Return the PDF as a download
+        return $pdf->download('visible-data.pdf');
     }
 }

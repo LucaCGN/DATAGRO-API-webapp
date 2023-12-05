@@ -1,435 +1,489 @@
-## public/js/DropdownFilter.js
+## resources/views/partials/download-buttons.blade.php
 ```
-// DropdownFilter.js
-
-// Convert frequency codes to full words at the top level so it's accessible by all functions
-const freqToWord = {
-    'D': 'Diário',
-    'W': 'Semanal',
-    'M': 'Mensal',
-    'A': 'Anual'
-};
-
-// Function to dynamically populate dropdowns with selection and correct placeholder text
-window.populateDropdowns = function(data) {
-    console.log("Populating dropdowns with data", data);
-
-    // Verify that data for each dropdown is an array and log if not
-    if (!Array.isArray(data['Classificação']) || !Array.isArray(data.subproduto) ||
-        !Array.isArray(data.local) || !Array.isArray(data.freq) ||
-        !Array.isArray(data.proprietario)) {
-        console.error("Expected data for dropdowns to be an array", data);
-        return;
-    }
-
-    const createOption = (value, text) => {
-        const option = document.createElement('option');
-        option.value = value;
-        option.textContent = text || value;
-        return option;
-    };
-
-    const createNullOption = (placeholder) => createOption('', placeholder);
-
-    // Define the dropdowns
-    const dropdowns = {
-        'Classificação-select': document.getElementById('Classificação-select'),
-        'subproduto-select': document.getElementById('subproduto-select'),
-        'local-select': document.getElementById('local-select'),
-        'freq-select': document.getElementById('freq-select'),
-        'proprietario-select': document.getElementById('proprietario-select')
-    };
-
-    // Reset dropdowns to ensure they are clear before adding new options
-    Object.values(dropdowns).forEach(dropdown => dropdown.innerHTML = '');
-
-    // Add options to dropdowns
-    Object.entries(dropdowns).forEach(([key, dropdown]) => {
-        const filterKey = key.replace('-select', '');
-        dropdown.appendChild(createNullOption(`Select ${filterKey}...`));
-
-        let optionsArray = data[filterKey];
-
-        // If current filter value is not in options, prepend it to the options array
-        if (window.currentFilters[filterKey] && !optionsArray.includes(window.currentFilters[filterKey])) {
-            optionsArray = [window.currentFilters[filterKey], ...optionsArray];
-        }
-
-        optionsArray.forEach(value => {
-            // Ensure 'Sim' and 'Não' are correctly displayed for 'proprietario'
-            if (filterKey === 'proprietario') {
-                dropdown.appendChild(createOption(value, value));
-            } else {
-                dropdown.appendChild(createOption(value));
-            }
-        });
-
-        // Set the selected value if it exists in currentFilters
-        if (window.currentFilters[filterKey]) {
-            dropdown.value = window.currentFilters[filterKey];
-        }
-    });
-};
-
-
-
-window.updateFilters = async function() {
-    console.log("[DropdownFilter] Starting filter update process");
-
-    // Fetch current filter values from the DOM once
-    const ClassificaçãoElement = document.getElementById('Classificação-select');
-    const subprodutoElement = document.getElementById('subproduto-select');
-    const localElement = document.getElementById('local-select');
-    const freqElement = document.getElementById('freq-select');
-    const proprietarioElement = document.getElementById('proprietario-select');
-
-    const Classificação = ClassificaçãoElement.value || null;
-    const subproduto = subprodutoElement.value || null;
-    const local = localElement.value || null;
-    let freq = freqElement.value || null;
-
-    // Get the displayed text for 'proprietario', which should be 'Sim' or 'Não'
-    let proprietario = proprietarioElement.options[proprietarioElement.selectedIndex].text;
-
-    // Convert frequency to code if needed
-    freq = Object.keys(freqToWord).find(key => freqToWord[key] === freq) || freq;
-
-    // Log current filter values
-    console.log("[DropdownFilter] Current filter values:", {
-        Classificação,
-        subproduto,
-        local,
-        freq,
-        proprietario // Log the text value that will be sent to the backend
-    });
-
-    // Prepare the filters to be applied, removing any that are null
-    const filterValues = {
-        Classificação,
-        subproduto,
-        local,
-        freq,
-        proprietario // Use the text value for 'proprietario'
-    };
-
-    // Remove any filters that are null or empty
-    Object.keys(filterValues).forEach(key => filterValues[key] == null && delete filterValues[key]);
-
-    // Update the window.currentFilters with the new values
-    window.currentFilters = { ...window.currentFilters, ...filterValues };
-
-    console.log("[DropdownFilter] Filter values after removing nulls:", window.currentFilters);
-
-    try {
-        // Send the selected filters and get updated options for other filters
-        const updateResponse = await fetch('/api/filters/updated', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(window.currentFilters)
-        });
-
-        if (!updateResponse.ok) {
-            throw new Error(`HTTP error! status: ${updateResponse.status}`);
-        }
-
-        const updatedFilters = await updateResponse.json();
-        window.populateDropdowns(updatedFilters);
-
-        // Fetch and update the products table with the filtered data
-        const filterResponse = await fetch('/api/filter-products', {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(window.currentFilters)
-        });
-
-        if (!filterResponse.ok) {
-            throw new Error(`HTTP error! status: ${filterResponse.status}`);
-        }
-
-        const filteredData = await filterResponse.json();
-        await window.populateProductsTable(filteredData.data);
-
-    } catch (error) {
-        console.error("[DropdownFilter] Error:", error);
-    }
-};
-
-
-
-
-
-
-window.resetFilters = function() {
-    console.log("[DropdownFilter] Resetting filters");
-
-    // Clear the current filters
-    window.currentFilters = {};
-
-    // Fetch initial filter options and reset the products table
-    if (typeof window.getInitialFilterOptions === "function") {
-        window.getInitialFilterOptions().then(initialFilters => {
-            if (initialFilters && typeof initialFilters === 'object') {
-                // Reset each dropdown to its default state after confirming we have the initial filter options
-                const dropdownIds = [
-                    'Classificação-select',
-                    'subproduto-select',
-                    'local-select',
-                    'freq-select',
-                    'proprietario-select'
-                ];
-
-                dropdownIds.forEach(id => {
-                    const dropdown = document.getElementById(id);
-                    if (dropdown) {
-                        dropdown.selectedIndex = 0; // This sets the dropdown back to the first option, typically "Select..."
-                    }
-                });
-
-                window.populateDropdowns(initialFilters);
-                window.populateProductsTable([]); // Reset the products table
-            } else {
-                console.error("Failed to fetch initial filter options or received undefined.");
-            }
-        });
-    } else {
-        console.error("getInitialFilterOptions function is not defined.");
-    }
-
-    console.log("[DropdownFilter] Filters have been reset");
-};
-
-
-
-
-window.getInitialFilterOptions = async function() {
-    console.log("[DropdownFilter] Fetching initial filter options");
-    try {
-        const response = await fetch('/api/initial-filter-options', {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const initialOptions = await response.json();
-        window.populateDropdowns(initialOptions);
-        console.log("[DropdownFilter] Initial filter options fetched and dropdowns populated");
-    } catch (error) {
-        console.error("[DropdownFilter] Error fetching initial filter options:", error);
-    }
-};
-
-// Make sure to initialize filters and attach event listeners once on load
-document.addEventListener('DOMContentLoaded', (function() {
-    let executed = false;
-    return function() {
-        if (!executed) {
-            executed = true;
-
-            // Fetch and populate initial filter options
-            window.getInitialFilterOptions();
-
-            // Attach event listener to the reset button
-            const resetButton = document.getElementById('reset-filters-btn');
-            if (resetButton) {
-                resetButton.addEventListener('click', function() {
-                    window.resetFilters();
-                    // If you want to update filters after reset, uncomment the following line:
-                    window.updateFilters();
-                });
-                console.log("[DropdownFilter] Reset button event listener attached");
-            } else {
-                console.error("[DropdownFilter] Reset button not found");
-            }
-
-            // Attach event listeners to filter dropdowns
-            const filters = ['Classificação-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
-            filters.forEach(filterId => {
-                const filterElement = document.getElementById(filterId);
-                if (filterElement) {
-                    filterElement.addEventListener('change', window.updateFilters);
-                    console.log(`[DropdownFilter] Event listener added for: ${filterId}`);
-                } else {
-                    console.error(`[DropdownFilter] Filter element not found: ${filterId}`);
-                }
-            });
-        }
-    };
-})());
+<div class="animated download-buttons-container">
+    <button id="download-csv-btn" class="button">Download CSV</button>
+    <button id="download-pdf-btn" class="button">Download PDF</button>
+</div>
+<script>console.log('[download-buttons.blade.php] Download buttons view loaded');</script>
 
 ```
-## app/Http/Controllers/FilterController.php
+## public/css/app.css
 ```
-<?php
+/* Main application styles */
+body {
+    font-family: Arial, sans-serif;
+    color: #4f4f4f; /* Dark grey for text */
+    background-color: #f8f8f8; /* Light grey background for a clean look */
+}
 
-namespace App\Http\Controllers;
+header {
+    background-color: #fff; /* White background for header */
+    color: #4f4f4f; /* Dark grey for text */
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
 
-use Illuminate\Http\Request;
-use App\Models\ExtendedProductList;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Database\QueryException;
+main {
+    margin: 15px;
+}
 
-class FilterController extends Controller
-{
-    // This method can be used to fetch initial filter options for the dropdowns
-    public function getInitialFilterOptions()
-    {
-        Log::info('[FilterController] Fetching initial filter options');
-        try {
-            // Fetch distinct values for each filter option from the database
-            $ClassificaçãoOptions = ExtendedProductList::distinct()->pluck('Classificação');
-            $subprodutoOptions = ExtendedProductList::distinct()->pluck('Subproduto');
-            $localOptions = ExtendedProductList::distinct()->pluck('Local');
-            $freqOptions = ExtendedProductList::distinct()->pluck('freq');
-            $bolsaOptions = ExtendedProductList::distinct()->pluck('bolsa');
+footer {
+    background-color: #fff; /* White background for footer */
+    color: #4f4f4f; /* Dark grey for text */
+    text-align: center;
+    padding: 10px;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
 
-            // Map 'bolsa' to 'proprietario' for frontend representation
-            $proprietarioOptions = $bolsaOptions->map(function ($item) {
-                return $item == 2 ? 'Sim' : 'Não'; // Ensure we return 'Sim'/'Não' instead of numeric values
-            })->unique()->values();
+.button {
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border: none; /* Removed border for a cleaner look */
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
 
-            Log::info('[FilterController] Initial filter options fetched', [
-                'Classificação' => $ClassificaçãoOptions,
-                'subproduto' => $subprodutoOptions,
-                'local' => $localOptions,
-                'freq' => $freqOptions,
-                'proprietario' => $proprietarioOptions,
-            ]);
+.button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
 
-            // Return the filter options as a JSON response
-            return response()->json([
-                'Classificação' => $ClassificaçãoOptions,
-                'subproduto' => $subprodutoOptions,
-                'local' => $localOptions,
-                'freq' => $freqOptions,
-                'proprietario' => $proprietarioOptions,
-            ]);
-        } catch (QueryException $e) {
-            Log::error('[FilterController] Database query exception: ' . $e->getMessage());
-            return response()->json(['error' => 'Database query exception'], 500);
-        } catch (\Exception $e) {
-            Log::error('[FilterController] General exception: ' . $e->getMessage());
-            return response()->json(['error' => 'General exception'], 500);
-        }
+@media screen and (max-width: 600px) {
+    body {
+        font-size: 18px;
     }
 
-    // Method to fetch updated filter options based on current selections
-    public function getUpdatedFilterOptions(Request $request)
-    {
-        Log::info('[FilterController] Fetching updated filter options with request: ', $request->all());
-        try {
-            // Initialize the base query
-            $query = ExtendedProductList::query();
+    header, footer {
+        text-align: center;
+        padding: 10px 20px;
+    }
 
-            // Apply filters based on the provided selections in the request
-            // Apply filters based on the provided selections in the request
-            foreach ($request->all() as $key => $value) {
-                if (!empty($value)) {
-                    // Convert 'proprietario' filter from frontend to 'bolsa' for the database query
-                    if ($key === 'proprietario') {
-                        if ($value === 'Sim') {
-                            $query->where('bolsa', 2);
-                        } elseif ($value === 'Não') { // Corrected typo here
-                            $query->where('bolsa', '<>', 2);
-                        }
-                        Log::info("Applied filter for 'bolsa' with value: {$value}");
-                    } else {
-                        $query->where($key, $value);
-                        Log::info("Applied filter for '{$key}' with value: {$value}");
-                    }
-                }
-            }
+    .responsive-table {
+        overflow-x: auto;
+    }
+}
 
-            // Log the SQL query
-            Log::debug('[FilterController] SQL Query: ' . $query->toSql());
+.animated {
+    animation: fadeIn 1s ease-in;
+}
 
-            // Fetch the distinct values for the filters that are not currently selected
-            $data = [
-                'Classificação' => $request->filled('Classificação') ? [] : $query->distinct()->pluck('Classificação')->all(),
-                'subproduto' => $request->filled('subproduto') ? [] : $query->distinct()->pluck('Subproduto')->all(),
-                'local' => $request->filled('local') ? [] : $query->distinct()->pluck('Local')->all(),
-                'freq' => $request->filled('freq') ? [] : $query->distinct()->pluck('freq')->all(),
-                // Fetch 'bolsa' options and map to 'proprietario' for frontend representation
-                'proprietario'  => $request->filled('proprietario') ? [] : $query->distinct()->pluck('bolsa')->map(function ($item) {
-                    return $item == 2 ? 'Sim' : 'Não'; // Convert back to 'Sim'/'Não' for the frontend
-                })->unique()->values()->all(),
-            ];
+@keyframes fadeIn {
+    0% {opacity: 0;}
+    100% {opacity: 1;}
+}
 
-            Log::info('[FilterController] Updated filter options fetched', $data);
+.pagination-controls {
+    text-align: center;
+    padding: 10px;
+}
 
-            return response()->json($data);
-        } catch (QueryException $e) {
-            Log::error('[FilterController] Database query exception: ' . $e->getMessage());
-            return response()->json(['error' => 'Database query exception'], 500);
-        } catch (\Exception $e) {
-            Log::error('[FilterController] General exception: ' . $e->getMessage());
-            return response()->json(['error' => 'General exception'], 500);
-        }
+.pagination-controls button {
+    margin: 0 5px;
+    padding: 5px 10px;
+    background-color: #8dbf42; /* Muted green for buttons */
+    color: #fff;
+    border: none; /* Removed border for a cleaner look */
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.pagination-controls button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
+
+/* Styles for the filters to be positioned to the left of the tables */
+.content {
+    display: flex;
+    flex-wrap: wrap; /* Ensure wrapping on smaller screens */
+}
+
+.tables-container {
+    margin-left: 20px;
+}
+
+/* Filter container and group styles */
+.filters-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.filter-group {
+    margin-bottom: 10px;
+}
+
+.filter-group label,
+.filter-group select {
+    width: 100%; /* Full width for mobile, adjust as needed */
+    margin-bottom: 5px; /* Vertical margin for spacing */
+}
+
+.filter-group select {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #fff;
+    color: #4f4f4f;
+}
+
+/* Table styles for consistency */
+.responsive-table table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.responsive-table th,
+.responsive-table td {
+    border: 1px solid #ddd; /* Light grey border */
+    padding: 8px;
+    text-align: left;
+}
+
+/* Download button container styles */
+.download-buttons-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.download-buttons-container button {
+    background-color: #8dbf42; /* Muted green */
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.download-buttons-container button:hover {
+    background-color: #6e9830; /* Darker green on hover */
+}
+
+@media screen and (max-width: 600px) {
+    .filters-container {
+        flex-direction: column; /* Stack filters vertically on small screens */
+    }
+
+    .filter-group {
+        width: 100%; /* Full width for filter groups on small screens */
+    }
+
+    .content,
+    .tables-container {
+        margin-left: 0;
+    }
+
+    .download-buttons-container {
+        flex-direction: column; /* Stack buttons vertically on small screens */
+    }
+
+    .download-buttons-container button {
+        width: 100%; /* Full width for buttons on small screens */
+        margin-bottom: 10px; /* Space between stacked buttons */
+    }
+}
+
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns items to the left */
+}
+
+.tables-container {
+    width: 100%; /* Ensures the container takes full width */
+}
+
+/* Ensure filters and buttons are in a flex container if they need to be horizontal */
+.filters-container,
+.download-buttons-container {
+    display: flex;
+    justify-content: flex-start; /* Aligns items to the left */
+    gap: 10px; /* Provides a gap between items */
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 600px) {
+    .filters-container,
+    .download-buttons-container {
+        flex-direction: column;
     }
 }
 
 ```
-## app/Http/Controllers/ProductController.php
+## resources/views/auth/login.blade.php
 ```
-<?php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Markets Team Data Tools</title>
+  <link href="{{ asset('css/login.css') }}" rel="stylesheet">
+</head>
+<body class="login-page">
+  <header class="login-header">
+    <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
+    <h2>Markets Team Data Tools</h2>
+  </header>
 
-// ProductController.php
+  <main class="login-container">
+    <div class="login-box">
+      <form method="POST" action="{{ route('login') }}" class="login-form">
+          @csrf
+          <div class="input-group">
+              <label for="email">Login:</label>
+              <input type="text" name="email" id="email" required autofocus>
+          </div>
+          <div class="input-group">
+              <label for="password">Password:</label>
+              <input type="password" name="password" id="password" required>
+          </div>
+          <button type="submit" class="button login-button">Login</button>
+          @if ($errors->any())
+              <div class="error-messages">
+                  <ul>
+                      @foreach ($errors->all() as $error)
+                          <li>{{ $error }}</li>
+                      @endforeach
+                  </ul>
+              </div>
+          @endif
+      </form>
+    </div>
+  </main>
 
-namespace App\Http\Controllers;
+  <footer class="login-footer">
+    <div class="links-container">
+      <h2>DATAGRO LINKS</h2>
+      <ul>
+          <li><a href="https://www.datagro.com/en/" target="_blank">www.datagro.com</a></li>
+          <li><a href="https://portal.datagro.com/" target="_blank">portal.datagro.com</a></li>
+          <li><a href="https://www.linkedin.com/company/datagro" target="_blank">Datagro LinkedIn</a></li>
+      </ul>
+    </div>
+    <!-- You can keep the image if it is part of the design -->
+    <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets Logo" style="height: 50px;">
+  </footer>
 
-use Illuminate\Http\Request;
-use App\Models\ExtendedProductList;
-use Illuminate\Support\Facades\Log;
+  <script>console.log('[login.blade.php] Login view loaded');</script>
+</body>
+</html>
 
-class ProductController extends Controller
-{
-    public function index(Request $request)
-    {
-        Log::info('ProductController: index method called', $request->all());
-        $perPage = 10;
+```
+## public/css/login.css
+```
+/* login.css - Cleaned and optimized styles for the login page */
 
-        try {
-            $query = ExtendedProductList::query();
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f8f8f8;
+    color: #4f4f4f;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
 
-            // Adjusted logic for 'proprietario' filter conversion
-            if ($request->filled('proprietario')) {
-                if ($request->input('proprietario') === 'Sim') {
-                    $query->where('bolsa', 2);
-                    Log::info("Applying filter: bolsa with value: 2");
-                } elseif ($request->input('proprietario') === 'Não') {
-                    $query->where('bolsa', '<>', 2);
-                    Log::info("Applying filter: bolsa with values not equal to 2");
-                }
-            }
+header, footer {
+    background-color: #fff;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
 
-            // Handle other filters
-            $filters = $request->only(['Classificação', 'subproduto', 'local', 'freq']);
-            foreach ($filters as $key => $value) {
-                if (!is_null($value) && $value !== '') {
-                    $query->where($key, $value);
-                    Log::info("Applying filter: {$key} with value: {$value}");
-                }
-            }
+main {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-            $products = $query->paginate($perPage);
+.login-box {
+    background-color: #fff;
+    padding: 1.25rem;
+    border-radius: 0.625rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 20rem;
+}
 
-            Log::info('Products fetched successfully with applied filters', ['count' => $products->count()]);
-            return response()->json($products);
-        } catch (\Exception $e) {
-            Log::error('Error fetching products', ['message' => $e->getMessage()]);
-            return response()->json(['error' => 'Error fetching products'], 500);
-        }
+.input-group {
+    margin-bottom: 1rem;
+}
+
+.input-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+}
+
+.button {
+    display: block;
+    width: 100%;
+    padding: 0.625rem;
+    margin-top: 1.25rem;
+    border: none;
+    border-radius: 0.25rem;
+    background-color: #8dbf42;
+    color: white;
+    cursor: pointer;
+}
+
+.error-messages {
+    color: red;
+    padding: 0;
+    list-style-type: none;
+}
+
+footer {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.links-container, .links-container ul {
+    width: 100%;
+    padding: 0;
+    list-style-type: none;
+}
+
+.links-container h2, .links-container ul li {
+    margin-bottom: 0.3125rem;
+}
+
+.links-container ul li a {
+    color: #8dbf42;
+    text-decoration: none;
+}
+
+.links-container ul li a:hover {
+    text-decoration: underline;
+}
+
+@media screen and (max-width: 600px) {
+    header, footer {
+        padding: 1rem;
+    }
+    .input-group label, .input-group input {
+        text-align: left;
     }
 }
+
+```
+## resources/views/partials/products-table.blade.php
+```
+<div class="responsive-table animated" id="products-table">
+    <table>
+        <thead>
+            <tr>
+                <th> [Carregar Data Series] </th>
+                <th>Produto  ('Classificação')  </th>
+                <th>Nome ('longo')  </th>
+                <th>Frequência</th>
+                <th>Primeira Data</th>
+            </tr>
+        </thead>
+        <tbody id="products-table-body">
+            <!-- Data populated by ProductsTable.js -->
+        </tbody>
+    </table>
+</div>
+<div id="selected-product-name" class="selected-product-display"></div>
+    <!-- Pagination Controls populated by ProductsTable.js -->
+</div>
+
+```
+## resources/views/partials/data-series-table.blade.php
+```
+<div class="responsive-table animated" id="data-series-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Cod</th>
+                <th>data</th>
+                <th>ult</th>
+                <th>mini</th>
+                <th>maxi</th>
+                <th>abe</th>
+                <th>volumes</th>
+                <th>cab</th>
+                <th>med</th>
+                <th>aju</th>
+            </tr>
+        </thead>
+        <tbody id="data-series-body">
+            <!-- Data populated by DataSeriesTable.js -->
+        </tbody>
+    </table>
+</div>
+<script>console.log('[data-series-table.blade.php] Data series table view loaded');</script>
+
+
+```
+## resources/views/partials/dropdown-filter.blade.php
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filterable Product Table</title>
+    <!-- Add any additional head content here (e.g., CSS links) -->
+</head>
+<body>
+    <div id="filter-container">
+        <!-- Dropdowns for each filter category -->
+        <select id="Classificação-select" class="filter-dropdown">
+            <option value="">Select Classificação...</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+        <select id="subproduto-select" class="filter-dropdown">
+            <option value="">Select Subproduto...</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+        <select id="local-select" class="filter-dropdown">
+            <option value="">Select Local...</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+        <select id="freq-select" class="filter-dropdown">
+            <option value="">Select Frequência...</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+        <select id="proprietario-select" class="filter-dropdown">
+            <option value="">Select Proprietário...</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+
+        <!-- Reset Button -->
+        <button id="reset-filters-btn">Reset Filters</button>
+    </div>
+
+    <!-- Container for the products table or other display elements -->
+    <div id="products-table">
+        <!-- Table or other elements will be populated dynamically -->
+    </div>
+
+    <!-- JavaScript Files -->
+    <script src="js/DropdownFilter.js"></script>
+    <!-- Include other JS files or scripts here -->
+</body>
+</html>
 
 ```
