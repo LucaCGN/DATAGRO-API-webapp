@@ -1,5 +1,7 @@
 <?php
 
+// ProductController.php
+
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
@@ -16,12 +18,14 @@ class ProductController extends Controller
         try {
             $query = ExtendedProductList::query();
 
-            // Convert 'proprietario' filter from frontend to 'bolsa' for the database query
+            // Adjusted logic for 'proprietario' filter conversion
             if ($request->filled('proprietario')) {
-                $bolsaValue = $request->input('proprietario') === 'Sim' ? 2 : ($request->input('proprietario') === 'Não' ? 1 : null);
-                if (!is_null($bolsaValue)) {
-                    $query->where('bolsa', $bolsaValue);
-                    Log::info("Applying filter: bolsa with value: {$bolsaValue}");
+                if ($request->input('proprietario') === 'Sim') {
+                    $query->where('bolsa', 2);
+                    Log::info("Applying filter: bolsa with value: 2");
+                } elseif ($request->input('proprietario') === 'Não') {
+                    $query->where('bolsa', '<>', 2);
+                    Log::info("Applying filter: bolsa with values not equal to 2");
                 }
             }
 
@@ -33,7 +37,6 @@ class ProductController extends Controller
                     Log::info("Applying filter: {$key} with value: {$value}");
                 }
             }
-
 
             $products = $query->paginate($perPage);
 

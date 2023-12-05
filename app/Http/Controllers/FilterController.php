@@ -64,8 +64,11 @@ class FilterController extends Controller
                 if (!empty($value)) {
                     // Convert 'proprietario' filter from frontend to 'bolsa' for the database query
                     if ($key === 'proprietario') {
-                        $value = $value === 'Sim' ? 2 : 'Não';
-                        $query->where('bolsa', $value);
+                        if ($value === 'Sim') {
+                            $query->where('bolsa', 2);
+                        } elseif ($value === 'Não') { // Corrected typo here
+                            $query->where('bolsa', '<>', 2);
+                        }
                         Log::info("Applied filter for 'bolsa' with value: {$value}");
                     } else {
                         $query->where($key, $value);
