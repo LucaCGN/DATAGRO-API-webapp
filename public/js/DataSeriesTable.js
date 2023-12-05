@@ -14,6 +14,7 @@ window.loadDataSeries = function(productCode) {
         .then(data => {
             console.log("[DataSeriesTable] DataSeries API Response received:", data);
             let tableBody = document.getElementById('data-series-body');
+            window.globalDataSeries = data;
             tableBody.innerHTML = data.slice(0, 10).map(series => `
                 <tr>
                     <td>${series.cod}</td>

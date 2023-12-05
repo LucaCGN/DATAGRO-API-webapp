@@ -2,16 +2,20 @@
 function downloadPDF() {
     console.log("[DownloadButtons] Initiating PDF download");
 
+    // Fetch products data from the products table
     const productsData = Array.from(document.querySelectorAll('#products-table tbody tr')).map(row => {
         return Array.from(row.querySelectorAll('td:not(:first-child)')).map(cell => cell.textContent.trim());
     });
 
+    // Fetch data series from the data series table
     const dataSeriesData = Array.from(document.querySelectorAll('#data-series-table tbody tr')).map(row => {
         return Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim());
     });
 
+    // Prepare the data payload for the request
     const data = { products: productsData, dataSeries: dataSeriesData };
 
+    // Make a POST request to the server to generate and download the PDF
     fetch('/download/visible-pdf', {
         method: 'POST',
         headers: {
@@ -20,22 +24,31 @@ function downloadPDF() {
         },
         body: JSON.stringify(data)
     })
-    .then(response => response.blob())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok ' + response.statusText);
+        }
+        return response.blob();
+    })
     .then(blob => {
+        // Create a blob URL from the response
         const url = window.URL.createObjectURL(blob);
 
-        // Create a link element, use it to download the file and remove it
+        // Create a link element, use it to download the file, and remove it
         const a = document.createElement('a');
         a.style.display = 'none';
         a.href = url;
         a.download = 'visible-data.pdf';
         document.body.appendChild(a);
         a.click();
+
+        // Clean up by revoking the object URL and removing the link element
         window.URL.revokeObjectURL(url);
         document.body.removeChild(a);
     })
     .catch((error) => console.error('Error:', error));
 }
+
 
 
 function downloadVisibleCSV() {

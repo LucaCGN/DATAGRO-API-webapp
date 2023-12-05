@@ -74,13 +74,15 @@ class DownloadController extends Controller
             abort(400, "Bad Request: No data provided");
         }
 
-        $products = $data['products'];
-        $dataSeries = $data['dataSeries'];
+        $products = $data['products'] ?? [];
+        $dataSeries = $data['dataSeries'] ?? [];
 
-        // Load the view file 'pdf_view', passing in the products and data series
+        Log::info('Products:', $products);
+        Log::info('Data Series:', $dataSeries);
+
         $pdf = PDF::loadView('pdf_view', ['products' => $products, 'dataSeries' => $dataSeries]);
 
-        // Return the PDF as a download
         return $pdf->download('visible-data.pdf');
     }
+
 }
