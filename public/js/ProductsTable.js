@@ -54,6 +54,12 @@ window.populateProductsTable = function(products) {
         return;
     }
 
+    // Reset selected product and clear DataSeries view if products list changes
+    if (selectedProductCode !== null) {
+        selectedProductCode = null;
+        clearDataSeriesView(); // Function to clear DataSeries view
+    }
+
     // Clear the table before populating new data
     tableBody.innerHTML = '';
 
@@ -74,6 +80,8 @@ window.populateProductsTable = function(products) {
         tableBody.innerHTML = `<tr><td colspan="5">No products found.</td></tr>`;
         console.log("[ProductsTable] No products found message displayed.");
     }
+
+    window.loadedProducts = products;
 };
 
 // Pagination rendering function
@@ -104,12 +112,43 @@ window.renderPagination = function() {
 
 window.selectProduct = function(productCode) {
     console.log("Selected product code: ", productCode);
-    window.loadDataSeries(productCode);
+    if (selectedProductCode !== productCode) {
+        selectedProductCode = productCode;
+        window.loadDataSeries(productCode);
+    } else {
+        selectedProductCode = null;
+        clearDataSeriesView(); // Clear DataSeries if the same product is unselected
+    }
+    updateSelectedProductName(); // Update the display of the selected product name
 };
 
 
-// Ensure that on document ready we reset the flag
+function clearDataSeriesView() {
+    let dataSeriesBody = document.getElementById('data-series-body');
+    if (dataSeriesBody) {
+        dataSeriesBody.innerHTML = '';
+    }
+    console.log("[DataSeriesTable] Data series view cleared.");
+}
+
+function updateSelectedProductName() {
+    let productNameDisplay = document.getElementById('selected-product-name');
+    if (productNameDisplay) {
+        if (selectedProductCode) {
+            // Find the selected product from the loaded products array
+            const selectedProduct = window.loadedProducts.find(product => product['Código_Produto'] === selectedProductCode);
+            if (selectedProduct) {
+                productNameDisplay.textContent = `DataSeries for: ${selectedProduct.longo}`;
+            }
+        } else {
+            productNameDisplay.textContent = 'Please select a product in the table above';
+        }
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     console.log("[ProductsTable] Page loaded - Starting to load products.");
     loadProducts();
+    updateSelectedProductName(); // Ensure placeholder is displayed initially
 });
+

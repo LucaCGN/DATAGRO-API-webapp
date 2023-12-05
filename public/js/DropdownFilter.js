@@ -187,12 +187,18 @@ async function fetchFilteredData(filters) {
 
 
 // Updated resetFilters function
+// Updated resetFilters function
 window.resetFilters = async function() {
     console.log("[DropdownFilter] Resetting filters");
 
     // Clear the current filters and previous filters to ensure a clean state
     window.currentFilters = {};
     window.previousFilterValues = {};
+
+    // Reset the selected product and clear the DataSeries view
+    window.selectedProductCode = null;
+    clearDataSeriesView(); // Clear the DataSeries table
+    updateSelectedProductName(); // Update the display to show the placeholder message
 
     // Fetch initial filter options and reset the products table
     try {
@@ -231,6 +237,23 @@ window.resetFilters = async function() {
         console.log("[DropdownFilter] Filters have been reset");
     }
 };
+
+// Add the clearDataSeriesView and updateSelectedProductName function definitions if not already present
+function clearDataSeriesView() {
+    let dataSeriesBody = document.getElementById('data-series-body');
+    if (dataSeriesBody) {
+        dataSeriesBody.innerHTML = '';
+    }
+    console.log("[DataSeriesTable] Data series view cleared.");
+}
+
+function updateSelectedProductName() {
+    let productNameDisplay = document.getElementById('selected-product-name');
+    if (productNameDisplay) {
+        productNameDisplay.textContent = 'Please select a product in the table above';
+    }
+}
+
 
 
 window.getInitialFilterOptions = async function() {
