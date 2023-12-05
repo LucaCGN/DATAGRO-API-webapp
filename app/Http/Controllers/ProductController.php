@@ -16,25 +16,28 @@ class ProductController extends Controller
         try {
             $query = ExtendedProductList::query();
 
-            // Dynamically apply filters if provided in the request, skip if null
-            $filters = $request->only(['classificacao', 'subproduto', 'local', 'freq', 'bolsa']);
-
-            // Check and replace 'classificacao' with 'Classificação'
-            if (isset($filters['classificacao'])) {
-                $filters['Classificação'] = $filters['classificacao'];
-                unset($filters['classificacao']); // Remove the old key
-            }
-
-            foreach ($filters as $key => $value) {
-                if (!is_null($value) && $value !== '') {
-                    $query->where($key, $value);
+            // Convert 'proprietario' filter from frontend to 'bolsa' for the database query
+            if ($request->filled('proprietario')) {
+                $bolsaValue = $request->input('proprietario') === 'Sim' ? 2 : ($request->input('proprietario') === 'Não' ? 1 : null);
+                if (!is_null($bolsaValue)) {
+                    $query->where('bolsa', $bolsaValue);
+                    Log::info("Applying filter: bolsa with value: {$bolsaValue}");
                 }
             }
 
-            // Paginate the query result
-            $products = $query->paginate($perPage, ['*'], 'page', $request->get('page', 1));
+            // Handle other filters
+            $filters = $request->only(['Classificação', 'subproduto', 'local', 'freq']);
+            foreach ($filters as $key => $value) {
+                if (!is_null($value) && $value !== '') {
+                    $query->where($key, $value);
+                    Log::info("Applying filter: {$key} with value: {$value}");
+                }
+            }
 
-            Log::info('Products fetched successfully', ['count' => $products->count()]);
+
+            $products = $query->paginate($perPage);
+
+            Log::info('Products fetched successfully with applied filters', ['count' => $products->count()]);
             return response()->json($products);
         } catch (\Exception $e) {
             Log::error('Error fetching products', ['message' => $e->getMessage()]);

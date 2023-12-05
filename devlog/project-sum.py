@@ -91,8 +91,9 @@ file_groups = {
         'public/js/DropdownFilter.js',
         'public/js/ProductsTable.js',
         'routes/web.php',
-    #    'resources/views/partials/dropdown-filter.blade.php',
-    #    'resources/views/partials/products-table.blade.php',
+        'resources/views/partials/dropdown-filter.blade.php',
+        'app/Models/ExtendedProductList.php',  
+ #       'resources/views/partials/products-table.blade.php',
     ],    
     'all': file_paths  # The 'all' group contains all the files
 }

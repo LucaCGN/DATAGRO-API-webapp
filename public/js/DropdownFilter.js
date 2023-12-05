@@ -8,118 +8,241 @@ const freqToWord = {
     'A': 'Anual'
 };
 
-// Function to dynamically populate dropdowns with null selection
+// Function to dynamically populate dropdowns with selection and correct placeholder text
 window.populateDropdowns = function(data) {
-    console.log("[DropdownFilter] Populating dropdowns with products data", JSON.stringify(data, null, 2));
+    console.log("Populating dropdowns with data", data);
 
-    // Define null option HTML
-    const nullOptionHTML = '<option value="">Select...</option>';
+    // Verify that data for each dropdown is an array and log if not
+    if (!Array.isArray(data.classificacao) || !Array.isArray(data.subproduto) ||
+        !Array.isArray(data.local) || !Array.isArray(data.freq) ||
+        !Array.isArray(data.proprietario)) {
+        console.error("Expected data for dropdowns to be an array", data);
+        return;
+    }
 
-    const dropdowns = {
-        'classificacao-select': [nullOptionHTML].concat(data.classificacao),
-        'subproduto-select': [nullOptionHTML].concat(data.subproduto),
-        'local-select': [nullOptionHTML].concat(data.local),
-        'freq-select': [nullOptionHTML].concat(data.freq.map(code => freqToWord[code] || code)),
-        'proprietario-select': [nullOptionHTML].concat(data.proprietario.map(item => item === 'Sim' ? 'Sim' : 'Não'))
-
+    const createNullOption = (placeholder) => {
+        const nullOption = document.createElement('option');
+        nullOption.value = '';
+        nullOption.textContent = placeholder;
+        return nullOption;
     };
 
-    Object.entries(dropdowns).forEach(([dropdownId, values]) => {
-        const dropdown = document.getElementById(dropdownId);
-        if (dropdown) {
-            // Ensure only one 'Select...' option is present
-            dropdown.innerHTML = '';
-            dropdown.appendChild(document.createElement('option')).setAttribute('value', '');
+    // Populate dropdowns with options
+    const dropdowns = {
+        'classificacao-select': document.getElementById('classificacao-select'),
+        'subproduto-select': document.getElementById('subproduto-select'),
+        'local-select': document.getElementById('local-select'),
+        'freq-select': document.getElementById('freq-select'),
+        'proprietario-select': document.getElementById('proprietario-select')
+    };
 
-            // Append the rest of the options
-            values.slice(1).forEach(value => {
+    // Reset dropdowns to ensure they are clear before adding new options
+    Object.values(dropdowns).forEach(dropdown => dropdown.innerHTML = '');
+
+    // Add options to dropdowns
+    Object.entries(dropdowns).forEach(([key, dropdown]) => {
+        if (dropdown) {
+            dropdown.appendChild(createNullOption(`Select ${key.replace('-select', '')}...`));
+            data[key.replace('-select', '')].forEach(value => {
                 const option = document.createElement('option');
                 option.value = value;
                 option.textContent = value;
                 dropdown.appendChild(option);
             });
-
-            console.log(`[DropdownFilter] Dropdown populated: ${dropdownId} with values:`, values);
         } else {
-            console.error(`[DropdownFilter] Dropdown not found: ${dropdownId}`);
+            console.error(`Dropdown not found: ${key}`);
+        }
+    });
+
+    // Check that the initial values are selected in the dropdowns
+    Object.keys(dropdowns).forEach(key => {
+        if (window.currentFilters[key.replace('-select', '')]) {
+            document.getElementById(key).value = window.currentFilters[key.replace('-select', '')];
         }
     });
 };
 
-
-
-// Function to handle filter changes and fetch filtered products
 window.updateFilters = async function() {
     console.log("[DropdownFilter] Starting filter update process");
 
-    const classificacao = document.getElementById('classificacao-select').value || null;
-    const subproduto = document.getElementById('subproduto-select').value || null;
-    const local = document.getElementById('local-select').value || null;
-    const freqValue = document.getElementById('freq-select').value || null;
-    const proprietarioValue = document.getElementById('proprietario-select').value || null;
+    // Fetch current filter values from the DOM once
+    const classificacaoElement = document.getElementById('classificacao-select');
+    const subprodutoElement = document.getElementById('subproduto-select');
+    const localElement = document.getElementById('local-select');
+    const freqElement = document.getElementById('freq-select');
+    const proprietarioElement = document.getElementById('proprietario-select');
 
+    const classificacao = classificacaoElement.value || null;
+    const subproduto = subprodutoElement.value || null;
+    const local = localElement.value || null;
+    let freq = freqElement.value || null;
+    let proprietario = proprietarioElement.value || null;
+
+    // Convert frequency and owner values to codes if needed
+    freq = Object.keys(freqToWord).find(key => freqToWord[key] === freq) || freq; // Map from full word to code
+    proprietario = proprietario === 'Sim' ? 2 : (proprietario === 'Não' ? 1 : null); // Convert to number
+
+    // Log current filter values
     console.log("[DropdownFilter] Current filter values:", {
         classificacao,
         subproduto,
         local,
-        freqValue,
-        proprietarioValue
+        freq,
+        proprietario
     });
 
-    const bolsa = proprietarioValue === 'Sim' ? 2 : (proprietarioValue === 'Não' ? 1 : null);
-    const freq = freqValue ? Object.keys(freqToWord).find(key => freqToWord[key] === freqValue) : null;
-
-    const filterValues = { classificacao, subproduto, local, freq, bolsa };
-
-    console.log("[DropdownFilter] Filters to be applied:", filterValues);
-
+    // Prepare the filters to be applied, removing any that are null
+    const filterValues = { classificacao, subproduto, local, freq, proprietario };
     Object.keys(filterValues).forEach(key => filterValues[key] == null && delete filterValues[key]);
 
+    // Update the window.currentFilters before fetching updated filter options
+    window.currentFilters = { ...window.currentFilters, ...filterValues };
     console.log("[DropdownFilter] Filter values after removing nulls:", filterValues);
 
-    window.currentFilters = filterValues;
-
-    console.log("[DropdownFilter] Stored current filters:", window.currentFilters);
-
     try {
-        console.log("[DropdownFilter] Sending request to filter products with filters:", filterValues);
-
-        const response = await fetch('/api/filter-products', {
+        // Send the selected filters and get updated options for other filters
+        const updateResponse = await fetch('/api/filters/updated', {
             method: 'POST',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'Content-Type': 'application/json',
                 'Accept': 'application/json'
             },
-            body: JSON.stringify(filterValues)
+            body: JSON.stringify(window.currentFilters)
         });
 
-        console.log("[DropdownFilter] Received response status:", response.status);
-
-        if (!response.ok) {
-            console.error(`[DropdownFilter] HTTP error! status: ${response.status}`);
-            return;
+        // Handle non-ok response
+        if (!updateResponse.ok) {
+            throw new Error(`HTTP error! status: ${updateResponse.status}`);
         }
 
-        const data = await response.json();
-        console.log("[DropdownFilter] Filtered products received:", JSON.stringify(data, null, 2));
-        await window.populateProductsTable(data.data);
+        // Get and populate dropdowns with updated filter options
+        const updatedFilters = await updateResponse.json();
+        window.populateDropdowns(updatedFilters);
+
+        // Fetch and update the products table with the filtered data
+        const filterResponse = await fetch('/api/filter-products', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(window.currentFilters)
+        });
+
+        // Handle non-ok response
+        if (!filterResponse.ok) {
+            throw new Error(`HTTP error! status: ${filterResponse.status}`);
+        }
+
+        // Populate the products table with the filtered data
+        const filteredData = await filterResponse.json();
+        await window.populateProductsTable(filteredData.data);
+
     } catch (error) {
-        console.error("[DropdownFilter] Filter products API Error:", error);
+        console.error("[DropdownFilter] Error:", error);
     }
+ };
+
+
+
+
+
+
+window.resetFilters = function() {
+    console.log("[DropdownFilter] Resetting filters");
+
+    // Define the IDs of the dropdown elements
+    const dropdownIds = [
+        'classificacao-select',
+        'subproduto-select',
+        'local-select',
+        'freq-select',
+        'proprietario-select'
+    ];
+
+    // Reset each dropdown to its default state
+    dropdownIds.forEach(id => {
+        const dropdown = document.getElementById(id);
+        if (dropdown) {
+            dropdown.selectedIndex = 0; // This sets the dropdown back to the first option, typically "Select..."
+        }
+    });
+
+    // Clear the current filters
+    window.currentFilters = {};
+
+    // Fetch initial filter options and reset the products table
+    if (typeof window.getInitialFilterOptions === "function") {
+        window.getInitialFilterOptions().then(initialFilters => {
+            window.populateDropdowns(initialFilters);
+        });
+    } else {
+        console.error("getInitialFilterOptions function is not defined.");
+    }
+
+    window.populateProductsTable([]);
+
+    console.log("[DropdownFilter] Filters have been reset");
 };
 
 
-// Event listeners for each filter dropdown
-document.addEventListener('DOMContentLoaded', function () {
-    const filters = ['classificacao-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
-    filters.forEach(filterId => {
-        const filterElement = document.getElementById(filterId);
-        if (filterElement) {
-            filterElement.addEventListener('change', window.updateFilters);
-            console.log(`[DropdownFilter] Event listener added for: ${filterId}`);
-        } else {
-            console.error(`[DropdownFilter] Filter element not found: ${filterId}`);
+
+window.getInitialFilterOptions = async function() {
+    console.log("[DropdownFilter] Fetching initial filter options");
+    try {
+        const response = await fetch('/api/initial-filter-options', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    });
-});
+        const initialOptions = await response.json();
+        window.populateDropdowns(initialOptions);
+        console.log("[DropdownFilter] Initial filter options fetched and dropdowns populated");
+    } catch (error) {
+        console.error("[DropdownFilter] Error fetching initial filter options:", error);
+    }
+};
+
+// Make sure to initialize filters and attach event listeners once on load
+document.addEventListener('DOMContentLoaded', (function() {
+    let executed = false;
+    return function() {
+        if (!executed) {
+            executed = true;
+
+            // Fetch and populate initial filter options
+            window.getInitialFilterOptions();
+
+            // Attach event listener to the reset button
+            const resetButton = document.getElementById('reset-filters-btn');
+            if (resetButton) {
+                resetButton.addEventListener('click', function() {
+                    window.resetFilters();
+                    // If you want to update filters after reset, uncomment the following line:
+                    window.updateFilters();
+                });
+                console.log("[DropdownFilter] Reset button event listener attached");
+            } else {
+                console.error("[DropdownFilter] Reset button not found");
+            }
+
+            // Attach event listeners to filter dropdowns
+            const filters = ['classificacao-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
+            filters.forEach(filterId => {
+                const filterElement = document.getElementById(filterId);
+                if (filterElement) {
+                    filterElement.addEventListener('change', window.updateFilters);
+                    console.log(`[DropdownFilter] Event listener added for: ${filterId}`);
+                } else {
+                    console.error(`[DropdownFilter] Filter element not found: ${filterId}`);
+                }
+            });
+        }
+    };
+})());

@@ -1,13 +1,42 @@
-// Corrected function to handle download actions
-function downloadCSV() {
-    console.log("[DownloadButtons] Initiating CSV download");
-    window.location.href = '/download/csv'; // This remains for your original CSV download
-}
 
 function downloadPDF() {
     console.log("[DownloadButtons] Initiating PDF download");
-    window.location.href = '/download/pdf'; // This remains for your original PDF download
+
+    const productsData = Array.from(document.querySelectorAll('#products-table tbody tr')).map(row => {
+        return Array.from(row.querySelectorAll('td:not(:first-child)')).map(cell => cell.textContent.trim());
+    });
+
+    const dataSeriesData = Array.from(document.querySelectorAll('#data-series-table tbody tr')).map(row => {
+        return Array.from(row.querySelectorAll('td')).map(cell => cell.textContent.trim());
+    });
+
+    const data = { products: productsData, dataSeries: dataSeriesData };
+
+    fetch('/download/visible-pdf', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.blob())
+    .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+
+        // Create a link element, use it to download the file and remove it
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'visible-data.pdf';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+    })
+    .catch((error) => console.error('Error:', error));
 }
+
 
 function downloadVisibleCSV() {
     // Gather data from the products table

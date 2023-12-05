@@ -63,5 +63,24 @@ class DownloadController extends Controller
         return $response;
     }
 
+    public function downloadPDF(Request $request)
+    {
+        Log::info('DownloadController: downloadPDF method called');
 
+        $data = json_decode($request->getContent(), true);
+
+        if($data === null) {
+            Log::error('DownloadController: downloadPDF method called without proper data');
+            abort(400, "Bad Request: No data provided");
+        }
+
+        $products = $data['products'];
+        $dataSeries = $data['dataSeries'];
+
+
+        // Load the view file 'pdf_view', passing in the products and data series
+        $pdf = PDF::loadView('pdf_view', ['products' => $products, 'dataSeries' => $dataSeries]);
+
+        return view('pdf_view', ['products' => $products, 'dataSeries' => $dataSeries]);
+    }
 }

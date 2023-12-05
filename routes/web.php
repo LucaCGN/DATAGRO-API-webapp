@@ -16,8 +16,8 @@ Route::get('/', function () {
 // Products related routes
 Route::get('/products', [ProductController::class, 'index']); // For initial load and pagination without filters
 
-// Updated route for filtered products, only POST requests
-Route::post('/api/filter-products', [ProductController::class, 'index']);
+// Updated POST route for filtered products
+Route::post('/api/filter-products', [ProductController::class, 'index']); // Assuming 'index' is the correct method
 
 // Data Series related routes
 Route::get('/data-series/{productId}', [DataSeriesController::class, 'show']);
@@ -25,18 +25,20 @@ Route::get('/data-series/{productId}/{page}/{perPage}', [DataSeriesController::c
 
 // Download routes
 Route::post('/download/visible-csv', [DownloadController::class, 'downloadVisibleCSV']);
+Route::post('/download/visible-pdf', [DownloadController::class, 'downloadPDF']);
+
 
 // CSRF token generation
 Route::get('/csrf-token', function() {
     return csrf_token();
 });
 
-// New route for initial filter data
-Route::get('/api/filters', [FilterController::class, 'getInitialFilterData']);
+// New GET route for initial filter options as expected in JS
+Route::get('/api/initial-filter-options', [FilterController::class, 'getInitialFilterOptions']);
 
-// New route for updated filter options based on selections
+// Ensure this POST route is as per the JavaScript expectations
 Route::post('/api/filters/updated', [FilterController::class, 'getUpdatedFilterOptions']);
 
-// Login Route
+// Login Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);

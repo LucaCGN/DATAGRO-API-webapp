@@ -1,37 +1,46 @@
-<div class="animated filters-container">
-    <div class="filter-group">
-        <label for="classificacao-select">Classificação</label>
-        <select id="classificacao-select">
-            <!-- Options will be populated via JavaScript -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filterable Product Table</title>
+    <!-- Add any additional head content here (e.g., CSS links) -->
+</head>
+<body>
+    <div id="filter-container">
+        <!-- Dropdowns for each filter category -->
+        <select id="classificacao-select" class="filter-dropdown">
+            <option value="">Select Classificação...</option>
+            <!-- Options will be populated dynamically -->
         </select>
+        <select id="subproduto-select" class="filter-dropdown">
+            <option value="">Select Subproduto...</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+        <select id="local-select" class="filter-dropdown">
+            <option value="">Select Local...</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+        <select id="freq-select" class="filter-dropdown">
+            <option value="">Select Frequência...</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+        <select id="proprietario-select" class="filter-dropdown">
+            <option value="">Select Proprietário...</option>
+            <!-- Options will be populated dynamically -->
+        </select>
+
+        <!-- Reset Button -->
+        <button id="reset-filters-btn">Reset Filters</button>
     </div>
 
-    <div class="filter-group">
-        <label for="subproduto-select">Subproduto</label>
-        <select id="subproduto-select">
-            <!-- Options will be populated via JavaScript -->
-        </select>
+    <!-- Container for the products table or other display elements -->
+    <div id="products-table">
+        <!-- Table or other elements will be populated dynamically -->
     </div>
 
-    <div class="filter-group">
-        <label for="local-select">Local</label>
-        <select id="local-select">
-            <!-- Options will be populated via JavaScript -->
-        </select>
-    </div>
-
-    <div class="filter-group">
-        <label for="freq-select">Frequência</label>
-        <select id="freq-select">
-            <!-- Options will be populated via JavaScript -->
-        </select>
-    </div>
-
-    <div class="filter-group">
-        <label for="proprietario-select">Proprietário</label>
-        <select id="proprietario-select">
-            <!-- Options will be populated via JavaScript -->
-        </select>
-    </div>
-</div>
-<script>console.log('[dropdown-filter.blade.php] Dropdown filter view loaded');</script>
+    <!-- JavaScript Files -->
+    <script src="js/DropdownFilter.js"></script>
+    <!-- Include other JS files or scripts here -->
+</body>
+</html>

@@ -5,118 +5,99 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\ExtendedProductList;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\QueryException;
 
 class FilterController extends Controller
 {
-    public function getInitialFilterData()
+    // This method can be used to fetch initial filter options for the dropdowns
+    public function getInitialFilterOptions()
     {
-        Log::info('[FilterController] Fetching initial filter data');
+        Log::info('[FilterController] Fetching initial filter options');
         try {
-            $classificacao = ExtendedProductList::distinct()->pluck('Classificação');
-            $subproduto = ExtendedProductList::distinct()->pluck('Subproduto');
-            $local = ExtendedProductList::distinct()->pluck('Local');
-            $freq = ExtendedProductList::distinct()->pluck('freq');
-            $bolsa = ExtendedProductList::distinct()->pluck('bolsa');
+            // Fetch distinct values for each filter option from the database
+            $classificacaoOptions = ExtendedProductList::distinct()->pluck('Classificação');
+            $subprodutoOptions = ExtendedProductList::distinct()->pluck('Subproduto');
+            $localOptions = ExtendedProductList::distinct()->pluck('Local');
+            $freqOptions = ExtendedProductList::distinct()->pluck('freq');
+            $bolsaOptions = ExtendedProductList::distinct()->pluck('bolsa');
 
-            $proprietario = $bolsa->map(function ($item) {
-                return $item == 2 ? 'Sim' : 'Não';
+            // Map 'bolsa' to 'proprietario' for frontend representation
+            $proprietarioOptions = $bolsaOptions->map(function ($item) {
+                return $item == 2 ? 'Sim' : 'Não'; // Ensure we return 'Sim'/'Não' instead of numeric values
             })->unique()->values();
 
-            Log::info('[FilterController] Filter data fetched successfully', [
-                'classificacao' => $classificacao,
-                'subproduto' => $subproduto,
-                'local' => $local,
-                'freq' => $freq,
-                'proprietario' => $proprietario,
+            Log::info('[FilterController] Initial filter options fetched', [
+                'classificacao' => $classificacaoOptions,
+                'subproduto' => $subprodutoOptions,
+                'local' => $localOptions,
+                'freq' => $freqOptions,
+                'proprietario' => $proprietarioOptions,
             ]);
 
+            // Return the filter options as a JSON response
             return response()->json([
-                'classificacao' => $classificacao,
-                'subproduto' => $subproduto,
-                'local' => $local,
-                'freq' => $freq,
-                'proprietario' => $proprietario,
+                'classificacao' => $classificacaoOptions,
+                'subproduto' => $subprodutoOptions,
+                'local' => $localOptions,
+                'freq' => $freqOptions,
+                'proprietario' => $proprietarioOptions,
             ]);
+        } catch (QueryException $e) {
+            Log::error('[FilterController] Database query exception: ' . $e->getMessage());
+            return response()->json(['error' => 'Database query exception'], 500);
         } catch (\Exception $e) {
-            Log::error('[FilterController] Error fetching initial filter data: ' . $e’sgetMessage());
-            return response()->json(['error' => 'Error fetching initial filter data'], 500);
+            Log::error('[FilterController] General exception: ' . $e->getMessage());
+            return response()->json(['error' => 'General exception'], 500);
         }
     }
 
-    public function getDropdownData(Request $request)
-    {
-        Log::info('[FilterController] Fetching dropdown data');
-        try {
-            $query = ExtendedProductList::query();
-
-            // Apply the filters if any are provided in the request
-            foreach ($request->all() as $key => $value) {
-                if (!empty($value)) {
-                    $query->where($key, $value);
-                }
-            }
-
-            // Fetch the data for dropdowns applying distinct to avoid duplicates
-            $classificacao = $query->distinct()->pluck('Classificação');
-            $subproduto = $query->distinct()->pluck('Subproduto');
-            $local = $query->distinct()->pluck('Local');
-            $freq = $query->distinct()->pluck('freq');
-            $proprietario = $query->distinct()->pluck('bolsa');
-
-            return response()->json([
-                'classificacao' => $classificacao,
-                'subproduto' => $subproduto,
-                'local' => $local,
-                'freq' => $freq,
-                'proprietario' => $proprietario->mapWithKeys(function ($item) {
-                    return [$item => $item == 2 ? 'sim' : 'nao'];
-                }),
-            ]);
-        } catch (\Exception $e) {
-            Log::error('[FilterController] Error fetching dropdown data: ' . $e->getMessage());
-            return response()->json(['error' => 'Error fetching dropdown data'], 500);
-        }
-    }
+    // Method to fetch updated filter options based on current selections
     public function getUpdatedFilterOptions(Request $request)
     {
-        Log::info('[FilterController] Fetching updated filter options based on current selections');
+        Log::info('[FilterController] Fetching updated filter options with request: ', $request->all());
         try {
             // Initialize the base query
             $query = ExtendedProductList::query();
 
-            // Dynamically build the query based on provided filters, except for the one being updated
-            $filters = $request->all();
-            foreach ($filters as $key => $value) {
-                // Skip empty filters
+            // Apply filters based on the provided selections in the request
+            foreach ($request->all() as $key => $value) {
                 if (!empty($value)) {
-                    $query->where($key, $value);
+                    // Convert 'proprietario' filter from frontend to 'bolsa' for the database query
+                    if ($key === 'proprietario') {
+                        $value = $value === 'Sim' ? 2 : 'Não';
+                        $query->where('bolsa', $value);
+                        Log::info("Applied filter for 'bolsa' with value: {$value}");
+                    } else {
+                        $query->where($key, $value);
+                        Log::info("Applied filter for '{$key}' with value: {$value}");
+                    }
                 }
             }
 
-            // Fetch the distinct values for each filter, excluding the keys present in the request
+            // Log the SQL query
+            Log::debug('[FilterController] SQL Query: ' . $query->toSql());
+
+            // Fetch the distinct values for the filters that are not currently selected
             $data = [
-                'classificacao' => $request->has('classificacao') ? [] : $query->distinct()->pluck('Classificação'),
-                'subproduto' => $request->has('subproduto') ? [] : $query->distinct()->pluck('Subproduto'),
-                'local' => $request->has('local') ? [] : $query->distinct()->pluck('Local'),
-                'freq' => $request->has('freq') ? [] : $query->distinct()->pluck('freq'),
+                'classificacao' => $request->filled('classificacao') ? [] : $query->distinct()->pluck('Classificação')->all(),
+                'subproduto' => $request->filled('subproduto') ? [] : $query->distinct()->pluck('Subproduto')->all(),
+                'local' => $request->filled('local') ? [] : $query->distinct()->pluck('Local')->all(),
+                'freq' => $request->filled('freq') ? [] : $query->distinct()->pluck('freq')->all(),
+                // Fetch 'bolsa' options and map to 'proprietario' for frontend representation
+                'proprietario'  => $request->filled('proprietario') ? [] : $query->distinct()->pluck('bolsa')->map(function ($item) {
+                    return $item == 2 ? 'Sim' : 'Não'; // Convert back to 'Sim'/'Não' for the frontend
+                })->unique()->values()->all(),
             ];
 
-            // Special handling for 'proprietario' based on 'bolsa'
-            if (!$request->has('proprietario')) {
-                $bolsaValues = $query->distinct()->pluck('bolsa');
-                $data['proprietario'] = $bolsaValues->mapWithKeys(function ($item) {
-                    return [$item => $item == 2 ? 'Sim' : 'Não'];
-                });
-            } else {
-                $data['proprietario'] = [];
-            }
+            Log::info('[FilterController] Updated filter options fetched', $data);
 
             return response()->json($data);
+        } catch (QueryException $e) {
+            Log::error('[FilterController] Database query exception: ' . $e->getMessage());
+            return response()->json(['error' => 'Database query exception'], 500);
         } catch (\Exception $e) {
-            Log::error('[FilterController] Error fetching updated filter options: ' . $e->getMessage());
-            return response()->json(['error' => 'Error fetching updated filter options'], 500);
+            Log::error('[FilterController] General exception: ' . $e->getMessage());
+            return response()->json(['error' => 'General exception'], 500);
         }
     }
-
 }
-
