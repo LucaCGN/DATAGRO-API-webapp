@@ -9,7 +9,7 @@
 <body>
     <div id="filter-container">
         <!-- Dropdowns for each filter category -->
-        <select id="classificacao-select" class="filter-dropdown">
+        <select id="Classificação-select" class="filter-dropdown">
             <option value="">Select Classificação...</option>
             <!-- Options will be populated dynamically -->
         </select>

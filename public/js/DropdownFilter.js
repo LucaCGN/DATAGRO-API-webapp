@@ -13,7 +13,7 @@ window.populateDropdowns = function(data) {
     console.log("Populating dropdowns with data", data);
 
     // Verify that data for each dropdown is an array and log if not
-    if (!Array.isArray(data.classificacao) || !Array.isArray(data.subproduto) ||
+    if (!Array.isArray(data.Classificação) || !Array.isArray(data.subproduto) ||
         !Array.isArray(data.local) || !Array.isArray(data.freq) ||
         !Array.isArray(data.proprietario)) {
         console.error("Expected data for dropdowns to be an array", data);
@@ -29,7 +29,7 @@ window.populateDropdowns = function(data) {
 
     // Populate dropdowns with options
     const dropdowns = {
-        'classificacao-select': document.getElementById('classificacao-select'),
+        'Classificação-select': document.getElementById('Classificação-select'),
         'subproduto-select': document.getElementById('subproduto-select'),
         'local-select': document.getElementById('local-select'),
         'freq-select': document.getElementById('freq-select'),
@@ -66,13 +66,13 @@ window.updateFilters = async function() {
     console.log("[DropdownFilter] Starting filter update process");
 
     // Fetch current filter values from the DOM once
-    const classificacaoElement = document.getElementById('classificacao-select');
+    const ClassificaçãoElement = document.getElementById('Classificação-select');
     const subprodutoElement = document.getElementById('subproduto-select');
     const localElement = document.getElementById('local-select');
     const freqElement = document.getElementById('freq-select');
     const proprietarioElement = document.getElementById('proprietario-select');
 
-    const classificacao = classificacaoElement.value || null;
+    const Classificação = ClassificaçãoElement.value || null;
     const subproduto = subprodutoElement.value || null;
     const local = localElement.value || null;
     let freq = freqElement.value || null;
@@ -84,7 +84,7 @@ window.updateFilters = async function() {
 
     // Log current filter values
     console.log("[DropdownFilter] Current filter values:", {
-        classificacao,
+        Classificação,
         subproduto,
         local,
         freq,
@@ -92,7 +92,7 @@ window.updateFilters = async function() {
     });
 
     // Prepare the filters to be applied, removing any that are null
-    const filterValues = { classificacao, subproduto, local, freq, proprietario };
+    const filterValues = { Classificação, subproduto, local, freq, proprietario };
     Object.keys(filterValues).forEach(key => filterValues[key] == null && delete filterValues[key]);
 
     // Update the window.currentFilters before fetching updated filter options
@@ -155,7 +155,7 @@ window.resetFilters = function() {
 
     // Define the IDs of the dropdown elements
     const dropdownIds = [
-        'classificacao-select',
+        'Classificação-select',
         'subproduto-select',
         'local-select',
         'freq-select',
@@ -233,7 +233,7 @@ document.addEventListener('DOMContentLoaded', (function() {
             }
 
             // Attach event listeners to filter dropdowns
-            const filters = ['classificacao-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
+            const filters = ['Classificação-select', 'subproduto-select', 'local-select', 'freq-select', 'proprietario-select'];
             filters.forEach(filterId => {
                 const filterElement = document.getElementById(filterId);
                 if (filterElement) {

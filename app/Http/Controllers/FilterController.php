@@ -15,7 +15,7 @@ class FilterController extends Controller
         Log::info('[FilterController] Fetching initial filter options');
         try {
             // Fetch distinct values for each filter option from the database
-            $classificacaoOptions = ExtendedProductList::distinct()->pluck('Classificação');
+            $ClassificaçãoOptions = ExtendedProductList::distinct()->pluck('Classificação');
             $subprodutoOptions = ExtendedProductList::distinct()->pluck('Subproduto');
             $localOptions = ExtendedProductList::distinct()->pluck('Local');
             $freqOptions = ExtendedProductList::distinct()->pluck('freq');
@@ -27,7 +27,7 @@ class FilterController extends Controller
             })->unique()->values();
 
             Log::info('[FilterController] Initial filter options fetched', [
-                'classificacao' => $classificacaoOptions,
+                'Classificação' => $ClassificaçãoOptions,
                 'subproduto' => $subprodutoOptions,
                 'local' => $localOptions,
                 'freq' => $freqOptions,
@@ -36,7 +36,7 @@ class FilterController extends Controller
 
             // Return the filter options as a JSON response
             return response()->json([
-                'classificacao' => $classificacaoOptions,
+                'Classificação' => $ClassificaçãoOptions,
                 'subproduto' => $subprodutoOptions,
                 'local' => $localOptions,
                 'freq' => $freqOptions,
@@ -79,7 +79,7 @@ class FilterController extends Controller
 
             // Fetch the distinct values for the filters that are not currently selected
             $data = [
-                'classificacao' => $request->filled('classificacao') ? [] : $query->distinct()->pluck('Classificação')->all(),
+                'Classificação' => $request->filled('Classificação') ? [] : $query->distinct()->pluck('Classificação')->all(),
                 'subproduto' => $request->filled('subproduto') ? [] : $query->distinct()->pluck('Subproduto')->all(),
                 'local' => $request->filled('local') ? [] : $query->distinct()->pluck('Local')->all(),
                 'freq' => $request->filled('freq') ? [] : $query->distinct()->pluck('freq')->all(),
