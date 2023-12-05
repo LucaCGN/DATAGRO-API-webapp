@@ -13,21 +13,23 @@ window.populateDropdowns = function(data) {
     console.log("Populating dropdowns with data", data);
 
     // Verify that data for each dropdown is an array and log if not
-    if (!Array.isArray(data.Classificação) || !Array.isArray(data.subproduto) ||
+    if (!Array.isArray(data['Classificação']) || !Array.isArray(data.subproduto) ||
         !Array.isArray(data.local) || !Array.isArray(data.freq) ||
         !Array.isArray(data.proprietario)) {
         console.error("Expected data for dropdowns to be an array", data);
         return;
     }
 
-    const createNullOption = (placeholder) => {
-        const nullOption = document.createElement('option');
-        nullOption.value = '';
-        nullOption.textContent = placeholder;
-        return nullOption;
+    const createOption = (value, text) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = text || value;
+        return option;
     };
 
-    // Populate dropdowns with options
+    const createNullOption = (placeholder) => createOption('', placeholder);
+
+    // Define the dropdowns
     const dropdowns = {
         'Classificação-select': document.getElementById('Classificação-select'),
         'subproduto-select': document.getElementById('subproduto-select'),
@@ -41,26 +43,27 @@ window.populateDropdowns = function(data) {
 
     // Add options to dropdowns
     Object.entries(dropdowns).forEach(([key, dropdown]) => {
-        if (dropdown) {
-            dropdown.appendChild(createNullOption(`Select ${key.replace('-select', '')}...`));
-            data[key.replace('-select', '')].forEach(value => {
-                const option = document.createElement('option');
-                option.value = value;
-                option.textContent = value;
-                dropdown.appendChild(option);
-            });
-        } else {
-            console.error(`Dropdown not found: ${key}`);
-        }
-    });
+        const filterKey = key.replace('-select', '');
+        dropdown.appendChild(createNullOption(`Select ${filterKey}...`));
 
-    // Check that the initial values are selected in the dropdowns
-    Object.keys(dropdowns).forEach(key => {
-        if (window.currentFilters[key.replace('-select', '')]) {
-            document.getElementById(key).value = window.currentFilters[key.replace('-select', '')];
+        let optionsArray = data[filterKey];
+
+        // If current filter value is not in options, prepend it to the options array
+        if (window.currentFilters[filterKey] && !optionsArray.includes(window.currentFilters[filterKey])) {
+            optionsArray = [window.currentFilters[filterKey], ...optionsArray];
+        }
+
+        optionsArray.forEach(value => {
+            dropdown.appendChild(createOption(value));
+        });
+
+        // Set the selected value if it exists in currentFilters
+        if (window.currentFilters[filterKey]) {
+            dropdown.value = window.currentFilters[filterKey];
         }
     });
 };
+
 
 window.updateFilters = async function() {
     console.log("[DropdownFilter] Starting filter update process");
