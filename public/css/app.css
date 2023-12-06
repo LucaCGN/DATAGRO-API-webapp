@@ -1,206 +1,216 @@
 /* Main application styles */
 body {
-    font-family: Arial, sans-serif;
-    color: #4f4f4f; /* Dark grey for text */
-    background-color: #f8f8f8; /* Light grey background for a clean look */
-}
-
-header {
-    background-color: #fff; /* White background for header */
-    color: #4f4f4f; /* Dark grey for text */
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-}
-
-main {
-    margin: 15px;
-}
-
-footer {
-    background-color: #fff; /* White background for footer */
-    color: #4f4f4f; /* Dark grey for text */
-    text-align: center;
-    padding: 10px;
-    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
-}
-
-.button {
-    background-color: #8dbf42; /* Muted green for buttons */
-    color: #fff;
-    padding: 10px 20px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 16px;
-    margin: 4px 2px;
-    cursor: pointer;
-    border: none; /* Removed border for a cleaner look */
-    border-radius: 5px;
-    transition: background-color 0.3s;
-}
-
-.button:hover {
-    background-color: #6e9830; /* Darker green on hover */
-}
-
-@media screen and (max-width: 600px) {
-    body {
-        font-size: 18px;
-    }
-
-    header, footer {
-        text-align: center;
-        padding: 10px 20px;
-    }
-
-    .responsive-table {
-        overflow-x: auto;
-    }
-}
-
-.animated {
-    animation: fadeIn 1s ease-in;
-}
-
-@keyframes fadeIn {
-    0% {opacity: 0;}
-    100% {opacity: 1;}
-}
-
-.pagination-controls {
-    text-align: center;
-    padding: 10px;
-}
-
-.pagination-controls button {
-    margin: 0 5px;
-    padding: 5px 10px;
-    background-color: #8dbf42; /* Muted green for buttons */
-    color: #fff;
-    border: none; /* Removed border for a cleaner look */
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.pagination-controls button:hover {
-    background-color: #6e9830; /* Darker green on hover */
-}
-
-/* Styles for the filters to be positioned to the left of the tables */
-.content {
-    display: flex;
-    flex-wrap: wrap; /* Ensure wrapping on smaller screens */
-}
-
-.tables-container {
-    margin-left: 20px;
-}
-
-/* Filter container and group styles */
-.filters-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    margin-bottom: 20px;
-}
-
-.filter-group {
-    margin-bottom: 10px;
-}
-
-.filter-group label,
-.filter-group select {
-    width: 100%; /* Full width for mobile, adjust as needed */
-    margin-bottom: 5px; /* Vertical margin for spacing */
-}
-
-.filter-group select {
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    background-color: #fff;
+    font-family: 'Arial', sans-serif;
     color: #4f4f4f;
+    background-color: #f8f8f8;
 }
 
-/* Table styles for consistency */
-.responsive-table table {
-    border-collapse: collapse;
-    width: 100%;
+/* Header styling to match the footer with plain white background */
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background-color: #fff; /* Set background color to white */
 }
 
-.responsive-table th,
-.responsive-table td {
-    border: 1px solid #ddd; /* Light grey border */
-    padding: 8px;
-    text-align: left;
-}
 
-/* Download button container styles */
-.download-buttons-container {
+/* Footer styling with logo and links */
+footer {
     display: flex;
     justify-content: space-between;
-    margin-top: 20px;
+    align-items: center;
+    padding: 10px;
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
 }
 
-.download-buttons-container button {
-    background-color: #8dbf42; /* Muted green */
+.footer-logo {
+    height: 50px;
+    margin-right: auto;
+}
+
+.footer-links h2 {
+    margin-top: 0;
+    color: var(--brand-brown);
+}
+
+.footer-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.footer-links ul li {
+    padding: 5px 0;
+}
+
+.footer-links ul li a {
+    color: #4f4f4f;
+    text-decoration: none;
+}
+
+.footer-links ul li a:hover {
+    text-decoration: underline;
+}
+
+/* Branding colors */
+:root {
+    --brand-green: #8dbf42;
+    --brand-brown: #8B4513;
+}
+
+/* Styling for the "selected-product-name" field */
+.selected-product-display {
+    font-weight: bold;
+    font-style: italic;
+    margin: 20px 0;
+    padding: 10px;
+    background-color: #f2f2f2;
+    text-align: center;
+    display: block;
+}
+
+/* Filter dropdown and buttons styling */
+.filter-dropdown,
+.button {
+    background-color: var(--brand-green);
     color: #fff;
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
-.download-buttons-container button:hover {
-    background-color: #6e9830; /* Darker green on hover */
+/* Specific styling for "Reset Filters" button */
+#reset-filters-btn {
+    background-color: transparent;
+    color: var(--brand-brown);
+    font-weight: bold;
+    padding: 10px 20px;
+    border: 2px solid var(--brand-brown);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
+/* Darken button on hover */
+.filter-dropdown:hover,
+.button:hover,
+#reset-filters-btn:hover {
+    background-color: var(--brand-brown);
+    color: #fff;
+}
+
+/* DataSeries Table Styling */
+.responsive-table table {
+    width: 100%;
+    max-width: 100%;
+    border-collapse: collapse;
+}
+
+.responsive-table th,
+.responsive-table td {
+    border: 1px solid #ddd; /* Style as per your design */
+    padding: 8px; /* Adjust padding as needed */
+    text-align: left; /* Aligns text to the left */
+    min-width: 120px; /* Ensures a minimum width for columns to avoid too much compression */
+}
+
+/* Title Styling */
+h1 {
+    color: var(--brand-brown);
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+/* Responsive design adjustments */
 @media screen and (max-width: 600px) {
-    .filters-container {
-        flex-direction: column; /* Stack filters vertically on small screens */
+    footer {
+        flex-direction: column;
+        align-items: center;
     }
 
-    .filter-group {
-        width: 100%; /* Full width for filter groups on small screens */
+    footer img.logo {
+        margin-bottom: 10px;
     }
 
-    .content,
-    .tables-container {
-        margin-left: 0;
+    footer .links {
+        flex-direction: column;
+        align-items: center;
     }
 
-    .download-buttons-container {
-        flex-direction: column; /* Stack buttons vertically on small screens */
+    .responsive-table {
+        overflow-x: auto;
     }
 
-    .download-buttons-container button {
-        width: 100%; /* Full width for buttons on small screens */
-        margin-bottom: 10px; /* Space between stacked buttons */
+    .responsive-table td,
+    .responsive-table th {
+        padding: 4px; /* Reduces padding on smaller screens for more space */
+        min-width: 80px; /* Reduces minimum width on smaller screens */
+    }
+
+    .filter-dropdown,
+    .button,
+    #reset-filters-btn {
+        width: 100%;
+        margin-bottom: 10px;
     }
 }
 
+/* Consistent vertical rhythm and spacing */
+* {
+    box-sizing: border-box;
+}
+
+/* Spacing and alignment for the main content */
 .main-content {
+    margin: 15px;
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Aligns items to the left */
+    align-items: flex-start;
 }
 
 .tables-container {
-    width: 100%; /* Ensures the container takes full width */
+    width: 100%;
 }
 
-/* Ensure filters and buttons are in a flex container if they need to be horizontal */
+/* Align filters and buttons to the left */
 .filters-container,
 .download-buttons-container {
     display: flex;
-    justify-content: flex-start; /* Aligns items to the left */
-    gap: 10px; /* Provides a gap between items */
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 15px; /* Adjust this value to match the desired spacing */
 }
 
-/* Responsive adjustments */
 @media screen and (max-width: 600px) {
     .filters-container,
     .download-buttons-container {
         flex-direction: column;
     }
 }
+
+.tables-container {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px; /* Adjust this value to match the footer's top margin */
+}
+
+.responsive-table td, .responsive-table th {
+    min-width: 120px; /* or any other appropriate value */
+}
+
+.tables-container {
+    max-width: 100%;
+    overflow-x: auto; /* for horizontal scrolling if necessary */
+}
+
+.responsive-table th:nth-child(1),
+.responsive-table td:nth-child(1) {
+    width: 10%; /* Adjust the percentage based on your design */
+}
+/* Repeat for each column as necessary */
+

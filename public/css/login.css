@@ -27,13 +27,14 @@ main {
     justify-content: center;
 }
 
+
 .login-box {
     background-color: #fff;
-    padding: 1.25rem;
+    padding: 1.25rem; /* Adjusted padding for even spacing */
     border-radius: 0.625rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     width: 100%;
-    max-width: 20rem;
+    max-width: 30rem; /* Increased max-width for a larger container */
 }
 
 .input-group {
@@ -51,7 +52,9 @@ main {
     padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 0.25rem;
+    box-sizing: border-box; /* Include padding and border in the element's width */
 }
+
 
 .button {
     display: block;

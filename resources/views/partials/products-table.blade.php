@@ -15,5 +15,5 @@
     </table>
 </div>
 <div id="selected-product-name" class="selected-product-display"></div>
-    <!-- Pagination Controls populated by ProductsTable.js -->
+
 </div>

@@ -9,7 +9,7 @@
 </head>
 <body>
     <header style="display: flex; justify-content: center; align-items: center; padding: 10px;">
-        <h1>API Mercado Físico - SALES TOOL</h1>
+        <h1>API Mercado Físico - Data Preview Tool</h1>
         <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
     </header>
 
@@ -23,9 +23,10 @@
     </main>
 
 
-  <footer style="display: flex; justify-content: center; align-items: center; padding: 10px;">
-    <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets" style="height: 50px;">
-    <div>
+
+<footer>
+    <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets" class="footer-logo">
+    <div class="footer-links">
         <h2>DATAGRO LINKS</h2>
         <ul>
             <li><a href="https://www.datagro.com/en/" target="_blank">www.datagro.com</a></li>
@@ -33,7 +34,9 @@
             <li><a href="https://www.linkedin.com/company/datagro" target="_blank">Datagro LinkedIn</a></li>
         </ul>
     </div>
-  </footer>
+</footer>
+
+
 
   <!-- Include the JavaScript files -->
   <script type="module" src="{{ asset('js/ProductsTable.js') }}"></script>

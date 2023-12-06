@@ -78,12 +78,12 @@ file_groups = {
     ],
     'templates-css': [ 
         'resources/views/partials/data-series-table.blade.php',
-        'resources/views/partials/download-buttons.blade.php',
-        'resources/views/partials/dropdown-filter.blade.php',
+      #  'resources/views/partials/download-buttons.blade.php',
+       # 'resources/views/partials/dropdown-filter.blade.php',
         'resources/views/partials/products-table.blade.php',
-        'resources/views/auth/login.blade.php',
+        'resources/views/app.blade.php',
         'public/css/app.css',
-        'public/css/login.css',
+     #   'public/css/login.css',
     ],
     'filter-enhancement': [
         'app/Http/Controllers/ProductController.php',
