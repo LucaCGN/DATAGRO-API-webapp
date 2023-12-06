@@ -15,24 +15,24 @@
     </style>
 </head>
 <body>
-    <h2>Produto Escolhido:</h2>
+    <h2>Produto Escolhido: {{ $selectedProduct['longo'] ?? 'N/A' }}</h2>
     <table>
         <thead>
             <tr>
                 <th>Produto</th>
-                <th>Nome</th>
+                <th>Subproduto</th>
+                <th>Local</th>
                 <th>Frequência</th>
-                <th>Primeira Data</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($products as $product)
-                <tr>
-                    @foreach($product as $field)
-                        <td>{{ $field }}</td>
-                    @endforeach
-                </tr>
-            @endforeach
+            <!-- Since it's a single product, no need for a loop here -->
+            <tr>
+                <td>{{ $selectedProduct['Produto'] ?? 'N/A' }}</td>
+                <td>{{ $selectedProduct['Subproduto'] ?? 'N/A' }}</td>
+                <td>{{ $selectedProduct['Local'] ?? 'N/A' }}</td>
+                <td>{{ $selectedProduct['Frequência'] ?? 'N/A' }}</td>
+            </tr>
         </tbody>
     </table>
 
@@ -52,9 +52,13 @@
         <tbody>
             @foreach($dataSeries as $series)
                 <tr>
-                    @foreach($series as $field)
-                        <td>{{ $field }}</td>
-                    @endforeach
+                    <td>{{ $series['cod'] ?? 'N/A' }}</td>
+                    <td>{{ $series['data'] ?? 'N/A' }}</td>
+                    <td>{{ $series['ult'] ?? 'N/A' }}</td>
+                    <td>{{ $series['mini'] ?? 'N/A' }}</td>
+                    <td>{{ $series['maxi'] ?? 'N/A' }}</td>
+                    <td>{{ $series['abe'] ?? 'N/A' }}</td>
+                    <td>{{ $series['volumes'] ?? 'N/A' }}</td>
                 </tr>
             @endforeach
         </tbody>

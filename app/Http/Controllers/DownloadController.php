@@ -72,12 +72,20 @@ class DownloadController extends Controller
             abort(400, "Bad Request: No product data provided");
         }
 
-        $selectedProducts = $data['product'];
+        // Extract the 'longo', 'Local', 'Subproduto', and 'freq' from the product data
+        $selectedProduct = [
+            'longo' => $data['product'][18], // Replace the index with the correct one if necessary
+            'Produto' => $data['product'][2], // 'Código_Produto' at index 1
+            'Local' => $data['product'][4], // 'Local' at index 4
+            'Subproduto' => $data['product'][3], // 'Subproduto' at index 2
+            'Frequência' => $data['product'][28], // 'freq' at index 27
+        ];
+
         $dataSeries = $data['dataSeries'] ?? [];
 
-        // Generate the PDF with only the desired columns
+        // Generate the PDF with the desired product details and existing data series logic
         $pdf = PDF::loadView('pdf_view', [
-            'products' => $selectedProducts,
+            'selectedProduct' => $selectedProduct,
             'dataSeries' => array_map(function ($series) {
                 return [
                     'cod' => $series['cod'],
@@ -87,11 +95,12 @@ class DownloadController extends Controller
                     'maxi' => $series['maxi'],
                     'abe' => $series['abe'],
                     'volumes' => $series['volumes'],
-                    // Exclude 'med' and 'aju' or any other columns you do not want to include
+                    // 'med' and 'aju' are intentionally excluded
                 ];
             }, $dataSeries)
         ]);
 
         return $pdf->download('visible-data.pdf');
     }
+
 }

@@ -44,7 +44,7 @@ function downloadVisibleCSV() {
 function downloadPDF() {
     console.log("[DownloadButtons] Initiating PDF download");
 
-    // Use the window.selectedProductCodeExport for the PDF download
+    // Check if a product has been selected
     if (!window.selectedProductCodeExport) {
         console.error('No product selected for export');
         alert('Please select a product before downloading the PDF.');
@@ -60,19 +60,14 @@ function downloadPDF() {
         return; // Exit the function if selected product data is not found for export
     }
 
+    // Log the selected product for debugging purposes
     console.log('Selected product data:', selectedProductRow);
 
-    // Ensure the data structure matches what the backend expects
-    const selectedProductData = [selectedProductRow].map(product => {
-        return {
-            'Produto': product['Código_Produto'],
-            'Nome': product['Nome'],
-            'Frequência': product['Frequência'],
-            'Primeira Data': product['Primeira Data']
-            // Add other fields if necessary
-        };
-    });
+    // Extract the selected product's data including the 'Código_Produto'
+    // Map the product object to an array of its values
+    const selectedProductData = Object.values(selectedProductRow);
 
+    // Log the extracted data for debugging purposes
     console.log('Extracted product data for PDF:', selectedProductData);
 
     // Fetch data series from the data series table with only the desired columns
@@ -95,7 +90,6 @@ function downloadPDF() {
 
     // Prepare the data payload for the request
     const data = { product: selectedProductData, dataSeries: dataSeriesData };
-
 
     // Make a POST request to the server to generate and download the PDF
     fetch('/download/visible-pdf', {
