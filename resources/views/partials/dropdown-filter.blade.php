@@ -31,7 +31,7 @@
         </select>
 
         <!-- Reset Button -->
-        <button id="reset-filters-btn">Reset Filters</button>
+        <button id="reset-filters-btn">Limpar Filtros</button>
     </div>
 
     <!-- Container for the products table or other display elements -->

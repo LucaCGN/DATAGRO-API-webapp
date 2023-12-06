@@ -147,7 +147,7 @@ function updateSelectedProductName() {
                 productNameDisplay.textContent = `DataSeries for: ${selectedProduct.longo}`;
             }
         } else {
-            productNameDisplay.textContent = 'Please select a product in the table above';
+            productNameDisplay.textContent = 'Por favor selecione um produto na tabela acima';
         }
     }
 }
