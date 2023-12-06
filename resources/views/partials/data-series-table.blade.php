@@ -10,8 +10,6 @@
                 <th>abe</th>
                 <th>volumes</th>
                 <th>cab</th>
-                <th>med</th>
-                <th>aju</th>
             </tr>
         </thead>
         <tbody id="data-series-body">

@@ -84,5 +84,4 @@ class DownloadController extends Controller
 
         return $pdf->download('visible-data.pdf');
     }
-
 }

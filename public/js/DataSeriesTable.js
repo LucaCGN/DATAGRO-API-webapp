@@ -25,8 +25,6 @@ window.loadDataSeries = function(productCode) {
                     <td>${series.abe}</td>
                     <td>${series.volumes}</td>
                     <td>${series.cab}</td>
-                    <td>${series.med}</td>
-                    <td>${series.aju}</td>
                 </tr>
             `).join('');
             console.log("[DataSeriesTable] Data series successfully rendered in table");

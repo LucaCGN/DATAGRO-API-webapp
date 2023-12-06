@@ -51,6 +51,7 @@ function downloadPDF() {
 
 
 
+
 function downloadVisibleCSV() {
     // Gather data from the products table
     const productsData = Array.from(document.querySelectorAll('#products-table tbody tr')).map(row => {
