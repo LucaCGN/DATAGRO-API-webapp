@@ -9,7 +9,7 @@
 <body class="login-page">
   <header class="login-header">
     <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
-    <h2>Markets Team Data Tools</h2>
+    <h2>DATAGRO Markets - Data Preview Platform</h2>
   </header>
 
   <main class="login-container">
@@ -39,14 +39,6 @@
   </main>
 
   <footer class="login-footer">
-    <div class="links-container">
-      <h2>DATAGRO LINKS</h2>
-      <ul>
-          <li><a href="https://www.datagro.com/en/" target="_blank">www.datagro.com</a></li>
-          <li><a href="https://portal.datagro.com/" target="_blank">portal.datagro.com</a></li>
-          <li><a href="https://www.linkedin.com/company/datagro" target="_blank">Datagro LinkedIn</a></li>
-      </ul>
-    </div>
     <!-- You can keep the image if it is part of the design -->
     <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets Logo" style="height: 50px;">
   </footer>

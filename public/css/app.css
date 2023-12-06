@@ -5,15 +5,30 @@ body {
     background-color: #f8f8f8;
 }
 
-/* Header styling to match the footer with plain white background */
+/* Header styling with the logo aligned to the left and the background set to white */
 header {
     display: flex;
-    justify-content: center;
     align-items: center;
-    padding: 10px;
+    padding: 15px; /* Reduced padding to reduce total height */
     background-color: #fff; /* Set background color to white */
 }
 
+/* Ensure the logo fits properly, aligned to the left, with adjusted size */
+header img {
+    height: auto; /* Keep the height auto to maintain aspect ratio */
+    width: auto; /* Width set to auto to adjust with height */
+    max-height: 60px; /* Example fixed max-height, adjust to your preference */
+    order: -1; /* This ensures that the logo comes first within the flex container */
+}
+
+/* Title styling with flex-grow to center the title text */
+header h1 {
+    flex-grow: 1;
+    text-align: center;
+    color: #4f4f4f;
+    margin: 0; /* Keep the margin 0 to align properly */
+    font-size: 1em; /* You can adjust the font size if necessary */
+}
 
 /* Footer styling with logo and links */
 footer {

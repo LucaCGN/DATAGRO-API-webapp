@@ -8,9 +8,9 @@
   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 </head>
 <body>
-    <header style="display: flex; justify-content: center; align-items: center; padding: 10px;">
-        <h1>API Mercado Físico - Data Preview Tool</h1>
-        <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
+    <header>
+        <h1>DATAGRO Markets - Data Preview Platform</h1>
+        <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo">
     </header>
 
     <main class="main-content">
@@ -26,14 +26,6 @@
 
 <footer>
     <img src="{{ asset('images/Logo - Banner Médio - Markets - 2.png') }}" alt="Datagro Markets" class="footer-logo">
-    <div class="footer-links">
-        <h2>DATAGRO LINKS</h2>
-        <ul>
-            <li><a href="https://www.datagro.com/en/" target="_blank">www.datagro.com</a></li>
-            <li><a href="https://portal.datagro.com/" target="_blank">portal.datagro.com</a></li>
-            <li><a href="https://www.linkedin.com/company/datagro" target="_blank">Datagro LinkedIn</a></li>
-        </ul>
-    </div>
 </footer>
 
 

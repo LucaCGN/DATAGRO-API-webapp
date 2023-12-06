@@ -8,17 +8,8 @@ const freqToWord = {
     'A': 'Anual'
 };
 
-// Function to dynamically populate dropdowns with selection and correct placeholder text
 window.populateDropdowns = function(data) {
     console.log("Populating dropdowns with data", data);
-
-    // Verify that data for each dropdown is an array and log if not
-    if (!Array.isArray(data['Classificação']) || !Array.isArray(data.subproduto) ||
-        !Array.isArray(data.local) || !Array.isArray(data.freq) ||
-        !Array.isArray(data.proprietario)) {
-        console.error("Expected data for dropdowns to be an array", data);
-        return;
-    }
 
     // Helper function to create a new option element
     const createOption = (value, text) => {
@@ -29,48 +20,94 @@ window.populateDropdowns = function(data) {
     };
 
     // Helper function to create a placeholder option
-    const createNullOption = (placeholder) => {
-        const option = createOption('', placeholder);
+    const createPlaceholderOption = (placeholder) => {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = placeholder;
         option.disabled = true; // Disable the placeholder option
         option.selected = true; // Set the placeholder option as selected by default
+        option.hidden = true; // Hide the placeholder option
         return option;
     };
 
-    // Define the dropdowns
+    // Define the dropdowns and their corresponding placeholder text
     const dropdowns = {
-        'Classificação-select': document.getElementById('Classificação-select'),
-        'subproduto-select': document.getElementById('subproduto-select'),
-        'local-select': document.getElementById('local-select'),
-        'freq-select': document.getElementById('freq-select'),
-        'proprietario-select': document.getElementById('proprietario-select')
+        'Classificação-select': {
+            element: document.getElementById('Classificação-select'),
+            placeholder: 'Produto'
+        },
+        'subproduto-select': {
+            element: document.getElementById('subproduto-select'),
+            placeholder: 'Subproduto'
+        },
+        'local-select': {
+            element: document.getElementById('local-select'),
+            placeholder: 'Local'
+        },
+        'freq-select': {
+            element: document.getElementById('freq-select'),
+            placeholder: 'Frequência',
+            data: data['freq'].map(code => ({
+                value: code, // the actual value to be sent to the backend
+                text: freqToWord[code] || code // the text to show the user
+            }))
+        },
+        'proprietario-select': {
+            element: document.getElementById('proprietario-select'),
+            placeholder: 'Proprietário'
+        }
     };
 
-    // Reset dropdowns to ensure they are clear before adding new options
-    Object.values(dropdowns).forEach(dropdown => dropdown.innerHTML = '');
+        // Special handling for 'freq-select' dropdown to convert codes to words
+        const freqDropdown = dropdowns['freq-select'].element;
+        freqDropdown.innerHTML = ''; // Clear existing options
+        freqDropdown.appendChild(createPlaceholderOption(dropdowns['freq-select'].placeholder));
 
-    // Add options to dropdowns
-    Object.entries(dropdowns).forEach(([key, dropdown]) => {
-        const filterKey = key.replace('-select', '');
-        dropdown.appendChild(createNullOption(`Select ${filterKey}...`)); // Create and append the placeholder
-
-        let optionsArray = data[filterKey];
-
-        // Prepend the current filter value to the options array if it's not present
-        if (window.currentFilters[filterKey] && !optionsArray.includes(window.currentFilters[filterKey])) {
-            optionsArray = [window.currentFilters[filterKey], ...optionsArray];
-        }
-
-        optionsArray.forEach(value => {
-            // Append actual options to the dropdown
-            dropdown.appendChild(createOption(value));
+        dropdowns['freq-select'].data.forEach(({value, text}) => {
+            freqDropdown.appendChild(createOption(value, text));
         });
 
-        // Set the selected value if it exists in currentFilters and is not the placeholder
-        if (window.currentFilters[filterKey] && optionsArray.includes(window.currentFilters[filterKey])) {
-            dropdown.value = window.currentFilters[filterKey];
+        // Set the selected value for 'freq-select' if one exists
+        if (window.currentFilters && window.currentFilters['freq']) {
+            // Map the frequency code to its word representation for the dropdown
+            const freqWord = freqToWord[window.currentFilters['freq']] || window.currentFilters['freq'];
+            freqDropdown.value = freqWord; // Set the dropdown to show the word to the user
+        }
+
+        // Add options to other dropdowns, excluding the 'freq' dropdown
+        Object.entries(dropdowns).forEach(([key, dropdownInfo]) => {
+            if (key !== 'freq-select') {
+            const filterKey = key.replace('-select', '');
+            const { element, placeholder } = dropdownInfo;
+
+            // Clear previous options and append the placeholder option to the dropdown
+            element.innerHTML = '';
+            element.appendChild(createPlaceholderOption(placeholder));
+
+            // Get the data for the current dropdown and add options
+            data[filterKey].forEach(value => {
+                element.appendChild(createOption(value, value));
+            });
+
+            // Set the selected value if it exists in currentFilters
+            if (window.currentFilters && window.currentFilters[filterKey]) {
+                const selectedValue = window.currentFilters[filterKey];
+                const selectedOption = Array.from(element.options).find(option => option.value === selectedValue);
+                if (selectedOption) {
+                    element.value = selectedValue;
+                } else {
+                    // The selected value is not in the options list, append it
+                    element.appendChild(createOption(selectedValue, selectedValue));
+                    element.value = selectedValue;
+                }
+            }
         }
     });
 };
+
+
+
+
 
 
 window.updateFilters = async function() {
@@ -96,10 +133,11 @@ window.updateFilters = async function() {
         proprietario
     });
 
-    let freq = freqElement.value;
-    console.log("[DropdownFilter] Initial freq value:", freq);
-
-
+    // Retrieve the frequency value and convert it back to code if it's not the placeholder
+    let freq = freqElement.options[freqElement.selectedIndex].value;
+    if (freq && freqToWord[freq]) {
+        freq = Object.keys(freqToWord).find(key => freqToWord[key] === freq) || freq;
+    }
 
 
     // Check if the displayed text for 'proprietario' is the placeholder and set it to null if so
