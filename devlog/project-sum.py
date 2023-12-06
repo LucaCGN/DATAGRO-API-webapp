@@ -64,6 +64,14 @@ file_groups = {
         'database/migrations/2023_03_01_120000_create_extended_product_list_table.php',
         'app/Console/Commands/FetchDatagroData.php',
     ],
+    'backend&models': [
+        'database/seeders/ExtendedProductListTableSeeder.php',
+        'database/migrations/2023_03_01_120001_create_data_series_table.php',
+        'database/migrations/2023_03_01_120000_create_extended_product_list_table.php',
+        'app/Console/Commands/FetchDatagroData.php',
+        'app/Models/DataSeries.php',
+        'app/Models/ExtendedProductList.php',
+    ],
     'products-table': [
         'app/Models/ExtendedProductList.php',  
         'resources/views/partials/products-table.blade.php',
@@ -89,11 +97,11 @@ file_groups = {
         'app/Http/Controllers/ProductController.php',
         'app/Http/Controllers/FilterController.php',
         'public/js/DropdownFilter.js',
-      #   'public/js/ProductsTable.js',
-   #      'routes/web.php',
-   #      'resources/views/partials/dropdown-filter.blade.php',
-   #      'app/Models/ExtendedProductList.php',  
- #       'resources/views/partials/products-table.blade.php',
+        'public/js/ProductsTable.js',
+        'routes/web.php',
+        'resources/views/partials/dropdown-filter.blade.php',
+        'app/Models/ExtendedProductList.php',  
+        'resources/views/partials/products-table.blade.php',
     ],    
     'all': file_paths  # The 'all' group contains all the files
 }

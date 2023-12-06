@@ -76,7 +76,7 @@ window.populateDropdowns = function(data) {
 window.updateFilters = async function() {
     console.log("[DropdownFilter] Starting filter update process");
 
-    // Fetch current filter values from the DOM once
+    // Fetch current filter values from the DOM
     const ClassificaçãoElement = document.getElementById('Classificação-select');
     const subprodutoElement = document.getElementById('subproduto-select');
     const localElement = document.getElementById('local-select');
@@ -86,26 +86,34 @@ window.updateFilters = async function() {
     const Classificação = ClassificaçãoElement.value || null;
     const subproduto = subprodutoElement.value || null;
     const local = localElement.value || null;
-    let freq = freqElement.value || null;
     let proprietario = proprietarioElement.value || null;
 
-    // Convert frequency to code if needed
-    if (freq && freq in freqToWord) {
-        freq = Object.keys(freqToWord).find(key => freqToWord[key] === freq);
-    }
+    console.log("[DropdownFilter] Retrieved values from DOM elements:", {
+        Classificação,
+        subproduto,
+        local,
+        freq: freqElement.value,
+        proprietario
+    });
+
+    let freq = freqElement.value;
+    console.log("[DropdownFilter] Initial freq value:", freq);
+
+
+
 
     // Check if the displayed text for 'proprietario' is the placeholder and set it to null if so
-    if (proprietarioElement.selectedIndex === 0) { // Assuming first option is placeholder
+    if (proprietarioElement.selectedIndex === 0) {
         proprietario = null;
     }
 
     // Log current filter values
-    console.log("[DropdownFilter] Current filter values:", {
+    console.log("[DropdownFilter] Filter values before removing nulls:", {
         Classificação,
         subproduto,
         local,
         freq,
-        proprietario // Log the text value that will be sent to the backend
+        proprietario
     });
 
     // Prepare the filters to be applied, removing any that are null or empty
@@ -114,7 +122,7 @@ window.updateFilters = async function() {
         subproduto,
         local,
         freq,
-        proprietario // Use the text value for 'proprietario'
+        proprietario
     };
 
     // Remove any filters that are null or empty
@@ -123,6 +131,8 @@ window.updateFilters = async function() {
             delete filterValues[key];
         }
     });
+
+    console.log("[DropdownFilter] Filter values after removing nulls:", filterValues);
 
     // Update the window.currentFilters with the new values
     window.currentFilters = { ...window.currentFilters, ...filterValues };
