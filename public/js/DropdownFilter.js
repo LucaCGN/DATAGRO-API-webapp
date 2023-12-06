@@ -134,11 +134,10 @@ window.updateFilters = async function() {
     });
 
     // Retrieve the frequency value and convert it back to code if it's not the placeholder
-    let freq = freqElement.options[freqElement.selectedIndex].value;
+    let freq = freqElement.value;
     if (freq && freqToWord[freq]) {
         freq = Object.keys(freqToWord).find(key => freqToWord[key] === freq) || freq;
     }
-
 
     // Check if the displayed text for 'proprietario' is the placeholder and set it to null if so
     if (proprietarioElement.selectedIndex === 0) {

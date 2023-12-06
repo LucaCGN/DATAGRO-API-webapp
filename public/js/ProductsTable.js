@@ -65,15 +65,20 @@ window.populateProductsTable = function(products) {
 
     // Only populate if there are products
     if (products.length > 0) {
-        tableBody.innerHTML = products.map(product => `
-            <tr>
-                <td><input type="radio" name="productSelect" value="${product['Código_Produto']}" onchange="selectProduct('${product['Código_Produto']}')"></td>
-                <td>${product.Classificação}</td>
-                <td>${product.longo}</td>
-                <td>${product.freq}</td>
-                <td>${product.alterado}</td>
-            </tr>
-        `).join('');
+        tableBody.innerHTML = products.map(product => {
+            // Convert the frequency code to the corresponding word
+            const freqWord = freqToWord[product.freq] || product.freq;
+
+            return `
+                <tr>
+                   <td><input type="radio" name="productSelect" value="${product['Código_Produto']}" onchange="selectProduct('${product['Código_Produto']}')"></td>
+                   <td>${product.Classificação}</td>
+                   <td>${product.longo}</td>
+                   <td>${freqWord}</td>
+                   <td>${product.alterado}</td>
+                </tr>
+            `;
+        }).join('');
         console.log("[ProductsTable] Products table populated with products.");
     } else {
         // Show a message or an empty state if there are no products
@@ -82,7 +87,8 @@ window.populateProductsTable = function(products) {
     }
 
     window.loadedProducts = products;
-};
+ };
+
 
 // Pagination rendering function
 window.renderPagination = function() {
