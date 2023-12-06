@@ -15,7 +15,7 @@ class DownloadController extends Controller
 
         // Decode the JSON data received from the frontend
         $data = json_decode($request->getContent(), true);
-        $products = $data['products'];
+        $selectedProduct = $data['product']; // Expecting the selected product's data
         $dataSeries = $data['dataSeries'];
 
         // Create a CSV file in memory
@@ -24,18 +24,16 @@ class DownloadController extends Controller
         // Set the headers for proper UTF-8 encoding
         fputs($file, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
 
-        // Manually add headers for the products table
-        $productHeaders = ['Produto', 'Nome', 'Frequência', 'Primeira Data'];
-        fputcsv($file, $productHeaders);
-
-        // Add product rows
-        foreach ($products as $product) {
-            fputcsv($file, $product);
+        // If a product has been selected, add its data to the CSV
+        if ($selectedProduct) {
+            // Manually add headers for the selected product data
+            $productHeaders = ['Produto', 'Nome', 'Frequência', 'Primeira Data'];
+            fputcsv($file, $productHeaders);
+            fputcsv($file, $selectedProduct);
         }
 
-        // Add a separator line and a blank line for spacing
-        fputcsv($file, array_fill(0, count($productHeaders), ''));
-        fputcsv($file, array_fill(0, count($productHeaders), ''));
+        // Add a blank line for spacing between product data and data series
+        fputcsv($file, []);
 
         // Manually add headers for the data series table
         $dataSeriesHeaders = ['Cod', 'data', 'ult', 'mini', 'maxi', 'abe', 'volumes', 'med', 'aju'];
@@ -56,7 +54,7 @@ class DownloadController extends Controller
         // Create a response and add headers for file download
         $response = response($csv)
             ->header('Content-Type', 'text/csv; charset=UTF-8')
-            ->header('Content-Disposition', 'attachment; filename="api-preview-data.csv"')
+            ->header('Content-Disposition', 'attachment; filename="visible-data.csv"')
             ->header('Pragma', 'no-cache')
             ->header('Expires', '0');
 
@@ -69,18 +67,30 @@ class DownloadController extends Controller
 
         $data = json_decode($request->getContent(), true);
 
-        if($data === null) {
-            Log::error('DownloadController: downloadPDF method called without proper data');
-            abort(400, "Bad Request: No data provided");
+        if (empty($data['product'])) {
+            Log::error('DownloadController: downloadPDF method called with empty product data');
+            abort(400, "Bad Request: No product data provided");
         }
 
-        $products = $data['products'] ?? [];
+        $selectedProducts = $data['product'];
         $dataSeries = $data['dataSeries'] ?? [];
 
-        Log::info('Products:', $products);
-        Log::info('Data Series:', $dataSeries);
-
-        $pdf = PDF::loadView('pdf_view', ['products' => $products, 'dataSeries' => $dataSeries]);
+        // Generate the PDF with only the desired columns
+        $pdf = PDF::loadView('pdf_view', [
+            'products' => $selectedProducts,
+            'dataSeries' => array_map(function ($series) {
+                return [
+                    'cod' => $series['cod'],
+                    'data' => $series['data'],
+                    'ult' => $series['ult'],
+                    'mini' => $series['mini'],
+                    'maxi' => $series['maxi'],
+                    'abe' => $series['abe'],
+                    'volumes' => $series['volumes'],
+                    // Exclude 'med' and 'aju' or any other columns you do not want to include
+                ];
+            }, $dataSeries)
+        ]);
 
         return $pdf->download('visible-data.pdf');
     }

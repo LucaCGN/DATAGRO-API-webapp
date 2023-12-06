@@ -118,11 +118,13 @@ window.renderPagination = function() {
 
 window.selectProduct = function(productCode) {
     console.log("Selected product code: ", productCode);
-    if (selectedProductCode !== productCode) {
-        selectedProductCode = productCode;
+    if (window.selectedProductCode !== productCode) {
+        window.selectedProductCode = productCode;
+        window.selectedProductCodeExport = productCode; // Duplicate the product code for export
         window.loadDataSeries(productCode);
     } else {
-        selectedProductCode = null;
+        window.selectedProductCode = null;
+        window.selectedProductCodeExport = null; // Clear the export product code as well
         clearDataSeriesView(); // Clear DataSeries if the same product is unselected
     }
     updateSelectedProductName(); // Update the display of the selected product name

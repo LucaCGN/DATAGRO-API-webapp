@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <h2>Products</h2>
+    <h2>Produto Escolhido:</h2>
     <table>
         <thead>
             <tr>
@@ -36,7 +36,7 @@
         </tbody>
     </table>
 
-    <h2>Data Series</h2>
+    <h2>Data Series:</h2>
     <table>
         <thead>
             <tr>
@@ -47,8 +47,6 @@
                 <th>maxi</th>
                 <th>abe</th>
                 <th>volumes</th>
-                <th>med</th>
-                <th>aju</th>
             </tr>
         </thead>
         <tbody>
