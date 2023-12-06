@@ -9,7 +9,7 @@
 <body class="login-page">
   <header class="login-header">
     <img src="{{ asset('images/Logo - Quadrado.png') }}" alt="Datagro Logo" style="height: 50px;">
-    <h2>DATAGRO Markets - Data Preview Platform</h2>
+    <h1>DATAGRO Markets - Data Preview Platform</h1>
   </header>
 
   <main class="login-container">
