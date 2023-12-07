@@ -120,15 +120,16 @@ window.selectProduct = function(productCode) {
     console.log("Selected product code: ", productCode);
     if (window.selectedProductCode !== productCode) {
         window.selectedProductCode = productCode;
-        window.selectedProductCodeExport = productCode; // Duplicate the product code for export
+        window.selectedProductCodeExport = productCode; // Set the export code
         window.loadDataSeries(productCode);
     } else {
         window.selectedProductCode = null;
-        window.selectedProductCodeExport = null; // Clear the export product code as well
-        clearDataSeriesView(); // Clear DataSeries if the same product is unselected
+        window.selectedProductCodeExport = null; // Clear the export code
+        clearDataSeriesView();
     }
     updateSelectedProductName(); // Update the display of the selected product name
 };
+
 
 
 function clearDataSeriesView() {
@@ -142,17 +143,15 @@ function clearDataSeriesView() {
 function updateSelectedProductName() {
     let productNameDisplay = document.getElementById('selected-product-name');
     if (productNameDisplay) {
-        if (selectedProductCode) {
-            // Find the selected product from the loaded products array
-            const selectedProduct = window.loadedProducts.find(product => product['Código_Produto'] === selectedProductCode);
-            if (selectedProduct) {
-                productNameDisplay.textContent = `DataSeries for: ${selectedProduct.longo}`;
-            }
+        if (window.selectedProductCode) {
+            const selectedProduct = window.loadedProducts.find(product => product['Código_Produto'] === window.selectedProductCode);
+            productNameDisplay.textContent = selectedProduct ? `DataSeries for: ${selectedProduct.longo}` : 'Product not found';
         } else {
             productNameDisplay.textContent = 'Por favor selecione um produto na tabela acima';
         }
     }
 }
+
 
 document.addEventListener('DOMContentLoaded', function () {
     console.log("[ProductsTable] Page loaded - Starting to load products.");
