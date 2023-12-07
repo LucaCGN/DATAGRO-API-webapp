@@ -15,7 +15,6 @@ class DownloadController extends Controller
 
         // Decode the JSON data received from the frontend
         $data = json_decode($request->getContent(), true);
-        $selectedProduct = $data['product']; // Expecting the selected product's data
         $dataSeries = $data['dataSeries'];
 
         // Create a CSV file in memory
@@ -23,17 +22,6 @@ class DownloadController extends Controller
 
         // Set the headers for proper UTF-8 encoding
         fputs($file, $bom =( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
-
-        // If a product has been selected, add its data to the CSV
-        if ($selectedProduct) {
-            // Manually add headers for the selected product data
-            $productHeaders = ['Produto', 'Nome', 'Frequência', 'Primeira Data'];
-            fputcsv($file, $productHeaders);
-            fputcsv($file, $selectedProduct);
-        }
-
-        // Add a blank line for spacing between product data and data series
-        fputcsv($file, []);
 
         // Manually add headers for the data series table
         $dataSeriesHeaders = ['Cod', 'data', 'ult', 'mini', 'maxi', 'abe', 'volumes', 'med', 'aju'];
