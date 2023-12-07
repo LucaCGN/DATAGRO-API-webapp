@@ -40,6 +40,7 @@ return new class extends Migration {
             $table->string('dex')->nullable();
             $table->dateTime('inserido')->nullable();
             $table->dateTime('alterado')->nullable();
+            $table->date('oldest_data_date')->nullable();
             $table->timestamps();
         });
     }

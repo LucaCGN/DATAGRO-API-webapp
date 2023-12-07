@@ -12,7 +12,7 @@ class ExtendedProductList extends Model
         'bolsa', 'roda', 'fonte', 'tav', 'subtav', 'decimais', 'correlatos',
         'empresa', 'contrato', 'subproduto_id', 'entcode', 'nome', 'longo', 'descr',
         'codf', 'bd', 'palavras', 'habilitado', 'lote', 'rep', 'vln', 'dia',
-        'freq', 'dex', 'inserido', 'alterado'
+        'freq', 'dex', 'inserido', 'alterado', 'oldest_data_date',
     ];
     public $timestamps = true;
 
