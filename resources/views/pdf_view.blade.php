@@ -42,10 +42,10 @@
             <tr>
                 <th>Cod</th>
                 <th>data</th>
-                <th>ult</th>
-                <th>mini</th>
-                <th>maxi</th>
                 <th>abe</th>
+                <th>maxi</th>
+                <th>mini</th>
+                <th>ult</th>
                 <th>volumes</th>
             </tr>
         </thead>
