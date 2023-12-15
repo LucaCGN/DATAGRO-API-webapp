@@ -6,44 +6,32 @@ let selectedProductCode = null;
 window.currentFilters = {};
 window.showingAllRecords = false;
 
-// Function to load products based on the current page and filters
-window.loadProducts = async function(page = 1, filters = window.currentFilters) {
-    console.log(`Fetching products for page: ${page} with filters`, filters);
+// Modify loadProducts function to fetch all products without pagination
+window.loadProducts = async function(filters = window.currentFilters) {
+    console.log(`Fetching products with filters`, filters);
 
-    // Building the query URL
     const query = new URLSearchParams(filters).toString();
-    const url = `/products?page=${page}&${query}`;
+    const url = `/products?${query}`;
 
-    // Headers for the fetch call
     const headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
     };
 
-    // Fetching products
-    console.log("[ProductsTable] Fetching products with URL:", url);
     try {
-        const response = await fetch(url, {
-            method: 'GET',
-            headers: headers,
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
+        const response = await fetch(url, { method: 'GET', headers: headers });
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
-        console.log("[ProductsTable] Products data received:", data);
         populateProductsTable(data.data || []);
-        renderPagination(data.current_page, data.last_page);
     } catch (error) {
         console.error("[ProductsTable] Failed to load products", error);
-        populateProductsTable([]); // Show empty state or handle error appropriately
+        populateProductsTable([]);
     }
 };
 
 
+// Populate the products table
 // Populate the products table
 window.populateProductsTable = function(products) {
     console.log("[ProductsTable] Populating products table with data:", products);
@@ -52,12 +40,6 @@ window.populateProductsTable = function(products) {
     if (!tableBody) {
         console.error("Table body not found");
         return;
-    }
-
-    // Reset selected product and clear DataSeries view if products list changes
-    if (selectedProductCode !== null) {
-        selectedProductCode = null;
-        clearDataSeriesView(); // Function to clear DataSeries view
     }
 
     // Clear the table before populating new data
@@ -69,13 +51,16 @@ window.populateProductsTable = function(products) {
             // Convert the frequency code to the corresponding word
             const freqWord = freqToWord[product.freq] || product.freq;
 
+            // Extract only the date part from the 'alterado' value
+            const dateOnly = product.alterado.split(' ')[0]; // Splits the string by space and takes the first part
+
             return `
                 <tr>
                    <td><input type="radio" name="productSelect" value="${product['Código_Produto']}" onchange="selectProduct('${product['Código_Produto']}')"></td>
                    <td>${product.Classificação}</td>
                    <td>${product.longo}</td>
                    <td>${freqWord}</td>
-                   <td>${product.alterado}</td>
+                   <td>${dateOnly}</td> <!-- Display only the date part -->
                 </tr>
             `;
         }).join('');
@@ -87,33 +72,11 @@ window.populateProductsTable = function(products) {
     }
 
     window.loadedProducts = products;
- };
-
-
-// Pagination rendering function
-window.renderPagination = function() {
-    console.log("[ProductsTable] Rendering pagination.");
-
-    const paginationDiv = document.getElementById('products-pagination');
-    if (!paginationDiv) {
-        console.error("Pagination div not found");
-        return;
-    }
-
-    let html = '';
-    if (window.currentPage > 1) {
-        html += `<button onclick="window.loadProducts(${window.currentPage - 1}, window.currentFilters)">Previous</button>`;
-    }
-
-    html += `<span>Page ${window.currentPage} of ${window.totalPages}</span>`;
-
-    if (window.currentPage < window.totalPages) {
-        html += `<button onclick="window.loadProducts(${window.currentPage + 1}, window.currentFilters)">Next</button>`;
-    }
-
-    paginationDiv.innerHTML = html;
-    console.log("[ProductsTable] Pagination rendered.");
 };
+
+
+
+
 
 
 window.selectProduct = function(productCode) {

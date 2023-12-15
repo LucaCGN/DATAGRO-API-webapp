@@ -134,6 +134,12 @@ footer {
     max-width: 100%;
     border-collapse: collapse;
 }
+.responsive-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: white; /* or any other color that matches your design */
+    z-index: 10; /* to ensure the header stays above the content when scrolling */
+}
 
 .responsive-table th,
 .responsive-table td {
@@ -238,4 +244,23 @@ h1 {
     width: 10%; /* Adjust the percentage based on your design */
 }
 /* Repeat for each column as necessary */
+
+/* Products Table Styling */
+#products-table {
+    max-height: 500px; /* Adjust the height as needed */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+/* Style adjustments for table rows and cells */
+#products-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#products-table th,
+#products-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
 

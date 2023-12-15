@@ -13,7 +13,7 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         Log::info('ProductController: index method called', $request->all());
-        $perPage = 10;
+        $perPage = 200;
 
         try {
             $query = ExtendedProductList::query();
