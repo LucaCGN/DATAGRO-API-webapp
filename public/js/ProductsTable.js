@@ -32,7 +32,6 @@ window.loadProducts = async function(filters = window.currentFilters) {
 
 
 // Populate the products table
-// Populate the products table
 window.populateProductsTable = function(products) {
     console.log("[ProductsTable] Populating products table with data:", products);
 
