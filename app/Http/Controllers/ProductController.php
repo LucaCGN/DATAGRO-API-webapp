@@ -21,11 +21,11 @@ class ProductController extends Controller
             // Adjusted logic for 'proprietario' filter conversion
             if ($request->filled('proprietario')) {
                 if ($request->input('proprietario') === 'Sim') {
-                    $query->where('bolsa', 2);
-                    Log::info("Applying filter: bolsa with value: 2");
+                    $query->where('fonte', 3);
+                    Log::info("Applying filter: fonte with value: 2");
                 } elseif ($request->input('proprietario') === 'Não') {
-                    $query->where('bolsa', '<>', 2);
-                    Log::info("Applying filter: bolsa with values not equal to 2");
+                    $query->where('fonte', '<>', 3);
+                    Log::info("Applying filter: fonte with values not equal to 2");
                 }
             }
 

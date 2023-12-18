@@ -19,10 +19,10 @@ class FilterController extends Controller
             $subprodutoOptions = ExtendedProductList::distinct()->pluck('Subproduto');
             $localOptions = ExtendedProductList::distinct()->pluck('Local');
             $freqOptions = ExtendedProductList::distinct()->pluck('freq');
-            $bolsaOptions = ExtendedProductList::distinct()->pluck('bolsa');
+            $fonteOptions = ExtendedProductList::distinct()->pluck('fonte');
 
-            // Map 'bolsa' to 'proprietario' for frontend representation
-            $proprietarioOptions = $bolsaOptions->map(function ($item) {
+            // Map 'fonte' to 'proprietario' for frontend representation
+            $proprietarioOptions = $fonteOptions->map(function ($item) {
                 return $item == 2 ? 'Sim' : 'Não'; // Ensure we return 'Sim'/'Não' instead of numeric values
             })->unique()->values();
 
@@ -62,14 +62,14 @@ class FilterController extends Controller
             // Apply filters based on the provided selections in the request
             foreach ($request->all() as $key => $value) {
                 if (!empty($value)) {
-                    // Convert 'proprietario' filter from frontend to 'bolsa' for the database query
+                    // Convert 'proprietario' filter from frontend to 'fonte' for the database query
                     if ($key === 'proprietario') {
                         if ($value === 'Sim') {
-                            $query->where('bolsa', 2);
+                            $query->where('fonte', 2);
                         } elseif ($value === 'Não') { // Corrected typo here
-                            $query->where('bolsa', '<>', 2);
+                            $query->where('fonte', '<>', 2);
                         }
-                        Log::info("Applied filter for 'bolsa' with value: {$value}");
+                        Log::info("Applied filter for 'fonte' with value: {$value}");
                     } else {
                         $query->where($key, $value);
                         Log::info("Applied filter for '{$key}' with value: {$value}");
@@ -86,8 +86,8 @@ class FilterController extends Controller
                 'subproduto' => $request->filled('subproduto') ? [] : $query->distinct()->pluck('Subproduto')->all(),
                 'local' => $request->filled('local') ? [] : $query->distinct()->pluck('Local')->all(),
                 'freq' => $request->filled('freq') ? [] : $query->distinct()->pluck('freq')->all(),
-                // Fetch 'bolsa' options and map to 'proprietario' for frontend representation
-                'proprietario'  => $request->filled('proprietario') ? [] : $query->distinct()->pluck('bolsa')->map(function ($item) {
+                // Fetch 'fonte' options and map to 'proprietario' for frontend representation
+                'proprietario'  => $request->filled('proprietario') ? [] : $query->distinct()->pluck('fonte')->map(function ($item) {
                     return $item == 2 ? 'Sim' : 'Não'; // Convert back to 'Sim'/'Não' for the frontend
                 })->unique()->values()->all(),
             ];
