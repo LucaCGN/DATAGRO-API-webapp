@@ -11,7 +11,8 @@ window.loadProducts = async function(filters = window.currentFilters) {
     console.log(`Fetching products with filters`, filters);
 
     const query = new URLSearchParams(filters).toString();
-    const url = `/products?${query}`;
+    const searchParam = filters.search ? `&search=${encodeURIComponent(filters.search)}` : '';
+    const url = `/products?${query}${searchParam}`;
 
     const headers = {
         'Accept': 'application/json',
@@ -121,3 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
     updateSelectedProductName(); // Ensure placeholder is displayed initially
 });
 
+window.applySearchFilter = async function() {
+    const searchTerm = document.getElementById('search-box').value;
+    await loadProducts({...window.currentFilters, search: searchTerm});
+};

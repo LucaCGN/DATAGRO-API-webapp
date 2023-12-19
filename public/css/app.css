@@ -264,3 +264,20 @@ h1 {
     text-align: left;
 }
 
+#filter-container {
+    display: flex;
+    justify-content: space-between; /* This will separate the dropdowns and the search box */
+    align-items: right;
+    /* ... other styles ... */
+}
+
+.search-container {
+    margin-left: auto; /* This will push the search container to the right */
+}
+
+#search-box {
+    padding: 5px 10px;
+    font-size: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}

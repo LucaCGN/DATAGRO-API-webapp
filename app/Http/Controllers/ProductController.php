@@ -18,26 +18,37 @@ class ProductController extends Controller
         try {
             $query = ExtendedProductList::query();
 
-            // Adjusted logic for 'proprietario' filter conversion
+            // Handle 'proprietario' filter conversion
             if ($request->filled('proprietario')) {
-                if ($request->input('proprietario') === 'Sim') {
-                    $query->where('fonte', 3);
-                    Log::info("Applying filter: fonte with value: 2");
-                } elseif ($request->input('proprietario') === 'Não') {
-                    $query->where('fonte', '<>', 3);
-                    Log::info("Applying filter: fonte with values not equal to 2");
-                }
+                $query->where('fonte', $request->input('proprietario') === 'Sim' ? 3 : '<>', 3);
+                Log::info("Applying filter: fonte with value: " . $request->input('proprietario'));
             }
 
             // Handle other filters
             $filters = $request->only(['Classificação', 'subproduto', 'local', 'freq']);
             foreach ($filters as $key => $value) {
-                if (!is_null($value) && $value !== '') {
+                if (!empty($value)) {
                     $query->where($key, $value);
                     Log::info("Applying filter: {$key} with value: {$value}");
                 }
             }
 
+            // Handle search across all columns
+            if ($request->filled('search')) {
+                $searchTerm = $request->input('search');
+                $query->where(function ($subQuery) use ($searchTerm) {
+                    $subQuery->where('longo', 'LIKE', "%{$searchTerm}%")
+                              ->orWhere('Classificação', 'LIKE', "%{$searchTerm}%")
+                              ->orWhere('subproduto', 'LIKE', "%{$searchTerm}%")
+                              ->orWhere('local', 'LIKE', "%{$searchTerm}%")
+                              ->orWhere('freq', 'LIKE', "%{$searchTerm}%")
+                             // Add other columns as needed
+                             ;
+                });
+                Log::info("Applying search filter with value: {$searchTerm}");
+            }
+
+            // Fetch the paginated products
             $products = $query->paginate($perPage);
 
             Log::info('Products fetched successfully with applied filters', ['count' => $products->count()]);

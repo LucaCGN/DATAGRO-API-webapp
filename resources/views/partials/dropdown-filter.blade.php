@@ -7,31 +7,38 @@
     <!-- Add any additional head content here (e.g., CSS links) -->
 </head>
 <body>
-    <div id="filter-container">
-        <!-- Dropdowns for each filter category -->
-        <select id="Classificação-select" class="filter-dropdown">
-            <option value="">Select Classificação...</option>
-            <!-- Options will be populated dynamically -->
-        </select>
-        <select id="subproduto-select" class="filter-dropdown">
-            <option value="">Select Subproduto...</option>
-            <!-- Options will be populated dynamically -->
-        </select>
-        <select id="local-select" class="filter-dropdown">
-            <option value="">Select Local...</option>
-            <!-- Options will be populated dynamically -->
-        </select>
-        <select id="freq-select" class="filter-dropdown">
-            <option value="">Select Frequência...</option>
-            <!-- Options will be populated dynamically -->
-        </select>
-        <select id="proprietario-select" class="filter-dropdown">
-            <option value="">Select Proprietário...</option>
-            <!-- Options will be populated dynamically -->
-        </select>
+    <div id="filter-container" style="display: flex; justify-content: space-between; align-items: center;">
+        <!-- Container for the dropdown filters -->
+        <div>
+            <select id="Classificação-select" class="filter-dropdown">
+                <option value="">Select Classificação...</option>
+                <!-- Options will be populated dynamically -->
+            </select>
+            <select id="subproduto-select" class="filter-dropdown">
+                <option value="">Select Subproduto...</option>
+                <!-- Options will be populated dynamically -->
+            </select>
+            <select id="local-select" class="filter-dropdown">
+                <option value="">Select Local...</option>
+                <!-- Options will be populated dynamically -->
+            </select>
+            <select id="freq-select" class="filter-dropdown">
+                <option value="">Select Frequência...</option>
+                <!-- Options will be populated dynamically -->
+            </select>
+            <select id="proprietario-select" class="filter-dropdown">
+                <option value="">Select Proprietário...</option>
+                <!-- Options will be populated dynamically -->
+            </select>
 
-        <!-- Reset Button -->
-        <button id="reset-filters-btn">Limpar Filtros</button>
+            <!-- Reset Button -->
+            <button id="reset-filters-btn">Limpar Filtros</button>
+        </div>
+
+        <!-- Container for the search input box -->
+        <div>
+            <input type="text" id="search-box" placeholder="Pesquisar..." oninput="applySearchFilter()" style="padding: 5px 10px;">
+        </div>
     </div>
 
     <!-- Container for the products table or other display elements -->
