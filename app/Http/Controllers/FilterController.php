@@ -51,41 +51,41 @@ class FilterController extends Controller
         }
     }
 
-    // Method to fetch updated filter options based on current selections
     public function getUpdatedFilterOptions(Request $request)
     {
         Log::info('[FilterController] Fetching updated filter options with request: ', $request->all());
         try {
-            // Initialize the base query
-            $query = ExtendedProductList::query();
+            // Initialize an array to hold the filter queries for each dropdown
+            $filterQueries = [];
 
-            // Apply filters based on the provided selections in the request
-            foreach ($request->all() as $key => $value) {
-                if (!empty($value)) {
-                    // Convert 'proprietario' filter from frontend to 'fonte' for the database query
-                    if ($key === 'proprietario') {
-                        if ($value === 'Sim') {
-                            $query->where('fonte', 3);
-                        } elseif ($value === 'Não') {
-                            $query->where('fonte', '<>', 3);
+            // Loop through each filter to build its query
+            foreach (['Classificação', 'subproduto', 'local', 'freq', 'proprietario'] as $filter) {
+                // Start with the base query for the filter
+                $filterQuery = ExtendedProductList::query();
+
+                // Apply the other filters to this query
+                foreach ($request->all() as $key => $value) {
+                    if (!empty($value) && $key !== $filter) {
+                        // Apply the filter if it's not the current one being processed
+                        if ($key === 'proprietario') {
+                            $filterQuery->where('fonte', $value === 'Sim' ? 3 : '<>', 3);
+                        } else {
+                            $filterQuery->where($key, $value);
                         }
-                        Log::info("Applied filter for 'fonte' with value: {$value}");
-                    } else {
-                        $query->where($key, $value);
-                        Log::info("Applied filter for '{$key}' with value: {$value}");
                     }
                 }
+
+                // Store the query for this filter
+                $filterQueries[$filter] = $filterQuery;
             }
 
-            // Fetch the distinct values for each filter, but not applying self-filter
+            // Fetch the distinct values for each filter using the corresponding query
             $data = [
-                'Classificação' => $request->filled('Classificação') ? ExtendedProductList::distinct()->pluck('Classificação')->all() : $query->distinct()->pluck('Classificação')->all(),
-                'subproduto' => $request->filled('subproduto') ? ExtendedProductList::distinct()->pluck('Subproduto')->all() : $query->distinct()->pluck('Subproduto')->all(),
-                'local' => $request->filled('local') ? ExtendedProductList::distinct()->pluck('Local')->all() : $query->distinct()->pluck('Local')->all(),
-                'freq' => $request->filled('freq') ? ExtendedProductList::distinct()->pluck('freq')->all() : $query->distinct()->pluck('freq')->all(),
-                'proprietario'  => $request->filled('proprietario') ? ExtendedProductList::distinct()->pluck('fonte')->map(function ($item) {
-                    return $item == 3 ? 'Sim' : 'Não';
-                })->unique()->values()->all() : $query->distinct()->pluck('fonte')->map(function ($item) {
+                'Classificação' => $filterQueries['Classificação']->distinct()->pluck('Classificação')->all(),
+                'subproduto' => $filterQueries['subproduto']->distinct()->pluck('Subproduto')->all(),
+                'local' => $filterQueries['local']->distinct()->pluck('Local')->all(),
+                'freq' => $filterQueries['freq']->distinct()->pluck('freq')->all(),
+                'proprietario' => $filterQueries['proprietario']->distinct()->pluck('fonte')->map(function ($item) {
                     return $item == 3 ? 'Sim' : 'Não';
                 })->unique()->values()->all(),
             ];
@@ -101,5 +101,4 @@ class FilterController extends Controller
             return response()->json(['error' => 'General exception'], 500);
         }
     }
-
 }
