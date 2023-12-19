@@ -77,16 +77,15 @@ class FilterController extends Controller
                 }
             }
 
-            // Log the SQL query
-            Log::debug('[FilterController] SQL Query: ' . $query->toSql());
-
-            // Fetch the distinct values for all filters
+            // Fetch the distinct values for each filter, but not applying self-filter
             $data = [
-                'Classificação' => $query->distinct()->pluck('Classificação')->all(),
-                'subproduto' => $query->distinct()->pluck('Subproduto')->all(),
-                'local' => $query->distinct()->pluck('Local')->all(),
-                'freq' => $query->distinct()->pluck('freq')->all(),
-                'proprietario'  => $query->distinct()->pluck('fonte')->map(function ($item) {
+                'Classificação' => $request->filled('Classificação') ? ExtendedProductList::distinct()->pluck('Classificação')->all() : $query->distinct()->pluck('Classificação')->all(),
+                'subproduto' => $request->filled('subproduto') ? ExtendedProductList::distinct()->pluck('Subproduto')->all() : $query->distinct()->pluck('Subproduto')->all(),
+                'local' => $request->filled('local') ? ExtendedProductList::distinct()->pluck('Local')->all() : $query->distinct()->pluck('Local')->all(),
+                'freq' => $request->filled('freq') ? ExtendedProductList::distinct()->pluck('freq')->all() : $query->distinct()->pluck('freq')->all(),
+                'proprietario'  => $request->filled('proprietario') ? ExtendedProductList::distinct()->pluck('fonte')->map(function ($item) {
+                    return $item == 3 ? 'Sim' : 'Não';
+                })->unique()->values()->all() : $query->distinct()->pluck('fonte')->map(function ($item) {
                     return $item == 3 ? 'Sim' : 'Não';
                 })->unique()->values()->all(),
             ];
@@ -102,4 +101,5 @@ class FilterController extends Controller
             return response()->json(['error' => 'General exception'], 500);
         }
     }
+
 }
