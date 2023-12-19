@@ -66,7 +66,7 @@ class FilterController extends Controller
                     if ($key === 'proprietario') {
                         if ($value === 'Sim') {
                             $query->where('fonte', 3);
-                        } elseif ($value === 'Não') { // Corrected typo here
+                        } elseif ($value === 'Não') {
                             $query->where('fonte', '<>', 3);
                         }
                         Log::info("Applied filter for 'fonte' with value: {$value}");
@@ -80,15 +80,14 @@ class FilterController extends Controller
             // Log the SQL query
             Log::debug('[FilterController] SQL Query: ' . $query->toSql());
 
-            // Fetch the distinct values for the filters that are not currently selected
+            // Fetch the distinct values for all filters
             $data = [
-                'Classificação' => $request->filled('Classificação') ? [] : $query->distinct()->pluck('Classificação')->all(),
-                'subproduto' => $request->filled('subproduto') ? [] : $query->distinct()->pluck('Subproduto')->all(),
-                'local' => $request->filled('local') ? [] : $query->distinct()->pluck('Local')->all(),
-                'freq' => $request->filled('freq') ? [] : $query->distinct()->pluck('freq')->all(),
-                // Fetch 'fonte' options and map to 'proprietario' for frontend representation
-                'proprietario'  => $request->filled('proprietario') ? [] : $query->distinct()->pluck('fonte')->map(function ($item) {
-                    return $item == 3 ? 'Sim' : 'Não'; // Convert back to 'Sim'/'Não' for the frontend
+                'Classificação' => $query->distinct()->pluck('Classificação')->all(),
+                'subproduto' => $query->distinct()->pluck('Subproduto')->all(),
+                'local' => $query->distinct()->pluck('Local')->all(),
+                'freq' => $query->distinct()->pluck('freq')->all(),
+                'proprietario'  => $query->distinct()->pluck('fonte')->map(function ($item) {
+                    return $item == 3 ? 'Sim' : 'Não';
                 })->unique()->values()->all(),
             ];
 
