@@ -23,7 +23,7 @@ class FilterController extends Controller
 
             // Map 'fonte' to 'proprietario' for frontend representation
             $proprietarioOptions = $fonteOptions->map(function ($item) {
-                return $item == 2 ? 'Sim' : 'Não'; // Ensure we return 'Sim'/'Não' instead of numeric values
+                return $item == 3 ? 'Sim' : 'Não'; // Ensure we return 'Sim'/'Não' instead of numeric values
             })->unique()->values();
 
             Log::info('[FilterController] Initial filter options fetched', [
@@ -65,9 +65,9 @@ class FilterController extends Controller
                     // Convert 'proprietario' filter from frontend to 'fonte' for the database query
                     if ($key === 'proprietario') {
                         if ($value === 'Sim') {
-                            $query->where('fonte', 2);
+                            $query->where('fonte', 3);
                         } elseif ($value === 'Não') { // Corrected typo here
-                            $query->where('fonte', '<>', 2);
+                            $query->where('fonte', '<>', 3);
                         }
                         Log::info("Applied filter for 'fonte' with value: {$value}");
                     } else {
@@ -88,7 +88,7 @@ class FilterController extends Controller
                 'freq' => $request->filled('freq') ? [] : $query->distinct()->pluck('freq')->all(),
                 // Fetch 'fonte' options and map to 'proprietario' for frontend representation
                 'proprietario'  => $request->filled('proprietario') ? [] : $query->distinct()->pluck('fonte')->map(function ($item) {
-                    return $item == 2 ? 'Sim' : 'Não'; // Convert back to 'Sim'/'Não' for the frontend
+                    return $item == 3 ? 'Sim' : 'Não'; // Convert back to 'Sim'/'Não' for the frontend
                 })->unique()->values()->all(),
             ];
 
