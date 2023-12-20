@@ -31,14 +31,12 @@
                 <!-- Options will be populated dynamically -->
             </select>
 
-            <!-- Reset Button -->
+            <!-- More dropdowns here -->
             <button id="reset-filters-btn">Limpar Filtros</button>
         </div>
-
-        <!-- Container for the search input box -->
-        <div>
-            <input type="text" id="search-box" placeholder="Pesquisar..." oninput="applySearchFilter()" style="padding: 5px 10px;">
-        </div>
+        <!-- Search box -->
+        <input type="text" id="search-box" placeholder="Pesquisar..." oninput="applySearchFilter()">
+    </div>
     </div>
 
     <!-- Container for the products table or other display elements -->

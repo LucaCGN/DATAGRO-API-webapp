@@ -100,9 +100,9 @@ footer {
 .filter-dropdown,
 .button {
     background-color: var(--brand-green);
-    color: #fff;
+    color: #4f4f4f;
     padding: 10px 20px;
-    border: none;
+    border: 1px solid #ddd; /* Border color */
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
@@ -118,6 +118,8 @@ footer {
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    margin-right: 10px; /* Add margin to separate from the search box */
+
 }
 
 /* Darken button on hover */
@@ -205,6 +207,7 @@ h1 {
 
 .tables-container {
     width: 100%;
+    display: block;
 }
 
 /* Align filters and buttons to the left */
@@ -212,15 +215,20 @@ h1 {
 .download-buttons-container {
     display: flex;
     justify-content: flex-start;
+    flex-wrap: wrap; /* Allows items to wrap as needed */
     gap: 10px;
     margin-top: 15px;
     margin-bottom: 15px; /* Adjust this value to match the desired spacing */
 }
 
 @media screen and (max-width: 600px) {
-    .filters-container,
-    .download-buttons-container {
+    #filter-container {
         flex-direction: column;
+        align-items: stretch; /* Stretch items to full width on small screens */
+    }
+    #search-box {
+        margin-top: 10px; /* Space between filters and search box on small screens */
+        width: 100%; /* Full width on small screens */
     }
 }
 
@@ -266,18 +274,25 @@ h1 {
 
 #filter-container {
     display: flex;
-    justify-content: space-between; /* This will separate the dropdowns and the search box */
-    align-items: right;
-    /* ... other styles ... */
+    justify-content: space-between; /* Space between the filters and the search box */
+    align-items: center; /* Vertical centering */
+    padding: 10px 0; /* Vertical padding */
 }
 
 .search-container {
     margin-left: auto; /* This will push the search container to the right */
 }
 
+/* Search box styling to match the app's design */
 #search-box {
-    padding: 5px 10px;
+    padding: 10px 20px;
     font-size: 1rem;
     border: 1px solid #ddd;
     border-radius: 5px;
+    outline: none;
+    background-color: #fff;
+    color: #4f4f4f;
+    /* Ensure it does not shrink and stays aligned to the right */
+    margin-left: 10px; /* Space between the filters and search box */
+    flex-shrink: 0;
 }
