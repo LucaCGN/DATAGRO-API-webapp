@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Filterable Product Table</title>
-    <!-- Add any additional head content here (e.g., CSS links) -->
+    <!-- Link to your CSS file -->
+    <link href="path_to_your_css_file.css" rel="stylesheet" type="text/css">
 </head>
 <body>
-    <div id="filter-container" style="display: flex; justify-content: space-between; align-items: center;">
+    <div id="filter-container">
         <!-- Container for the dropdown filters -->
-        <div>
+        <div class="filters-container">
             <select id="Classificação-select" class="filter-dropdown">
                 <option value="">Select Classificação...</option>
                 <!-- Options will be populated dynamically -->
@@ -30,13 +31,10 @@
                 <option value="">Select Proprietário...</option>
                 <!-- Options will be populated dynamically -->
             </select>
-
-            <!-- More dropdowns here -->
             <button id="reset-filters-btn">Limpar Filtros</button>
         </div>
         <!-- Search box -->
         <input type="text" id="search-box" placeholder="Pesquisar..." oninput="applySearchFilter()">
-    </div>
     </div>
 
     <!-- Container for the products table or other display elements -->

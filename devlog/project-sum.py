@@ -70,7 +70,8 @@ file_groups = {
         'database/migrations/2023_03_01_120000_create_extended_product_list_table.php',
         'app/Console/Commands/FetchDatagroData.php',
         'app/Models/DataSeries.php',
-        'app/Models/ExtendedProductList.php',
+        'app/Models/ExtendedProductList.php'
+        'app\Console\Commands\PopulateOldestDataDate.php',
     ],
     'products-table': [
         'app/Models/ExtendedProductList.php',  
