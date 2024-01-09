@@ -1,58 +1,57 @@
-## database/migrations/2023_03_01_120000_create_extended_product_list_table.php
+## app/Models/DataSeries.php
 ```
 <?php
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
-return new class extends Migration {
-    public function up()
+use Illuminate\Database\Eloquent\Model;
+
+class DataSeries extends Model
+{
+    protected $table = 'data_series_tables';
+
+    protected $fillable = [
+        'extended_product_list_id', 'cod', 'data', 'ult', 'mini', 'maxi',
+        'abe', 'volumes', 'cab', 'med', 'aju'
+    ];
+
+    public $timestamps = true;
+
+    // Define the relationship with ExtendedProductList
+    public function extendedProductList()
     {
-        Schema::create('extended_product_list_tables', function (Blueprint $table) {
-            $table->id();
-            $table->string('Código_Produto')->unique();
-            $table->string('Classificação')->nullable();
-            $table->string('Subproduto')->nullable();
-            $table->string('Local')->nullable();
-            $table->string('Fetch_Status')->nullable();
-            $table->integer('bolsa')->nullable();
-            $table->integer('roda')->nullable();
-            $table->integer('fonte')->nullable();
-            $table->string('tav')->nullable();
-            $table->string('subtav')->nullable();
-            $table->integer('decimais')->nullable();
-            $table->integer('correlatos')->nullable();
-            $table->string('empresa')->nullable();
-            $table->string('contrato')->nullable();
-            $table->integer('subproduto_id')->nullable();
-            $table->string('entcode')->nullable();
-            $table->string('nome')->nullable();
-            $table->string('longo')->nullable();
-            $table->text('descr')->nullable();
-            $table->string('codf')->nullable();
-            $table->string('bd')->nullable();
-            $table->text('palavras')->nullable();
-            $table->integer('habilitado')->nullable();
-            $table->integer('lote')->nullable();
-            $table->integer('rep')->nullable();
-            $table->integer('vln')->nullable();
-            $table->integer('dia')->nullable();
-            $table->string('freq')->nullable();
-            $table->string('dex')->nullable();
-            $table->dateTime('inserido')->nullable();
-            $table->dateTime('alterado')->nullable();
-            $table->date('oldest_data_date')->nullable();
-            $table->timestamps();
-        });
+        return $this->belongsTo(ExtendedProductList::class, 'extended_product_list_id');
     }
+}
 
-    public function down()
+```
+## database/seeders/ExtendedProductListTableSeeder.php
+```
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use League\Csv\Reader; // You might need to install the league/csv package.
+
+class ExtendedProductListTableSeeder extends Seeder
+{
+    public function run()
     {
-        Schema::dropIfExists('extended_product_list_tables');
-    }
-};
+        $csv = Reader::createFromPath('C:\Users\lnonino\OneDrive - DATAGRO\Documentos\GitHub\DataAgro\Laravel-API-WebAPP\datagro-webapp\database\products_list.csv', 'r');
+        $csv->setHeaderOffset(0);
 
+        foreach ($csv as $record) {
+            DB::table('extended_product_list_tables')->insert([
+                'Código_Produto' => $record['Código_Produto'],
+                'Classificação' => $record['Classificação'],
+                'Subproduto' => $record['Subproduto'],
+                'Local' => $record['Local'],
+            ]);
+        }
+    }
+}
 
 ```
 ## app/Console/Commands/FetchDatagroData.php
@@ -338,59 +337,60 @@ return new class extends Migration {
 };
 
 ```
-## database/seeders/ExtendedProductListTableSeeder.php
+## database/migrations/2023_03_01_120000_create_extended_product_list_table.php
 ```
 <?php
 
-namespace Database\Seeders;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use League\Csv\Reader; // You might need to install the league/csv package.
-
-class ExtendedProductListTableSeeder extends Seeder
-{
-    public function run()
+return new class extends Migration {
+    public function up()
     {
-        $csv = Reader::createFromPath('C:\Users\lnonino\OneDrive - DATAGRO\Documentos\GitHub\DataAgro\Laravel-API-WebAPP\datagro-webapp\database\products_list.csv', 'r');
-        $csv->setHeaderOffset(0);
-
-        foreach ($csv as $record) {
-            DB::table('extended_product_list_tables')->insert([
-                'Código_Produto' => $record['Código_Produto'],
-                'Classificação' => $record['Classificação'],
-                'Subproduto' => $record['Subproduto'],
-                'Local' => $record['Local'],
-            ]);
-        }
+        Schema::create('extended_product_list_tables', function (Blueprint $table) {
+            $table->id();
+            $table->string('Código_Produto')->unique();
+            $table->string('Classificação')->nullable();
+            $table->string('Subproduto')->nullable();
+            $table->string('Local')->nullable();
+            $table->string('Fetch_Status')->nullable();
+            $table->integer('bolsa')->nullable();
+            $table->integer('roda')->nullable();
+            $table->integer('fonte')->nullable();
+            $table->string('tav')->nullable();
+            $table->string('subtav')->nullable();
+            $table->integer('decimais')->nullable();
+            $table->integer('correlatos')->nullable();
+            $table->string('empresa')->nullable();
+            $table->string('contrato')->nullable();
+            $table->integer('subproduto_id')->nullable();
+            $table->string('entcode')->nullable();
+            $table->string('nome')->nullable();
+            $table->string('longo')->nullable();
+            $table->text('descr')->nullable();
+            $table->string('codf')->nullable();
+            $table->string('bd')->nullable();
+            $table->text('palavras')->nullable();
+            $table->integer('habilitado')->nullable();
+            $table->integer('lote')->nullable();
+            $table->integer('rep')->nullable();
+            $table->integer('vln')->nullable();
+            $table->integer('dia')->nullable();
+            $table->string('freq')->nullable();
+            $table->string('dex')->nullable();
+            $table->dateTime('inserido')->nullable();
+            $table->dateTime('alterado')->nullable();
+            $table->date('oldest_data_date')->nullable();
+            $table->timestamps();
+        });
     }
-}
 
-```
-## app/Models/DataSeries.php
-```
-<?php
-
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class DataSeries extends Model
-{
-    protected $table = 'data_series_tables';
-
-    protected $fillable = [
-        'extended_product_list_id', 'cod', 'data', 'ult', 'mini', 'maxi',
-        'abe', 'volumes', 'cab', 'med', 'aju'
-    ];
-
-    public $timestamps = true;
-
-    // Define the relationship with ExtendedProductList
-    public function extendedProductList()
+    public function down()
     {
-        return $this->belongsTo(ExtendedProductList::class, 'extended_product_list_id');
+        Schema::dropIfExists('extended_product_list_tables');
     }
-}
+};
+
 
 ```
