@@ -25,6 +25,16 @@ class LuigiPipelineController extends Controller
         }
     }
 
+    public function testExec()
+    {
+        exec('echo "Test successful"', $output, $return_var);
+        if ($return_var == 0) {
+            return response()->json(['message' => implode("\n", $output)], 200);
+        } else {
+            return response()->json(['error' => 'Exec test failed.', 'output' => $output], 500);
+        }
+    }
+
 
     public function triggerUSDA()
     {

@@ -65,3 +65,6 @@ Route::get('/test-env', function () {
     exec('env', $output);
     return implode('<br>', $output);
 });
+
+// test exec
+Route::get('/test-exec', [LuigiPipelineController::class, 'testExec']);
