@@ -14,6 +14,10 @@ class LuigiPipelineController extends Controller
 
         // Construct the command with the environment variables
         $command = $envVars . " python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . escapeshellarg($pipelineName) . " 2>&1";
+
+        // Log the command being executed
+        Log::info("Executing command: " . $command);
+
         exec($command, $output, $return_var);
 
         if ($return_var == 0) {
@@ -24,6 +28,7 @@ class LuigiPipelineController extends Controller
             return response()->json(['error' => $pipelineName . ' pipeline execution failed.', 'output' => $output], 500);
         }
     }
+
 
     public function testExec()
     {
