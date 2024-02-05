@@ -6,24 +6,22 @@ use Log;
 
 class LuigiPipelineController extends Controller
 {
-    private function executePipeline($pipelineName)
-    {
-        // Construct the command without additional environment variables
-        $command = "python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . $pipelineName;
-
-        // Log the command being executed
+    private function executePipeline($pipelineName) {
+        $command = "python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . $pipelineName . " 2>&1";
         Log::info("Executing command: " . $command);
-
         exec($command, $output, $return_var);
+
+        $detailedOutput = implode("\n", $output);
 
         if ($return_var == 0) {
             Log::info("Pipeline " . $pipelineName . " triggered successfully.");
-            return response()->json(['message' => $pipelineName . ' pipeline triggered successfully.', 'output' => $output], 200);
+            return response()->json(['message' => $pipelineName . ' pipeline triggered successfully.'], 200);
         } else {
-            Log::error("Pipeline " . $pipelineName . " execution failed. Output: " . implode("\n", $output));
-            return response()->json(['error' => $pipelineName . ' pipeline execution failed.', 'output' => $output], 500);
+            Log::error("Pipeline " . $pipelineName . " execution failed. Detailed Output: " . $detailedOutput);
+            return response()->json(['error' => $pipelineName . ' pipeline execution failed.', 'detailedOutput' => $detailedOutput], 500);
         }
     }
+
 
     public function triggerUSDA()
     {
@@ -51,7 +49,7 @@ class LuigiPipelineController extends Controller
     public function executeTestScript()
     {
         $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test.py";
-        $command = "python3 " . $scriptPath;
+        $command = "/usr/bin/python3 " . $scriptPath;
 
         Log::info("Executing test script: " . $command);
 
