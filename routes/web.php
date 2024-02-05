@@ -42,3 +42,12 @@ Route::post('/api/filters/updated', [FilterController::class, 'getUpdatedFilterO
 // Login Routes
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
+
+
+use App\Http\Controllers\LuigiPipelineController;
+
+// Luigi Pipeline Routes
+Route::get('/pipeline/usda', [LuigiPipelineController::class, 'triggerUSDA']);
+Route::get('/pipeline/comex', [LuigiPipelineController::class, 'triggerCOMEX']);
+Route::get('/pipeline/indec', [LuigiPipelineController::class, 'triggerINDEC']);
+Route::get('/pipeline/all', [LuigiPipelineController::class, 'triggerAllPipelines']);
