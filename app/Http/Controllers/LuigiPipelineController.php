@@ -8,14 +8,11 @@ class LuigiPipelineController extends Controller
 {
     private function executePipeline($pipelineName)
     {
-        // Set the PATH environment variable to include the Python executable's directory
-        $envVars = 'export PATH=/usr/local/bin:/bin:/usr/bin:/usr/bin/python3.6;';
-
-        // Add Python's site-packages directories to PYTHONPATH
-        $envVars .= 'export PYTHONPATH=/usr/local/lib64/python3.6/site-packages:/usr/local/lib/python3.6/site-packages:/usr/bin/../lib64/python3.6/site-packages:/usr/bin/../lib/python3.6/site-packages;';
-
-        // Construct the command with the environment variables
-        $command = $envVars . " python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . escapeshellarg($pipelineName) . " 2>&1";
+        // Directly set the PATH and PYTHONPATH in the command
+        $command = "PATH=/usr/local/bin:/bin:/usr/bin:/usr/bin/python3.6 " .
+                   "PYTHONPATH=/usr/local/lib64/python3.6/site-packages:/usr/local/lib/python3.6/site-packages:/usr/bin/../lib64/python3.6/site-packages:/usr/bin/../lib/python3.6/site-packages " .
+                   "/usr/bin/python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " .
+                   escapeshellarg($pipelineName) . " 2>&1";
 
         // Log the command being executed
         Log::info("Executing command: " . $command);
