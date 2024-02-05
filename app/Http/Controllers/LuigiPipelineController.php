@@ -2,15 +2,17 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Response;
-use Log; // Ensure you have the Log facade included
+use Log;
 
 class LuigiPipelineController extends Controller
 {
     private function executePipeline($pipelineName)
     {
-        // Set the PATH environment variable and any other necessary variables
-        $envVars = 'export PATH=/usr/local/bin:/bin:/usr/bin;';
-        // Add here any other environment variable exports if needed
+        // Set the PATH environment variable to include the Python executable's directory
+        $envVars = 'export PATH=/usr/local/bin:/bin:/usr/bin:/usr/bin/python3.6;';
+
+        // Add Python's site-packages directories to PYTHONPATH
+        $envVars .= 'export PYTHONPATH=/usr/local/lib64/python3.6/site-packages:/usr/local/lib/python3.6/site-packages:/usr/bin/../lib64/python3.6/site-packages:/usr/bin/../lib/python3.6/site-packages;';
 
         // Construct the command with the environment variables
         $command = $envVars . " python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . escapeshellarg($pipelineName) . " 2>&1";
@@ -28,18 +30,6 @@ class LuigiPipelineController extends Controller
             return response()->json(['error' => $pipelineName . ' pipeline execution failed.', 'output' => $output], 500);
         }
     }
-
-
-    public function testExec()
-    {
-        exec('echo "Test successful"', $output, $return_var);
-        if ($return_var == 0) {
-            return response()->json(['message' => implode("\n", $output)], 200);
-        } else {
-            return response()->json(['error' => 'Exec test failed.', 'output' => $output], 500);
-        }
-    }
-
 
     public function triggerUSDA()
     {
@@ -61,4 +51,3 @@ class LuigiPipelineController extends Controller
         return $this->executePipeline('ALL');
     }
 }
-
