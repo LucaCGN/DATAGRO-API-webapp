@@ -1,32 +1,43 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Response;
+use Log; // Ensure you have the Log facade included
 
 class LuigiPipelineController extends Controller
 {
+    private function executePipeline($pipelineName)
+    {
+        $command = "python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . escapeshellarg($pipelineName) . " 2>&1";
+        exec($command, $output, $return_var);
+
+        if ($return_var == 0) {
+            Log::info("Pipeline " . $pipelineName . " triggered successfully.");
+            return response()->json(['message' => $pipelineName . ' pipeline triggered successfully.'], 200);
+        } else {
+            Log::error("Pipeline " . $pipelineName . " execution failed. Output: " . implode("\n", $output));
+            return response()->json(['error' => $pipelineName . ' pipeline execution failed.', 'output' => $output], 500);
+        }
+    }
+
     public function triggerUSDA()
     {
-        exec("python3 ./luigi/main.py --pipeline USDA");
-        return response()->json(['message' => 'USDA pipeline triggered successfully.'], 200);
+        return $this->executePipeline('USDA');
     }
 
     public function triggerCOMEX()
     {
-        exec("python3 ./luigi/main.py --pipeline COMEX");
-        return response()->json(['message' => 'COMEX pipeline triggered successfully.'], 200);
+        return $this->executePipeline('COMEX');
     }
 
     public function triggerINDEC()
     {
-        exec("python3 ./luigi/main.py --pipeline INDEC");
-        return response()->json(['message' => 'INDEC pipeline triggered successfully.'], 200);
+        return $this->executePipeline('INDEC');
     }
 
     public function triggerAllPipelines()
     {
-        exec("python3 ./luigi/main.py --pipeline ALL");
-        return response()->json(['message' => 'All pipelines triggered successfully.'], 200);
+        return $this->executePipeline('ALL');
     }
 }
+
