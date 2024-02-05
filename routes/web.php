@@ -51,3 +51,17 @@ Route::get('/pipeline/usda', [LuigiPipelineController::class, 'triggerUSDA']);
 Route::get('/pipeline/comex', [LuigiPipelineController::class, 'triggerCOMEX']);
 Route::get('/pipeline/indec', [LuigiPipelineController::class, 'triggerINDEC']);
 Route::get('/pipeline/all', [LuigiPipelineController::class, 'triggerAllPipelines']);
+
+
+Route::get('/test-user', function () {
+    $output = [];
+    exec('whoami', $output);
+    return $output[0];
+});
+
+
+Route::get('/test-env', function () {
+    $output = [];
+    exec('env', $output);
+    return implode('<br>', $output);
+});

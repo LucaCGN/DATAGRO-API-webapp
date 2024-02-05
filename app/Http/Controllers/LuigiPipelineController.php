@@ -8,7 +8,7 @@ class LuigiPipelineController extends Controller
 {
     private function executePipeline($pipelineName)
     {
-        $command = "python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . escapeshellarg($pipelineName) . " 2>&1";
+        $command = "python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . $pipelineName . " 2>&1";
         exec($command, $output, $return_var);
 
         if ($return_var == 0) {
