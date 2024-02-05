@@ -20,24 +20,31 @@ class ConsolidateFetchedData(luigi.Task):
         all_data = []
         for file_name in os.listdir(self.data_dir):
             file_path = os.path.join(self.data_dir, file_name)
-            with open(file_path, 'r') as file:
-                data = json.load(file)
-                # Process and structure the JSON data
-                for entry in data:
-                    processed_entry = {
-                        'Country': entry.get('CountryName', ''),
-                        'MarketYear': entry.get('MarketYear', ''),
-                        'CalendarYear': entry.get('CalendarYear', ''),
-                        'Month': entry.get('Month', ''),
-                        'Attribute': entry.get('AttributeDescription', ''),
-                        'Value': entry.get('Value', ''),
-                        'CommodityCode': file_name.split('_')[0]
-                    }
-                    all_data.append(processed_entry)
+            try:
+                with open(file_path, 'r') as file:
+                    data = json.load(file)
+                    # Process and structure the JSON data
+                    for entry in data:
+                        processed_entry = {
+                            'Country': entry.get('CountryName', ''),
+                            'MarketYear': entry.get('MarketYear', ''),
+                            'CalendarYear': entry.get('CalendarYear', ''),
+                            'Month': entry.get('Month', ''),
+                            'Attribute': entry.get('AttributeDescription', ''),
+                            'Value': entry.get('Value', ''),
+                            'CommodityCode': file_name.split('_')[0]
+                        }
+                        all_data.append(processed_entry)
+
+            except json.JSONDecodeError as e:
+                print(f"Error loading JSON from {file_path}: {e}")
+            except Exception as e:
+                print(f"Unexpected error with file {file_path}: {e}")
 
         # Create DataFrame and save to CSV
         df = pd.DataFrame(all_data)
         df.to_csv(self.output().path, index=False)
+
 
 if __name__ == '__main__':
     luigi.run()

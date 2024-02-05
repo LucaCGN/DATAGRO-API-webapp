@@ -49,6 +49,17 @@ class INDECPipeline(luigi.WrapperTask):
             UpdateINDECMasterTable()
         ]
 
+class MainETLPipeline(luigi.WrapperTask):
+    """
+    Main wrapper task to run COMEX, USDA, and INDEC pipelines.
+    """
+    def requires(self):
+        return [
+            USDAETLPipeline(),
+            ComexETLPipeline(),
+            INDECPipeline()
+        ]
+
 def main():
     parser = argparse.ArgumentParser(description="Run ETL pipelines")
     parser.add_argument('--pipeline', help='Specify which pipeline to run', choices=['USDA', 'COMEX', 'INDEC', 'ALL'])
@@ -56,13 +67,13 @@ def main():
     args = parser.parse_args()
 
     if args.pipeline == 'USDA':
-        luigi.run(main_task_cls=USDAETLPipeline)
+        luigi.build([USDAETLPipeline()], local_scheduler=True)
     elif args.pipeline == 'COMEX':
-        luigi.run(main_task_cls=ComexETLPipeline)
+        luigi.build([ComexETLPipeline()], local_scheduler=True)
     elif args.pipeline == 'INDEC':
-        luigi.run(main_task_cls=INDECPipeline)
+        luigi.build([INDECPipeline()], local_scheduler=True)
     elif args.pipeline == 'ALL':
-        luigi.run(main_task_cls=MainETLPipeline)
+        luigi.build([MainETLPipeline()], local_scheduler=True)
     else:
         print("Please specify a valid pipeline: USDA, COMEX, INDEC, or ALL")
 
