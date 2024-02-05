@@ -8,11 +8,8 @@ class LuigiPipelineController extends Controller
 {
     private function executePipeline($pipelineName)
     {
-        // Directly set the PATH and PYTHONPATH in the command
-        $command = "PATH=/usr/local/bin:/bin:/usr/bin:/usr/bin/python3.6 " .
-                   "PYTHONPATH=/usr/local/lib64/python3.6/site-packages:/usr/local/lib/python3.6/site-packages:/usr/bin/../lib64/python3.6/site-packages:/usr/bin/../lib/python3.6/site-packages " .
-                   "/usr/bin/python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " .
-                   escapeshellarg($pipelineName) . " 2>&1";
+        // Construct the command without additional environment variables
+        $command = "python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . $pipelineName;
 
         // Log the command being executed
         Log::info("Executing command: " . $command);
@@ -21,7 +18,7 @@ class LuigiPipelineController extends Controller
 
         if ($return_var == 0) {
             Log::info("Pipeline " . $pipelineName . " triggered successfully.");
-            return response()->json(['message' => $pipelineName . ' pipeline triggered successfully.'], 200);
+            return response()->json(['message' => $pipelineName . ' pipeline triggered successfully.', 'output' => $output], 200);
         } else {
             Log::error("Pipeline " . $pipelineName . " execution failed. Output: " . implode("\n", $output));
             return response()->json(['error' => $pipelineName . ' pipeline execution failed.', 'output' => $output], 500);
