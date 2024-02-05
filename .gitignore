@@ -22,3 +22,9 @@ yarn-error.log
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Ignore Pipeline Data
+.gitignore
+data/usda/*
+data/comex/*
+data/indec/*
