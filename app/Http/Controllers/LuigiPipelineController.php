@@ -33,21 +33,25 @@ class LuigiPipelineController extends Controller
 
     public function triggerUSDA()
     {
+        Log::info("USDA pipeline trigger initiated.");
         return $this->executePipeline('USDA');
     }
 
     public function triggerCOMEX()
     {
+        Log::info("COMEX pipeline trigger initiated.");
         return $this->executePipeline('COMEX');
     }
 
     public function triggerINDEC()
     {
+        Log::info("INDEC pipeline trigger initiated.");
         return $this->executePipeline('INDEC');
     }
 
     public function triggerAllPipelines()
     {
+        Log::info("ALL pipelines trigger initiated.");
         return $this->executePipeline('ALL');
     }
 }
