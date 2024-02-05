@@ -51,4 +51,22 @@ class LuigiPipelineController extends Controller
         Log::info("ALL pipelines trigger initiated.");
         return $this->executePipeline('ALL');
     }
+    public function executeTestScript()
+    {
+        $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test.py";
+        $command = "python3 " . $scriptPath;
+
+        Log::info("Executing test script: " . $command);
+
+        exec($command, $output, $return_var);
+
+        if ($return_var == 0) {
+            Log::info("Test script executed successfully.");
+            return response()->json(['message' => 'Test script executed successfully.', 'output' => $output], 200);
+        } else {
+            Log::error("Test script execution failed. Output: " . implode("\n", $output));
+            return response()->json(['error' => 'Test script execution failed.', 'output' => $output], 500);
+        }
+    }
+
 }

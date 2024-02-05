@@ -68,3 +68,4 @@ Route::get('/test-env', function () {
 
 // test exec
 Route::get('/test-exec', [LuigiPipelineController::class, 'testExec']);
+Route::get('/test-python-script', [LuigiPipelineController::class, 'executeTestScript']);
