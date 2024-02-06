@@ -7,7 +7,11 @@ use Log;
 class LuigiPipelineController extends Controller
 {
     private function executePipeline($pipelineName) {
-        $command = "python3 /home/u830751002/domains/datagro-markets-tools.online/luigi/main.py --pipeline " . $pipelineName . " 2>&1";
+        // Properly separate the script path and arguments
+        $scriptPath = escapeshellarg("/home/u830751002/domains/datagro-markets-tools.online/luigi/main.py");
+        $pipelineArgument = "--pipeline " . escapeshellarg($pipelineName);
+        $command = "/usr/bin/python3 " . $scriptPath . " " . $pipelineArgument . " 2>&1";
+
         Log::info("Executing command: " . $command);
         exec($command, $output, $return_var);
 
@@ -22,37 +26,27 @@ class LuigiPipelineController extends Controller
         }
     }
 
-
-    public function triggerUSDA()
-    {
-        Log::info("USDA pipeline trigger initiated.");
+    public function triggerUSDA() {
         return $this->executePipeline('USDA');
     }
 
-    public function triggerCOMEX()
-    {
-        Log::info("COMEX pipeline trigger initiated.");
+    public function triggerCOMEX() {
         return $this->executePipeline('COMEX');
     }
 
-    public function triggerINDEC()
-    {
-        Log::info("INDEC pipeline trigger initiated.");
+    public function triggerINDEC() {
         return $this->executePipeline('INDEC');
     }
 
-    public function triggerAllPipelines()
-    {
-        Log::info("ALL pipelines trigger initiated.");
+    public function triggerAllPipelines() {
         return $this->executePipeline('ALL');
     }
-    public function executeTestScript()
-    {
+
+    public function executeTestScript() {
         $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test.py";
-        $command = "/usr/bin/python3 " . $scriptPath;
+        $command = "/usr/bin/python3 " . escapeshellarg($scriptPath);
 
         Log::info("Executing test script: " . $command);
-
         exec($command, $output, $return_var);
 
         if ($return_var == 0) {
@@ -63,5 +57,4 @@ class LuigiPipelineController extends Controller
             return response()->json(['error' => 'Test script execution failed.', 'output' => $output], 500);
         }
     }
-
 }
