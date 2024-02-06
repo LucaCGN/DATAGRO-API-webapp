@@ -1,10 +1,9 @@
-# test_beautifulsoup.py
-from bs4 import BeautifulSoup
+# test_numpy.py
+import numpy as np
 
 def test():
-    html_doc = "<html><head><title>The Dormouse's story</title></head>"
-    soup = BeautifulSoup(html_doc, 'html.parser')
-    print(soup.title.string)
+    array = np.array([1, 2, 3])
+    print("Numpy Array:", array)
 
 if __name__ == '__main__':
     test()
