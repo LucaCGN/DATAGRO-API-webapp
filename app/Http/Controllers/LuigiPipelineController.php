@@ -42,18 +42,41 @@ class LuigiPipelineController extends Controller
         return $this->executePipeline('ALL');
     }
 
+    public function executeTestScriptPassthru() {
+        $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test.py";
+        $command = "/usr/bin/python3 " . escapeshellarg($scriptPath);
+
+        Log::info("Executing test script with passthru: " . $command);
+
+        ob_start(); // Start output buffering
+        passthru($command, $return_var);
+        $output = ob_get_clean(); // Get the buffer and then clean it
+
+        if ($return_var == 0) {
+            Log::info("Test script executed successfully with passthru.");
+            return response()->json(['message' => 'Test script executed successfully.', 'output' => $output], 200);
+        } else {
+            Log::error("Test script execution failed with passthru. Output: " . $output);
+            return response()->json(['error' => 'Test script execution failed.', 'output' => $output], 500);
+        }
+    }
+
     public function executeTestScript() {
         $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test.py";
         $command = "/usr/bin/python3 " . escapeshellarg($scriptPath);
 
         Log::info("Executing test script: " . $command);
-        exec($command, $output, $return_var);
+
+        // Using shell_exec
+        $output = shell_exec($command);
+
+        $return_var = (is_null($output) || $output === '') ? 1 : 0;
 
         if ($return_var == 0) {
-            Log::info("Test script executed successfully.");
+            Log::info("Test script executed successfully with shell_exec.");
             return response()->json(['message' => 'Test script executed successfully.', 'output' => $output], 200);
         } else {
-            Log::error("Test script execution failed. Output: " . implode("\n", $output));
+            Log::error("Test script execution failed with shell_exec. Output: " . $output);
             return response()->json(['error' => 'Test script execution failed.', 'output' => $output], 500);
         }
     }
