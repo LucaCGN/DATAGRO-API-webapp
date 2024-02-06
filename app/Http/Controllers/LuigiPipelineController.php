@@ -73,6 +73,9 @@ class LuigiPipelineController extends Controller
         putenv("PYTHONPATH=/home/u830751002/.local/lib/python3.6/site-packages");
         putenv("GOPATH=/opt/go");
         putenv("GOROOT=/opt/golang/1.19.4");
+        putenv("PYTHONPATH=/home/u830751002/.local/lib/python3.6/site-packages:/usr/lib64/python3.6/site-packages");
+        putenv("LD_LIBRARY_PATH=/home/u830751002/.local/lib/python3.6/site-packages/pandas/_libs/tslibs");
+
 
         // Other environment variables can be set here as necessary
 
