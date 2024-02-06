@@ -43,7 +43,7 @@ class LuigiPipelineController extends Controller
     }
 
     public function executeTestScriptPassthru() {
-        $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test2.py";
+        $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test4.py";
         $command = "/usr/bin/python3 " . escapeshellarg($scriptPath);
 
         Log::info("Executing test script with passthru: " . $command);
@@ -62,7 +62,7 @@ class LuigiPipelineController extends Controller
     }
 
     public function executeTestScript() {
-        $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test2.py";
+        $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test4.py";
         $command = "python3 " . escapeshellarg($scriptPath);
 
         Log::info("Executing test script: " . $command);
