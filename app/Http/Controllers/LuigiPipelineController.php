@@ -42,42 +42,58 @@ class LuigiPipelineController extends Controller
         return $this->executePipeline('ALL');
     }
 
-    public function executeTestScriptPassthru() {
+    public function executeTestScriptSystem() {
         $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test3.py";
         $command = "/usr/bin/python3 " . escapeshellarg($scriptPath);
 
-        Log::info("Executing test script with passthru: " . $command);
+        Log::info("Executing test script with system: " . $command);
 
-        ob_start(); // Start output buffering
-        passthru($command, $return_var);
-        $output = ob_get_clean(); // Get the buffer and then clean it
+        ob_start();
+        system($command, $return_var);
+        $output = ob_get_clean();
 
         if ($return_var == 0) {
-            Log::info("Test script executed successfully with passthru.");
+            Log::info("Test script executed successfully with system.");
             return response()->json(['message' => 'Test script executed successfully.', 'output' => $output], 200);
         } else {
-            Log::error("Test script execution failed with passthru. Output: " . $output);
-            return response()->json(['error' => 'Test script execution failed.', 'output' => $output], 500);
+            Log::error("Test script execution failed with system. Return code: $return_var. Output: " . $output);
+            return response()->json(['error' => 'Test script execution failed.', 'return_code' => $return_var, 'output' => $output], 500);
         }
     }
 
-    public function executeTestScript() {
+    public function executeTestScriptProcOpen() {
         $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test3.py";
-        $command = "python3 " . escapeshellarg($scriptPath);
+        $command = "/usr/bin/python3 " . escapeshellarg($scriptPath);
+        $descriptorSpec = array(
+            0 => array("pipe", "r"),  // stdin
+            1 => array("pipe", "w"),  // stdout
+            2 => array("pipe", "w")   // stderr
+        );
 
-        Log::info("Executing test script: " . $command);
+        Log::info("Executing test script with proc_open: " . $command);
 
-        // Using shell_exec
-        $output = shell_exec($command);
+        $process = proc_open($command, $descriptorSpec, $pipes);
 
-        $return_var = (is_null($output) || $output === '') ? 1 : 0;
+        if (is_resource($process)) {
+            $output = stream_get_contents($pipes[1]);
+            $error = stream_get_contents($pipes[2]);
 
-        if ($return_var == 0) {
-            Log::info("Test script executed successfully with shell_exec.");
-            return response()->json(['message' => 'Test script executed successfully.', 'output' => $output], 200);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+
+            $return_var = proc_close($process);
+
+            if ($return_var == 0) {
+                Log::info("Test script executed successfully with proc_open.");
+                return response()->json(['message' => 'Test script executed successfully.', 'output' => $output], 200);
+            } else {
+                Log::error("Test script execution failed with proc_open. Return code: $return_var. Error: " . $error);
+                return response()->json(['error' => 'Test script execution failed.', 'return_code' => $return_var, 'output' => $output, 'error_output' => $error], 500);
+            }
         } else {
-            Log::error("Test script execution failed with shell_exec. Output: " . $output);
-            return response()->json(['error' => 'Test script execution failed.', 'output' => $output], 500);
+            Log::error("Failed to start process with proc_open.");
+            return response()->json(['error' => 'Failed to start process.'], 500);
         }
     }
+
 }
