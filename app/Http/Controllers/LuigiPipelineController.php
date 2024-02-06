@@ -63,7 +63,7 @@ class LuigiPipelineController extends Controller
 
     public function executeTestScript() {
         $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test.py";
-        $command = "/usr/bin/python3 " . escapeshellarg($scriptPath);
+        $command = "python3 " . escapeshellarg($scriptPath);
 
         Log::info("Executing test script: " . $command);
 
