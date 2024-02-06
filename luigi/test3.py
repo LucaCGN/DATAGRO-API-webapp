@@ -1,11 +1,8 @@
-import pandas as pd
+import sys
+import pkg_resources
 
-# Create a simple DataFrame
-data = {'Name': ['John', 'Anna', 'Peter', 'Linda'],
-        'Age': [28, 34, 29, 32],
-        'City': ['New York', 'Paris', 'Berlin', 'London']}
-
-df = pd.DataFrame(data)
-
-# Print the DataFrame
-print(df)
+print("Python Version:", sys.version)
+print("\nInstalled Packages:")
+installed_packages = [(d.project_name, d.version) for d in pkg_resources.working_set]
+for package_name, version in sorted(installed_packages):
+    print(f"{package_name}=={version}")
