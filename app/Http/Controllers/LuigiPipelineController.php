@@ -7,10 +7,13 @@ use Log;
 class LuigiPipelineController extends Controller
 {
     private function executePipeline($pipelineName) {
+        // Adjust the path to the virtual environment's Python executable
+        $pythonBinary = base_path("luigi/venv/bin/python");
+
         // Properly separate the script path and arguments
-        $scriptPath = escapeshellarg("/home/u830751002/domains/datagro-markets-tools.online/luigi/main.py");
+        $scriptPath = escapeshellarg(base_path("luigi/main.py"));
         $pipelineArgument = "--pipeline " . escapeshellarg($pipelineName);
-        $command = "/usr/bin/python3 " . $scriptPath . " " . $pipelineArgument . " 2>&1";
+        $command = "{$pythonBinary} " . $scriptPath . " " . $pipelineArgument . " 2>&1";
 
         Log::info("Executing command: " . $command);
         exec($command, $output, $return_var);
@@ -19,12 +22,13 @@ class LuigiPipelineController extends Controller
 
         if ($return_var == 0) {
             Log::info("Pipeline " . $pipelineName . " triggered successfully.");
-            return response()->json(['message' => $pipelineName . ' pipeline triggered successfully.'], 200);
+            return response()->json(['message' => $pipelineName . ' pipeline triggered successfully.', 'output' => $detailedOutput], 200);
         } else {
             Log::error("Pipeline " . $pipelineName . " execution failed. Detailed Output: " . $detailedOutput);
             return response()->json(['error' => $pipelineName . ' pipeline execution failed.', 'detailedOutput' => $detailedOutput], 500);
         }
     }
+
 
     public function triggerUSDA() {
         return $this->executePipeline('USDA');
@@ -40,25 +44,6 @@ class LuigiPipelineController extends Controller
 
     public function triggerAllPipelines() {
         return $this->executePipeline('ALL');
-    }
-
-    public function executeTestScriptSystem() {
-        $scriptPath = "/home/u830751002/domains/datagro-markets-tools.online/luigi/test3.py";
-        $command = "/usr/bin/python3 " . escapeshellarg($scriptPath);
-
-        Log::info("Executing test script with system: " . $command);
-
-        ob_start();
-        system($command, $return_var);
-        $output = ob_get_clean();
-
-        if ($return_var == 0) {
-            Log::info("Test script executed successfully with system.");
-            return response()->json(['message' => 'Test script executed successfully.', 'output' => $output], 200);
-        } else {
-            Log::error("Test script execution failed with system. Return code: $return_var. Output: " . $output);
-            return response()->json(['error' => 'Test script execution failed.', 'return_code' => $return_var, 'output' => $output], 500);
-        }
     }
 
     public function executeTestScriptProcOpen() {
