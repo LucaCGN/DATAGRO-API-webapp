@@ -54,6 +54,10 @@ Route::get('/pipeline/indec', [LuigiPipelineController::class, 'triggerINDEC']);
 Route::get('/pipeline/all', [LuigiPipelineController::class, 'triggerAllPipelines']);
 Route::get('/pipeline/usda/data', [LuigiPipelineController::class, 'fetchUSDAall']);
 
+Route::get('/pipeline/usda/test', function () {
+    return 'Test route works';
+});
+
 Route::get('/test-user', function () {
     $output = [];
     exec('whoami', $output);
