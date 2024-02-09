@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Response;
 use Log;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class LuigiPipelineController extends Controller
 {
