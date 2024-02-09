@@ -45,27 +45,29 @@ class LuigiPipelineController extends Controller
     public function triggerAllPipelines() {
         return $this->executePipeline('ALL');
     }
-                    public function fetchUSDAall()
-                    {
-                        Log::info('fetchUSDAall: Function accessed');
 
-                        // Set the path to your CSV file
-                        $filePath = storage_path('luigi/data/usda/processed/master_table.csv');
-                        Log::info('fetchUSDAall: File path - ' . $filePath);
+    public function fetchUSDAall()
+    {
+        Log::info('fetchUSDAall: Function accessed');
 
-                        // Check if the file exists
-                        if (!file_exists($filePath)) {
-                            Log::error('fetchUSDAall: File not found at path - ' . $filePath);
-                            abort(404, 'File not found');
-                        }
+        // Set the correct path to your CSV file
+        $baseDir = base_path(); // Get the base path of the Laravel installation
+        $filePath = $baseDir . '/luigi/data/usda/processed/master_table.csv'; // Correct file path
+        Log::info('fetchUSDAall: File path - ' . $filePath);
 
-                        Log::info('fetchUSDAall: File exists, preparing download');
+        // Check if the file exists
+        if (!file_exists($filePath)) {
+            Log::error('fetchUSDAall: File not found at path - ' . $filePath);
+            abort(404, 'File not found');
+        }
 
-                        // Return the file as a download
-                        return response()->download($filePath, 'master_table.csv', [
-                            'Content-Type' => 'text/csv',
-                        ]);
-                    }
+        Log::info('fetchUSDAall: File exists, preparing download');
+
+        // Return the file as a download
+        return response()->download($filePath, 'master_table.csv', [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
 
 
 }
