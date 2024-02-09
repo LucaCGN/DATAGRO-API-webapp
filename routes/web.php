@@ -7,6 +7,7 @@ use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\FilterController;
 use App\Http\Controllers\LoginController;
 use App\Models\ExtendedProductList;
+use App\Http\Controllers\DataFetchController;
 
 Route::get('/', function () {
     $products = ExtendedProductList::all();
@@ -71,10 +72,7 @@ Route::get('/test-exec', [LuigiPipelineController::class, 'testExec']);
 Route::get('/test-python-script1', [LuigiPipelineController::class, 'executeTestScriptSystem']);
 Route::get('/test-python-script2', [LuigiPipelineController::class, 'executeTestScriptProcOpen']);
 
-// CSV DATA ENDPOINTS
-use App\Http\Controllers\DataFetchController;
 
-Route::get('/pipeline/usda/data', [DataFetchController::class, 'fetchUSDAall']);
-Route::get('/pipeline/comex/exp', [DataFetchController::class, 'fetchCOMEXexp']);
-Route::get('/pipeline/comex/imp', [DataFetchController::class, 'fetchCOMEXimp']);
-Route::get('/pipeline/indec/exp', [DataFetchController::class, 'fetchINDECexp']);
+
+Route::get('/usda/data', [DataFetchController::class, 'fetchUSDAall']);
+
