@@ -1,5 +1,7 @@
+import os
 import pandas as pd
 import luigi
+from datetime import datetime, timedelta
 from luigi import LocalTarget
 from tasks.usda_pipeline.consolidate_csvs import ConsolidateFetchedData
 
@@ -14,7 +16,17 @@ class InsertUniqueData(luigi.Task):
         return LocalTarget(self.master_table_file)
 
     def complete(self):
-     # Always return False to indicate that the task is never complete
+        # Check if the output file exists
+        if not self.output().exists():
+            return False
+
+        # Get the modification time of the file
+        modification_time = datetime.fromtimestamp(os.path.getmtime(self.output().path))
+        # If the file has been updated in the last 5 minutes, consider the task complete
+        if datetime.now() - modification_time < timedelta(minutes=5):
+            return True
+
+        # If the file is older than 5 minutes, the task is not complete
         return False
 
     def run(self):

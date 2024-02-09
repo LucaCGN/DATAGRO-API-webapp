@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DataFetchController extends Controller
+
 {
     public function fetchUSDAall()
     {

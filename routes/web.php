@@ -71,8 +71,9 @@ Route::get('/test-exec', [LuigiPipelineController::class, 'testExec']);
 Route::get('/test-python-script1', [LuigiPipelineController::class, 'executeTestScriptSystem']);
 Route::get('/test-python-script2', [LuigiPipelineController::class, 'executeTestScriptProcOpen']);
 
+// CSV DATA ENDPOINTS
+use App\Http\Controllers\DataFetchController;
 
-// Luigi Pipeline Routes
 Route::get('/pipeline/usda/data', [DataFetchController::class, 'fetchUSDAall']);
 Route::get('/pipeline/comex/exp', [DataFetchController::class, 'fetchCOMEXexp']);
 Route::get('/pipeline/comex/imp', [DataFetchController::class, 'fetchCOMEXimp']);
