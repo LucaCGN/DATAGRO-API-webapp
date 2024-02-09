@@ -1,4 +1,3 @@
-# .\usda_pipeline\fetch_current_year_data.py
 import requests
 import datetime
 import luigi
@@ -7,7 +6,7 @@ import os
 
 class FetchUSDAData(luigi.Task):
     """
-    Luigi Task to fetch USDA data for the current and previous market years for predefined commodity codes.
+    Luigi Task to fetch USDA data for the current, previous, and next market years for predefined commodity codes.
     """
     api_key = luigi.Parameter()
     data_dir = 'data/usda/raw'
@@ -47,9 +46,10 @@ class FetchUSDAData(luigi.Task):
 
     def output(self):
         current_year = datetime.datetime.now().year
-        return [luigi.LocalTarget(f'{self.data_dir}/{code}_data_{year}.json') 
-                for code in self.commodity_codes 
-                for year in [current_year, current_year - 1]]
+        years = [current_year - 1, current_year, current_year + 1]  # Include previous, current, and next year
+        return [luigi.LocalTarget(f'{self.data_dir}/{code}_data_{year}.json')
+                for code in self.commodity_codes
+                for year in years]
 
     def run(self):
         api_endpoint = "https://apps.fas.usda.gov/PSDOnlineDataServices/api/CommodityData/GetCommodityDataByYear"
@@ -58,7 +58,7 @@ class FetchUSDAData(luigi.Task):
         for target in self.output():
             commodity_code, year = target.path.split('/')[-1].split('_')[0], target.path.split('_')[-1].split('.')[0]
             response = requests.get(f"{api_endpoint}?commodityCode={commodity_code}&marketYear={year}", headers=headers)
-            
+
             if response.status_code == 200:
                 # Overwrite the file if it exists
                 with open(target.path, 'w') as file:

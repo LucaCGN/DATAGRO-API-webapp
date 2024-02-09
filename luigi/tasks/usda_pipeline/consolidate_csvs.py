@@ -26,7 +26,7 @@ class ConsolidateFetchedData(luigi.Task):
                     # Process and structure the JSON data
                     for entry in data:
                         processed_entry = {
-                            'Country': entry.get('CountryName', ''),
+                            'Country': entry.get('CountryName', '').strip(),  # Added strip() here
                             'MarketYear': entry.get('MarketYear', ''),
                             'CalendarYear': entry.get('CalendarYear', ''),
                             'Month': entry.get('Month', ''),
