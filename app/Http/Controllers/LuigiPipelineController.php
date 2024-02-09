@@ -64,11 +64,8 @@ class LuigiPipelineController extends Controller
 
         Log::info('fetchUSDAall: File exists, preparing download');
 
-        // Return the file as a download
-        return response()->download($filePath, 'master_table.csv', [
-            'Content-Type' => 'text/csv',
-        ]);
+        // Return the file as a download without setting additional headers
+        return response()->download($filePath, 'master_table.csv');
     }
-
 
 }
