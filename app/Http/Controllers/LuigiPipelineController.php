@@ -46,50 +46,20 @@ class LuigiPipelineController extends Controller
         return $this->executePipeline('ALL');
     }
 
-    public function executeTestScriptProcOpen() {
-        // Adjust the path to the virtual environment's Python executable
-        $pythonBinary = base_path("luigi/venv/bin/python");
+    public function fetchUSDAall()
+    {
+        // Set the path to your CSV file
+        $filePath = storage_path('app/luigi/data/usda/processed/master_table.csv');
 
-        // Adjust the path to your Python script within the Laravel project
-        $scriptPath = base_path("luigi/test3.py");
-
-        // Combine the Python executable and script path into one command
-        $command = "{$pythonBinary} " . escapeshellarg($scriptPath);
-
-
-
-        // Other environment variables can be set here as necessary
-
-        $descriptorSpec = array(
-            0 => array("pipe", "r"),  // stdin
-            1 => array("pipe", "w"),  // stdout
-            2 => array("pipe", "w")   // stderr
-        );
-
-        Log::info("Executing test script with proc_open: " . $command);
-
-        $process = proc_open($command, $descriptorSpec, $pipes);
-
-        if (is_resource($process)) {
-            $output = stream_get_contents($pipes[1]);
-            $error = stream_get_contents($pipes[2]);
-
-            fclose($pipes[1]);
-            fclose($pipes[2]);
-
-            $return_var = proc_close($process);
-
-            if ($return_var == 0) {
-                Log::info("Test script executed successfully with proc_open.");
-                return response()->json(['message' => 'Test script executed successfully.', 'output' => $output], 200);
-            } else {
-                Log::error("Test script execution failed with proc_open. Return code: $return_var. Error: " . $error);
-                return response()->json(['error' => 'Test script execution failed.', 'return_code' => $return_var, 'output' => $output, 'error_output' => $error], 500);
-            }
-        } else {
-            Log::error("Failed to start process with proc_open.");
-            return response()->json(['error' => 'Failed to start process.'], 500);
+        // Check if the file exists
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found');
         }
+
+        // Return the file as a download
+        return response()->download($filePath, 'master_table.csv', [
+            'Content-Type' => 'text/csv',
+        ]);
     }
 
 }

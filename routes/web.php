@@ -52,7 +52,7 @@ Route::get('/pipeline/usda', [LuigiPipelineController::class, 'triggerUSDA']);
 Route::get('/pipeline/comex', [LuigiPipelineController::class, 'triggerCOMEX']);
 Route::get('/pipeline/indec', [LuigiPipelineController::class, 'triggerINDEC']);
 Route::get('/pipeline/all', [LuigiPipelineController::class, 'triggerAllPipelines']);
-Route::get('/please-work', [DataFetchController::class, 'fetchUSDAall']);
+Route::get('/pipeline/usda/data', [LuigiPipelineController::class, 'fetchUSDAall']);
 
 Route::get('/test-user', function () {
     $output = [];
