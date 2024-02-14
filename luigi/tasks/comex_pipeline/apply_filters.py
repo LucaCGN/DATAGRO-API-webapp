@@ -1,6 +1,4 @@
-
-# .\comex_pipeline\apply_filters.py
-import os  
+import os
 import luigi
 import pandas as pd
 import datetime
@@ -20,31 +18,20 @@ class FilterData(luigi.Task):
         return DownloadCurrentYearData(data_type=self.data_type)
 
     def output(self):
-        # current_year = datetime.datetime.now().year
-        current_year = 2023
+        today = datetime.datetime.today()
+        current_year = today.year if today.month > 1 else today.year - 1
         return luigi.LocalTarget(f'data/comex/filtered/{self.data_type}_filtered_{current_year}.csv')
 
     def run(self):
-        # Debug: Print the type and content of input
-        print(f"Type of self.input(): {type(self.input())}")
-        print(f"Content of self.input(): {self.input()}")
-            
-        # Ensure the output directory exists
-        os.makedirs(os.path.dirname(self.output().path), exist_ok=True)
+        today = datetime.datetime.today()
+        last_month_end = datetime.datetime(today.year, today.month, 1) - datetime.timedelta(days=1)
+        last_month, last_year = last_month_end.month, last_month_end.year if today.month > 1 else today.year - 1
 
         # Read the input file
         df = pd.read_csv(self.input().path, delimiter=';', quotechar='"', encoding='utf-8')
 
-        # Filter logic remains the same
-        ##today = datetime.datetime.today()
-        ##last_month_end = first_day_of_current_month - datetime.timedelta(days=1)
-        ##last_month, last_year = last_month_end.month, last_month_end.year
-
-        # HARDCODE FOR TESTING
-        last_year = 2023
-        last_month = 12
-        df_filtered = df[(df['CO_NCM'].astype(str).isin(self.ncm_codes_to_keep)) & 
-                         (df['CO_ANO'] == last_year) & 
+        df_filtered = df[(df['CO_NCM'].astype(str).isin(self.ncm_codes_to_keep)) &
+                         (df['CO_ANO'] == last_year) &
                          (df['CO_MES'] == last_month)]
 
         df_filtered.to_csv(self.output().path, index=False)

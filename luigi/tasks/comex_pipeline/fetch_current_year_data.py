@@ -7,23 +7,27 @@ class DownloadCurrentYearData(luigi.Task):
     data_type = luigi.Parameter()  # 'EXP' or 'IMP'
 
     def output(self):
-        # Original logic:
-        # current_year = datetime.datetime.now().year
-        # return luigi.LocalTarget(f'data/comex/raw/{self.data_type}_{current_year}.csv')
+        current_year = datetime.datetime.now().year
+        current_month = datetime.datetime.now().month
 
-        # Testing logic with hardcoded year:
-        return luigi.LocalTarget(f'data/comex/raw/{self.data_type}_2023.csv')
+        # If current month is January, use the previous year
+        if current_month == 1:
+            current_year -= 1
+
+        return luigi.LocalTarget(f'data/comex/raw/{self.data_type}_{current_year}.csv')
 
     def run(self):
         base_url = "https://balanca.economia.gov.br/balanca/bd/comexstat-bd/ncm/"
-        # Original logic:
-        # current_year = datetime.datetime.now().year
-        # url = f"{base_url}{self.data_type}_{current_year}.csv"
+        current_year = datetime.datetime.now().year
+        current_month = datetime.datetime.now().month
 
-        # Testing logic with hardcoded year:
-        url = f"{base_url}{self.data_type}_2023.csv"
+        # If current month is January, use the previous year
+        if current_month == 1:
+            current_year -= 1
 
-       # Making the request
+        url = f"{base_url}{self.data_type}_{current_year}.csv"
+
+        # Making the request
         response = requests.get(url, verify=False, stream=True)
         print(f"Requesting data from URL: {url}")
         print(f"Status code: {response.status_code}")

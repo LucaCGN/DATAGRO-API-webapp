@@ -46,8 +46,12 @@ class MergeAuxiliaryData(luigi.Task):
         aux15_df = pd.read_csv('data/aux_tables/aux_15.csv', index_col='CO_URF')
         df = pd.merge(df, aux15_df[['NO_URF']], on='CO_URF', how='left')
 
+        # Removing duplicates
+        df = df.drop_duplicates()
+
         # Saving the final merged DataFrame
         df.to_csv(self.output().path, index=False)
+
 
 if __name__ == '__main__':
     luigi.build([MergeAuxiliaryData(data_type='EXP'), MergeAuxiliaryData(data_type='IMP')], local_scheduler=True)

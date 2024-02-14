@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import luigi
+from datetime import datetime, timedelta
 from tasks.comex_pipeline.add_columns_from_aux import MergeAuxiliaryData
 
 class UpdateMasterTable(luigi.Task):
@@ -10,7 +11,23 @@ class UpdateMasterTable(luigi.Task):
         return MergeAuxiliaryData(data_type=self.data_type)
 
     def output(self):
-        return luigi.LocalTarget(f'data/comex/processed/{self.data_type}_master_table.csv')
+        file_name = 'exports' if self.data_type == 'EXP' else 'imports'
+        return luigi.LocalTarget(f'data/comex/processed/{file_name}_master_table.csv')
+
+    def complete(self):
+        # Check if the output file exists
+        if not self.output().exists():
+            return False
+
+        # Get the modification time of the file
+        modification_time = datetime.fromtimestamp(os.path.getmtime(self.output().path))
+
+        # If the file has been updated in the last 5 minutes, consider the task complete
+        if datetime.now() - modification_time < timedelta(minutes=5):
+            return True
+
+        # If the file is older than 5 minutes, the task is not complete
+        return False
 
     def run(self):
         merged_data_path = self.input().path
