@@ -1,0 +1,69 @@
+﻿AreaHarvested; <ARH>
+AreaPlanted; <ARP>
+BeginningStocks; <BES>
+CalendarYear; <CLY>
+CatchForReduction; <CFR>
+CommodityCode; <CMC>
+Country; <CTY>
+Crush; <CRU>
+CYExports; <CYE>
+CYExptoUS; <CEU>
+CYImpfromUS; <CIU>
+CYImports; <CYI>
+EndingStocks; <ENS>
+ExtrRate; <EXR>
+FeedandResidual; <FAR>
+FeedWasteDomCons; <FWD>
+FoodUseDomCons; <FDC>
+FSIConsumption; <FSC>
+IndustrialDomCons; <IDC>
+<MKY>;data
+Month; <MON>
+MYExports; <MYE>
+MYExptoEU; <MEE>
+MYImpfromEU; <MIE>
+MYImpfromUS; <MIU>
+MYImports; <MYI>
+Production; <PRO>
+SeedtoLintRatio; <SLR>
+SME; <SME>
+TotalConsumption; <TTC>
+TotalDistribution; <TTD>
+TotalDomCons; <TDC>
+TotalSupply; <TTS>
+Trees; <TRE>
+TYExports; <TYE>
+TYImpfromUS; <TIU>
+TYImports; <TYI>
+Yield; <YLD>
+TYImp.fromU.S.;<TIU>
+CYExp.toU.S.;<CEU>
+FoodUseDom.Cons.;<FDC>
+FeedWasteDom.Cons.;<FWD>
+TotalDom.Cons.;<TDC>
+Extr.Rate,999.9999;<EXR>
+TYImp,fromU,S,;<TIU>
+CYExp,toU,S,;<CEU>
+FoodUseDom,Cons,;<FDC>
+FeedWasteDom,Cons,;<FWD>
+TotalDom,Cons,;<TDC>
+Extr,Rate,999,9999;<EXR>
+Extr.Rate,.999.9999;<EXR>
+CYExp,toU,S,;<CEU>
+CYImp,fromU,S,;<CIU>
+Extr,Rate;<EXR>
+FeedWasteDom,Cons,;<FWD>
+FoodUseDom,Cons,;<FDC>
+IndustrialDom,Cons,;<IDC>
+MYExp,toEU;<MEE>
+MYImp,fromEU;<MIE>
+MYImp,fromU,S,;<MIU>
+TotalDom,Cons,;<TDC>
+Extr.Rate,.999.9999;<EXR>
+CYExptortstoUS;<CEU>
+CYImportsfromUS;<CIU>
+Extr.Rate.999.9999;<EXR>
+MYImportsfromUS;<MIU>
+MYExptortstoEU;<MEE>
+MYImportsfromEU;<MIE>
+Code;cod

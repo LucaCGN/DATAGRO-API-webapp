@@ -45,37 +45,10 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 
 
-use App\Http\Controllers\LuigiPipelineController;
+use App\Http\Controllers\InvoiceController;
 
-// Luigi Pipeline Routes
-Route::get('/pipeline/usda', [LuigiPipelineController::class, 'triggerUSDA']);
-Route::get('/pipeline/comex', [LuigiPipelineController::class, 'triggerCOMEX']);
-Route::get('/pipeline/indec', [LuigiPipelineController::class, 'triggerINDEC']);
-Route::get('/pipeline/all', [LuigiPipelineController::class, 'triggerAllPipelines']);
-Route::get('/pipeline/usda/data', [LuigiPipelineController::class, 'fetchUSDAall']);
-Route::get('/pipeline/usda/test', function () {
-    return 'Test route works';
-});
+// Display the form using a controller method
+Route::get('/nf-splitter', [InvoiceController::class, 'showSplitterForm'])->name('nf-splitter.form');
 
-Route::get('/test-user', function () {
-    $output = [];
-    exec('whoami', $output);
-    return $output[0];
-});
-
-
-Route::get('/test-env', function () {
-    $output = [];
-    exec('env', $output);
-    return implode('<br>', $output);
-});
-
-// test exec
-Route::get('/test-exec', [LuigiPipelineController::class, 'testExec']);
-Route::get('/test-python-script1', [LuigiPipelineController::class, 'executeTestScriptSystem']);
-Route::get('/test-python-script2', [LuigiPipelineController::class, 'executeTestScriptProcOpen']);
-
-
-
-
-
+// Handle the form submission using a controller method
+Route::post('/nf-splitter', [InvoiceController::class, 'splitPdf'])->name('nf-splitter.split');
